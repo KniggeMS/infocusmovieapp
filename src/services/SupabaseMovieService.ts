@@ -95,4 +95,27 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       return null;
     }
   }
+
+  async add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie> {
+    const mappedData = {
+      title: movie.title,
+      poster_path: movie.posterPath,
+      runtime: movie.runtime,
+      release_date: movie.releaseDate,
+      overview: movie.overview,
+      vote_average: movie.voteAverage,
+    };
+
+    const { data, error } = await this.client
+      .from('movies')
+      .insert(mappedData)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Supabase add error: ${error.message}`);
+    }
+
+    return this.mapRowToMovie(data);
+  }
 }

@@ -50,11 +50,35 @@ export class MovieConductor {
         await this.handleSearch(intent.payload);
         break;
       case 'ADD_MOVIE':
-        // Implementation for adding movie will go here
+        await this.handleAddMovie(intent.payload);
         break;
       case 'REMOVE_MOVIE':
         // Implementation for removing movie will go here
         break;
+    }
+  }
+
+  /**
+   * Handles adding a new movie.
+   */
+  private async handleAddMovie(movie: Movie): Promise<void> {
+    this.updateState({ status: 'loading', error: null });
+
+    try {
+      // Create a clean object without ID or addedAt, as DB handles these
+      const { id, addedAt, ...cleanMovie } = movie;
+      const savedMovie = await this.adapter.add(cleanMovie);
+      
+      // Update state: prepend new movie to the list
+      this.updateState({ 
+        items: [savedMovie, ...this.state.items], 
+        status: 'idle' 
+      });
+    } catch (error) {
+      this.updateState({
+        status: 'error',
+        error: error instanceof Error ? error.message : 'An unknown error occurred during add',
+      });
     }
   }
 
