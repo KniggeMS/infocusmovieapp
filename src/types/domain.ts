@@ -26,4 +26,5 @@ export interface MovieServiceAdapter {
   getById(id: string): Promise<Movie | null>;
   getTrending(): Promise<Movie[]>;
   add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie>;
+  delete(id: string): Promise<void>;
 }

@@ -53,8 +53,31 @@ export class MovieConductor {
         await this.handleAddMovie(intent.payload);
         break;
       case 'REMOVE_MOVIE':
-        // Implementation for removing movie will go here
+        await this.handleRemoveMovie(intent.payload);
         break;
+    }
+  }
+
+  /**
+   * Handles removing a movie with optimistic updates.
+   */
+  private async handleRemoveMovie(id: string): Promise<void> {
+    // Optimistic Update: Remove item immediately
+    const originalItems = this.state.items;
+    const newItems = originalItems.filter((movie) => movie.id !== id);
+    this.updateState({ items: newItems });
+
+    try {
+      await this.adapter.delete(id);
+      // No further action needed on success
+    } catch (error) {
+      // Rollback on error
+      this.updateState({
+        status: 'error',
+        error: error instanceof Error ? error.message : 'An unknown error occurred during removal',
+      });
+      // Re-fetch to ensure sync with server
+      await this.dispatch({ type: 'LOAD_MOVIES' });
     }
   }
 

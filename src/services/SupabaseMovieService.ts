@@ -118,4 +118,15 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
     return this.mapRowToMovie(data);
   }
+
+  async delete(id: string): Promise<void> {
+    const { error } = await this.client
+      .from('movies')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Supabase delete error: ${error.message}`);
+    }
+  }
 }
