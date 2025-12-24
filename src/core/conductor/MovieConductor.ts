@@ -46,15 +46,32 @@ export class MovieConductor {
       case 'LOAD_MOVIES':
         await this.handleLoadMovies();
         break;
+      case 'SEARCH':
+        await this.handleSearch(intent.payload);
+        break;
       case 'ADD_MOVIE':
         // Implementation for adding movie will go here
-        break;
-      case 'SEARCH':
-        // Implementation for search will go here
         break;
       case 'REMOVE_MOVIE':
         // Implementation for removing movie will go here
         break;
+    }
+  }
+
+  /**
+   * Handles the search of movies.
+   */
+  private async handleSearch(query: string): Promise<void> {
+    this.updateState({ status: 'loading', error: null });
+
+    try {
+      const movies = await this.adapter.search(query);
+      this.updateState({ items: movies, status: 'idle' });
+    } catch (error) {
+      this.updateState({
+        status: 'error',
+        error: error instanceof Error ? error.message : 'An unknown error occurred during search',
+      });
     }
   }
 

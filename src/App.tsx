@@ -24,11 +24,37 @@ function App({ conductor }: AppProps) {
     conductor.dispatch({ type: 'LOAD_MOVIES' });
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length === 0) {
+      conductor.dispatch({ type: 'LOAD_MOVIES' });
+    } else if (value.length > 2) {
+      conductor.dispatch({ type: 'SEARCH', payload: value });
+    }
+  };
+
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', color: '#fff', backgroundColor: '#0B0E14', minHeight: '100vh' }}>
       <h1>InFocus CineLog V2</h1>
       
       <div style={{ marginBottom: '20px' }}>
+        <input 
+          type="text" 
+          placeholder="Suche..." 
+          onChange={handleSearchChange}
+          style={{
+            padding: '10px',
+            fontSize: '16px',
+            width: '100%',
+            maxWidth: '300px',
+            marginBottom: '10px',
+            borderRadius: '4px',
+            border: '1px solid #333',
+            backgroundColor: '#1f2937',
+            color: 'white'
+          }}
+        />
+        <br />
         <button 
           onClick={handleLoadMovies}
           disabled={state.status === 'loading'}
