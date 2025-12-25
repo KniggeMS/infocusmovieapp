@@ -16,6 +16,45 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   /**
+   * Searches for movies using the TMDB API.
+   */
+  private async searchTMDB(query: string): Promise<Movie[]> {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) {
+      console.warn('VITE_TMDB_API_KEY is missing. Skipping TMDB search.');
+      return [];
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}&language=de-DE`
+      );
+
+      if (!response.ok) {
+        throw new Error(`TMDB API Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      return (data.results || []).map((result: any) => ({
+        id: String(result.id),
+        title: result.title,
+        overview: result.overview,
+        posterPath: result.poster_path 
+          ? `https://image.tmdb.org/t/p/w500${result.poster_path}` 
+          : null,
+        releaseDate: result.release_date || null,
+        runtime: null, // TMDB search doesn't return runtime
+        voteAverage: result.vote_average || null,
+        source: 'tmdb'
+      }));
+    } catch (error) {
+      console.error('Error searching TMDB:', error);
+      return [];
+    }
+  }
+
+  /**
    * Maps a raw Supabase database row (snake_case) to the Movie domain object (camelCase).
    * Robust handling for missing or null fields.
    */
@@ -29,6 +68,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       overview: row.overview || null,
       voteAverage: row.vote_average ? Number(row.vote_average) : null,
       addedAt: row.created_at || undefined,
+      source: 'database'
     };
   }
 
@@ -54,23 +94,12 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async search(query: string): Promise<Movie[]> {
-    try {
-      const { data, error } = await this.client
-        .from('movies')
-        .select('*')
-        .ilike('title', `%${query}%`)
-        .limit(20);
-
-      if (error) {
-        console.error('Supabase search error:', error.message);
-        return [];
-      }
-
-      return (data || []).map((row) => this.mapRowToMovie(row));
-    } catch (err) {
-      console.error('Unexpected error in search:', err);
-      return [];
+    if (!query || query.trim().length === 0) {
+      return this.getTrending();
     }
+    
+    // Switch to TMDB search for real data
+    return this.searchTMDB(query);
   }
 
   async getById(id: string): Promise<Movie | null> {
@@ -97,13 +126,15 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie> {
+    const { source, ...cleanMovie } = movie; // Remove source before insertion
+
     const mappedData = {
-      title: movie.title,
-      poster_path: movie.posterPath,
-      runtime: movie.runtime,
-      release_date: movie.releaseDate,
-      overview: movie.overview,
-      vote_average: movie.voteAverage,
+      title: cleanMovie.title,
+      poster_path: cleanMovie.posterPath,
+      runtime: cleanMovie.runtime,
+      release_date: cleanMovie.releaseDate,
+      overview: cleanMovie.overview,
+      vote_average: cleanMovie.voteAverage,
     };
 
     const { data, error } = await this.client

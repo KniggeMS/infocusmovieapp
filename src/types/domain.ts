@@ -7,6 +7,7 @@ export interface Movie {
   overview: string | null;
   voteAverage: number | null;
   addedAt?: string;
+  source?: 'tmdb' | 'database';
 }
 
 export type UserIntent = 
