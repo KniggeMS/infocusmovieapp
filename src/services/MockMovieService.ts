@@ -71,4 +71,35 @@ export class MockMovieService implements MovieServiceAdapter {
     const movie = this.mockDb.find((m) => m.id === id);
     return movie || null;
   }
+
+  async getMovieDetails(tmdbId: string): Promise<Movie> {
+    return {
+        id: tmdbId,
+        title: 'Mock Movie Details',
+        posterPath: null,
+        runtime: 120,
+        releaseDate: '2025-01-01',
+        overview: 'Mock details overview.',
+        voteAverage: 8.0,
+        source: 'tmdb',
+        director: 'Mock Director',
+        cast: [{ name: 'Mock Actor', character: 'Hero', profilePath: null }]
+    };
+  }
+
+  async add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie> {
+    return { ...movie, id: 'mock-id' };
+  }
+
+  async delete(id: string): Promise<void> {
+    // Mock delete implementation
+  }
+
+  async update(id: string, updates: Partial<any>): Promise<void> {
+    // Mock update implementation
+  }
+
+  async exists(title: string): Promise<boolean> {
+    return this.mockDb.some(m => m.title.toLowerCase() === title.toLowerCase());
+  }
 }

@@ -1,0 +1,161 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "InFocus" [level=1] [ref=e6]
+      - generic [ref=e7]:
+        - img [ref=e8]
+        - textbox "Search movies..." [ref=e11]
+  - generic [ref=e13]:
+    - generic [ref=e14] [cursor=pointer]:
+      - img "Fight Club" [ref=e15]
+      - button [ref=e18]:
+        - img [ref=e19]
+      - generic [ref=e22]:
+        - heading "Fight Club" [level=3] [ref=e23]
+        - generic [ref=e25]: N/A
+        - generic [ref=e26]:
+          - img [ref=e27]
+          - img [ref=e29]
+    - generic [ref=e32] [cursor=pointer]:
+      - img "Fight Club" [ref=e33]
+      - button [ref=e36]:
+        - img [ref=e37]
+      - generic [ref=e40]:
+        - heading "Fight Club" [level=3] [ref=e41]
+        - generic [ref=e43]: N/A
+        - generic [ref=e44]:
+          - img [ref=e45]
+          - img [ref=e47]
+    - generic [ref=e50] [cursor=pointer]:
+      - img "Gladiator" [ref=e51]
+      - button [ref=e54]:
+        - img [ref=e55]
+      - generic [ref=e58]:
+        - heading "Gladiator" [level=3] [ref=e59]
+        - generic [ref=e60]:
+          - generic [ref=e61]: "2000"
+          - generic [ref=e62]: ★ 8.2
+        - generic [ref=e63]:
+          - img [ref=e64]
+          - img [ref=e66]
+    - generic [ref=e69] [cursor=pointer]:
+      - img "Inception" [ref=e70]
+      - button [ref=e73]:
+        - img [ref=e74]
+      - generic [ref=e77]:
+        - heading "Inception" [level=3] [ref=e78]
+        - generic [ref=e79]:
+          - generic [ref=e80]: "2010"
+          - generic [ref=e81]: ★ 8.4
+        - generic [ref=e82]:
+          - img [ref=e83]
+          - img [ref=e85]
+    - generic [ref=e88] [cursor=pointer]:
+      - img "Predator - Upgrade" [ref=e89]
+      - button [ref=e92]:
+        - img [ref=e93]
+      - generic [ref=e96]:
+        - heading "Predator - Upgrade" [level=3] [ref=e97]
+        - generic [ref=e98]:
+          - generic [ref=e99]: "2018"
+          - generic [ref=e100]: ★ 5.6
+        - generic [ref=e101]:
+          - img [ref=e102]
+          - img [ref=e104]
+  - navigation [ref=e107]:
+    - button "Home" [ref=e108] [cursor=pointer]:
+      - img [ref=e109]
+    - button "Favorites" [ref=e112] [cursor=pointer]:
+      - img [ref=e113]
+    - button "Search / Top" [ref=e116] [cursor=pointer]:
+      - img [ref=e117]
+    - button "List / Watched" [ref=e120] [cursor=pointer]:
+      - img [ref=e121]
+    - button "Achievements" [ref=e124] [cursor=pointer]:
+      - img [ref=e125]
+    - button "Statistics" [ref=e127] [cursor=pointer]:
+      - img [ref=e128]
+  - generic [ref=e131]:
+    - button [ref=e132] [cursor=pointer]:
+      - img [ref=e133]
+    - generic [ref=e136]:
+      - img "Fight Club" [ref=e137]
+      - generic [ref=e139]:
+        - heading "Fight Club" [level=2] [ref=e140]
+        - generic [ref=e141]:
+          - generic [ref=e142]: "1999"
+          - generic [ref=e143]: 139 min
+          - generic [ref=e144]: ★ 8.4
+    - generic [ref=e145]:
+      - generic [ref=e146]:
+        - heading "Plot" [level=3] [ref=e147]
+        - paragraph [ref=e148]: Ein Yuppie findet beim charismatischen Tyler Durden Unterschlupf, nachdem seine Wohnung in die Luft gejagt wird. Ein Gerangel zwischen den beiden entwickelt sich zu einer Schlägerei, die mit der Erkenntnis endet, dass man sich nach einer ordentlichen Portion Prügel einfach besser fühlt. Der "Fight Club" ist geboren. Immer mehr Männer versammeln sich, um sich zu schlagen - und gestärkt in den Alltag zu gehen. Wie ein Virus greift das Konzept um sich, doch für Tyler ist der Kampfverein nur die erste Stufe, um die USA in die Knie zu zwingen.
+      - generic [ref=e149]:
+        - heading "Director" [level=3] [ref=e150]
+        - generic [ref=e151]: David Fincher
+      - generic [ref=e152]:
+        - heading "Top Cast" [level=3] [ref=e153]
+        - generic [ref=e154]:
+          - generic [ref=e155]:
+            - img "Edward Norton" [ref=e157]
+            - generic [ref=e158]:
+              - generic [ref=e159]: Edward Norton
+              - generic [ref=e160]: Narrator
+          - generic [ref=e161]:
+            - img "Brad Pitt" [ref=e163]
+            - generic [ref=e164]:
+              - generic [ref=e165]: Brad Pitt
+              - generic [ref=e166]: Tyler Durden
+          - generic [ref=e167]:
+            - img "Helena Bonham Carter" [ref=e169]
+            - generic [ref=e170]:
+              - generic [ref=e171]: Helena Bonham Carter
+              - generic [ref=e172]: Marla Singer
+          - generic [ref=e173]:
+            - img "Meat Loaf" [ref=e175]
+            - generic [ref=e176]:
+              - generic [ref=e177]: Meat Loaf
+              - generic [ref=e178]: Robert Paulson
+          - generic [ref=e179]:
+            - img "Jared Leto" [ref=e181]
+            - generic [ref=e182]:
+              - generic [ref=e183]: Jared Leto
+              - generic [ref=e184]: Angel Face
+      - generic [ref=e185]:
+        - heading "Where to Watch" [level=3] [ref=e186]
+        - generic [ref=e187]:
+          - generic [ref=e188]:
+            - generic [ref=e189]: Stream
+            - generic [ref=e190]:
+              - img "Amazon Prime Video" [ref=e191]
+              - img "Disney Plus" [ref=e192]
+              - img "Amazon Prime Video with Ads" [ref=e193]
+          - generic [ref=e194]:
+            - generic [ref=e195]: Rent
+            - generic [ref=e196]:
+              - img "Apple TV" [ref=e197]
+              - img "Amazon Video" [ref=e198]
+              - img "Google Play Movies" [ref=e199]
+              - img "YouTube" [ref=e200]
+              - img "Sky Store" [ref=e201]
+              - img "Rakuten TV" [ref=e202]
+              - img "maxdome Store" [ref=e203]
+              - img "MagentaTV" [ref=e204]
+              - img "Videoload" [ref=e205]
+              - img "Freenet meinVOD" [ref=e206]
+          - generic [ref=e207]:
+            - generic [ref=e208]: Buy
+            - generic [ref=e209]:
+              - img "Apple TV" [ref=e210]
+              - img "Amazon Video" [ref=e211]
+              - img "Google Play Movies" [ref=e212]
+              - img "YouTube" [ref=e213]
+              - img "Sky Store" [ref=e214]
+              - img "Rakuten TV" [ref=e215]
+              - img "maxdome Store" [ref=e216]
+              - img "MagentaTV" [ref=e217]
+              - img "Videoload" [ref=e218]
+```

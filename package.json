@@ -21,6 +21,10 @@
   "author": "BigDaddy",
   "license": "MIT",
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
     "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.89.0",
     "lucide-react": "^0.555.0",
@@ -30,6 +34,7 @@
     "recharts": "^3.5.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",

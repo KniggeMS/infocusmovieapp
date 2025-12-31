@@ -38,6 +38,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       
       return (data.results || []).map((result: any) => ({
         id: String(result.id),
+        tmdbId: result.id,
         title: result.title,
         overview: result.overview,
         posterPath: result.poster_path 
@@ -59,8 +60,12 @@ export class SupabaseMovieService implements MovieServiceAdapter {
    * Robust handling for missing or null fields.
    */
   private mapRowToMovie(row: any): Movie {
+    // CRITICAL: Ensure tmdbId is correctly mapped from DB column tmdb_id
+    const tmdbId = row.tmdb_id ? Number(row.tmdb_id) : undefined;
+
     return {
       id: row.id?.toString() || '',
+      tmdbId: tmdbId,
       title: row.title || 'Unknown Title',
       posterPath: row.poster_path || null,
       runtime: row.runtime ? Number(row.runtime) : null,
@@ -68,7 +73,9 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       overview: row.overview || null,
       voteAverage: row.vote_average ? Number(row.vote_average) : null,
       addedAt: row.created_at || undefined,
-      source: 'database'
+      source: 'database',
+      watched: row.watched ?? false,
+      favorite: row.favorite ?? false,
     };
   }
 
@@ -125,10 +132,92 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     }
   }
 
+  async getMovieDetails(tmdbId: string): Promise<Movie> {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) {
+        console.warn('TMDB API Key missing!');
+        throw new Error('VITE_TMDB_API_KEY missing');
+    }
+
+    try {
+      // Append credits, watch/providers AND recommendations
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${apiKey}&language=de-DE&append_to_response=credits,watch/providers,recommendations`
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ status_message: 'Unknown Error' }));
+        throw new Error(`TMDB Error ${response.status}: ${errorData.status_message}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.id) {
+          console.warn('Fetched details missing ID', data);
+      }
+
+      const director = data.credits?.crew?.find((m: any) => m.job === 'Director')?.name || 'Unknown';
+      const cast = (data.credits?.cast || []).slice(0, 5).map((c: any) => ({
+        name: c.name,
+        character: c.character,
+        profilePath: c.profile_path ? `https://image.tmdb.org/t/p/w200${c.profile_path}` : null
+      }));
+
+      // Map Recommendations
+      const recommendations = (data.recommendations?.results || []).slice(0, 10).map((rec: any) => ({
+        id: String(rec.id),
+        tmdbId: rec.id, // Explicitly set TMDB ID for recommendations
+        title: rec.title,
+        posterPath: rec.poster_path ? `https://image.tmdb.org/t/p/w300${rec.poster_path}` : null,
+        releaseDate: rec.release_date || null,
+        voteAverage: rec.vote_average || null,
+        source: 'tmdb' as const
+      }));
+
+      // Map Watch Providers (DE only)
+      const providersRaw = data['watch/providers']?.results?.DE || {};
+      const mapProvider = (p: any) => ({
+        providerName: p.provider_name,
+        logoPath: p.logo_path ? `https://image.tmdb.org/t/p/original${p.logo_path}` : ''
+      });
+
+      const watchProviders = {
+        flatrate: (providersRaw.flatrate || []).map(mapProvider),
+        rent: (providersRaw.rent || []).map(mapProvider),
+        buy: (providersRaw.buy || []).map(mapProvider)
+      };
+
+      return {
+        id: String(data.id),
+        tmdbId: data.id, // Explicitly set TMDB ID
+        title: data.title || 'Unknown Title',
+        overview: data.overview || '',
+        posterPath: data.poster_path 
+          ? `https://image.tmdb.org/t/p/w500${data.poster_path}` 
+          : null,
+        releaseDate: data.release_date || null,
+        runtime: data.runtime || null,
+        voteAverage: data.vote_average || null,
+        source: 'tmdb',
+        genres: data.genres?.map((g: any) => g.name) || [],
+        director,
+        cast,
+        recommendations,
+        watchProviders
+      };
+    } catch (error) {
+      console.error('Error fetching details:', error);
+      throw error;
+    }
+  }
+
   async add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie> {
-    const { source, ...cleanMovie } = movie; // Remove source before insertion
+    // WICHTIG: Wir entfernen explizit 'id' (da TMDB-ID) und 'source'.
+    // Wir nutzen einen Cast zu 'any', um sicherzustellen, dass wir auch Properties destrukturieren können, die im Omit-Typ eigentlich nicht da sein sollten (Safety net).
+    const { id, source, addedAt, ...cleanMovie } = movie as any;
 
     const mappedData = {
+      tmdb_id: cleanMovie.tmdbId || id, // Save TMDB ID!
       title: cleanMovie.title,
       poster_path: cleanMovie.posterPath,
       runtime: cleanMovie.runtime,
@@ -159,5 +248,26 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     if (error) {
       throw new Error(`Supabase delete error: ${error.message}`);
     }
+  }
+
+  async update(id: string, updates: Partial<any>): Promise<void> {
+    const { error } = await this.client
+      .from('movies')
+      .update(updates)
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Supabase update error: ${error.message}`);
+    }
+  }
+
+  async exists(title: string): Promise<boolean> {
+    const { data } = await this.client
+      .from('movies')
+      .select('id')
+      .ilike('title', title)
+      .limit(1);
+
+    return !!data && data.length > 0;
   }
 }
