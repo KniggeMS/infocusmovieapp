@@ -1,8 +1,13 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Movie, MovieServiceAdapter } from '../types/domain';
+import { Database } from '../types/supabase'; // <--- Generierte Typen
+
+// Helper Type für exakte DB-Struktur
+type MovieRow = Database['public']['Tables']['movies']['Row'];
+type MovieInsert = Database['public']['Tables']['movies']['Insert'];
 
 export class SupabaseMovieService implements MovieServiceAdapter {
-  private client: SupabaseClient;
+  private client: SupabaseClient<Database>;
 
   constructor() {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -12,7 +17,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       throw new Error('Missing Supabase environment variables');
     }
 
-    this.client = createClient(supabaseUrl, supabaseKey);
+    this.client = createClient<Database>(supabaseUrl, supabaseKey);
   }
 
   /**
@@ -57,14 +62,14 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
   /**
    * Maps a raw Supabase database row (snake_case) to the Movie domain object (camelCase).
-   * Robust handling for missing or null fields.
+   * STRICTLY TYPED NOW via MovieRow
    */
-  private mapRowToMovie(row: any): Movie {
-    // CRITICAL: Ensure tmdbId is correctly mapped from DB column tmdb_id
+  private mapRowToMovie(row: MovieRow): Movie {
+    // TypeScript kennt jetzt row.tmdb_id
     const tmdbId = row.tmdb_id ? Number(row.tmdb_id) : undefined;
 
     return {
-      id: row.id?.toString() || '',
+      id: row.id.toString(),
       tmdbId: tmdbId,
       title: row.title || 'Unknown Title',
       posterPath: row.poster_path || null,
@@ -72,7 +77,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       releaseDate: row.release_date || null,
       overview: row.overview || null,
       voteAverage: row.vote_average ? Number(row.vote_average) : null,
-      addedAt: row.created_at || undefined,
+      addedAt: row.created_at, // Ist in DB immer string
       source: 'database',
       watched: row.watched ?? false,
       favorite: row.favorite ?? false,
@@ -118,7 +123,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
         .single();
 
       if (error) {
-        // Warning usually sufficient for getById not found, no need to spam error console if just not found
+        // Warning usually sufficient for getById not found
         console.warn('Supabase getById error or not found:', error.message);
         return null;
       }
@@ -212,12 +217,13 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie> {
-    // WICHTIG: Wir entfernen explizit 'id' (da TMDB-ID) und 'source'.
-    // Wir nutzen einen Cast zu 'any', um sicherzustellen, dass wir auch Properties destrukturieren können, die im Omit-Typ eigentlich nicht da sein sollten (Safety net).
+    // Cast to 'any' for destructuring safety of unknown props
     const { id, source, addedAt, ...cleanMovie } = movie as any;
 
-    const mappedData = {
-      tmdb_id: cleanMovie.tmdbId || id, // Save TMDB ID!
+    // Use MovieInsert type for type safety
+    // Notice: we DO NOT send user_id. DB handles it via DEFAULT auth.uid()
+    const mappedData: MovieInsert = {
+      tmdb_id: cleanMovie.tmdbId || id,
       title: cleanMovie.title,
       poster_path: cleanMovie.posterPath,
       runtime: cleanMovie.runtime,
