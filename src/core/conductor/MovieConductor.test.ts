@@ -11,6 +11,7 @@ const mockAdapter: MovieServiceAdapter = {
   getTrending: vi.fn().mockResolvedValue(mockMovies),
   search: vi.fn().mockResolvedValue([]),
   getById: vi.fn().mockResolvedValue(null),
+  getMovieDetails: vi.fn().mockResolvedValue({} as Movie),
   add: vi.fn(),
   delete: vi.fn(),
   update: vi.fn(),

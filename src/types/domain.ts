@@ -19,7 +19,7 @@ export interface Movie {
   tmdbId?: number;
   title: string;
   posterPath: string | null;
-  runtime: number | null;
+  runtime?: number | null;
   releaseDate: string | null;
   overview: string | null;
   voteAverage: number | null;

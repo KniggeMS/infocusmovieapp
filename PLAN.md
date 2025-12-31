@@ -16,12 +16,14 @@
 - [x] **Statistics (Charts):** Visual Charts for watching habits (Genres, Watch time).
 - [x] **App Branding (Splash & Icons):** Professional start-up experience.
 - [x] **FIX: TMDB ID Persistence (Schema Update)**: Ensures local movies can fetch online details.
-- [ ] **AI Recommendations (via TMDB):** [IN PROGRESS] "Zap" Feature to suggest movies based on watchlist.
+- [x] **AI Recommendations (via TMDB):** Discovery Feature with direct add-to-watchlist.
+- [ ] **User Management (Auth & Roles):** [IN PROGRESS] Secure access and admin privileges.
 
 ## 📋 Backlog
+- [ ] **Internationalization (i18n):** Multi-language support.
 - [x] **Cast & Crew:** Detailed view for actors and directors.
 - [x] **Streaming Providers:** "Where to watch" integration (JustWatch API).
 - [ ] **Social Features:** Share lists with friends.
 
 ---
-**Session Note (27.12.2025):** Last State: V2.0 reached. Branding active. Database schema extended (tmdb_id). Old movies need re-add by user. Ready for Phase 6 (AI/Zap) or Store Prep.
+**Session Note (27.12.2025):** Last State: V2.0 Discovery Feature Complete. Build types relaxed for production. ready for Store Prep or Final Polish.

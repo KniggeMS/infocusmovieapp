@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { MovieConductor } from './core/conductor/MovieConductor';
 import { WatchlistState, Movie } from './types/domain';
-import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check } from 'lucide-react';
+import { UserProfile } from './types/auth';
+import { AuthService } from './services/AuthService';
+import { LoginScreen } from './components/LoginScreen';
+import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { SplashScreen } from '@capacitor/splash-screen';
 
@@ -10,29 +13,46 @@ interface AppProps {
 }
 
 function App({ conductor }: AppProps) {
+  // Auth State
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   // Initialize with current state from conductor
   const [state, setState] = useState<WatchlistState>(conductor.getState());
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    // Check for existing session
+    const checkUser = async () => {
+      try {
+        const currentUser = await AuthService.getInstance().getCurrentUser();
+        setUser(currentUser);
+      } catch (e) {
+        console.error('Auth check failed:', e);
+      } finally {
+        setAuthLoading(false);
+        // Hide Splash Screen once auth check is done (or failed)
+        try {
+            await SplashScreen.hide();
+        } catch (e) {
+            // Ignore splash screen errors on web
+        }
+      }
+    };
+    checkUser();
+
     // Subscribe to conductor updates
     const unsubscribe = conductor.subscribe((newState) => {
       setState(newState);
     });
 
-    // Hide Splash Screen once the app is mounted
-    const hideSplash = async () => {
-        try {
-            await SplashScreen.hide();
-        } catch (e) {
-            console.warn('Splash Screen hide failed (probably running on web):', e);
-        }
-    };
-    hideSplash();
-
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, [conductor]);
+
+  const handleLogout = async () => {
+    await AuthService.getInstance().signOut();
+    setUser(null);
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -52,6 +72,16 @@ function App({ conductor }: AppProps) {
     conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
   };
 
+  // Show Loading Screen while checking auth
+  if (authLoading) {
+      return <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center text-white">Loading...</div>;
+  }
+
+  // Show Login Screen if no user
+  if (!user) {
+      return <LoginScreen onLoginSuccess={setUser} />;
+  }
+
   const filteredItems = state.items.filter((movie) => {
     if (state.filter === 'favorites') return movie.favorite;
     if (state.filter === 'watched') return movie.watched;
@@ -64,17 +94,42 @@ function App({ conductor }: AppProps) {
       {/* Header (Sticky Glass) */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0E14]/80 backdrop-blur-xl border-b border-white/5 px-4 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-            <h1 className="text-xl font-bold tracking-tight shrink-0">InFocus</h1>
+            <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight shrink-0">InFocus</h1>
+                {/* Role Badge */}
+                {user.role === 'admin' && (
+                    <span className="flex items-center gap-1 bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        <Shield className="w-3 h-3" />
+                        Admin
+                    </span>
+                )}
+                {user.role === 'manager' && (
+                    <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Manager
+                    </span>
+                )}
+            </div>
             
-            <div className="bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full flex items-center gap-2 max-w-md">
-                <Search className="w-4 h-4 text-gray-400" />
-                <input 
-                    type="text" 
-                    placeholder="Search movies..." 
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className="bg-transparent border-none focus:outline-none w-full text-white placeholder-gray-400"
-                />
+            <div className="flex-1 flex justify-end gap-3">
+                 <div className="bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full flex items-center gap-2 max-w-[200px] sm:max-w-md transition-all">
+                    <Search className="w-4 h-4 text-gray-400" />
+                    <input 
+                        type="text" 
+                        placeholder="Search..." 
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="bg-transparent border-none focus:outline-none w-full text-white placeholder-gray-400"
+                    />
+                </div>
+                
+                {/* Logout Button */}
+                <button 
+                    onClick={handleLogout}
+                    className="bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 p-3 rounded-2xl transition-colors border border-white/5"
+                    title="Sign Out"
+                >
+                    <LogOut className="w-5 h-5" />
+                </button>
             </div>
         </div>
       </header>
