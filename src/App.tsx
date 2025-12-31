@@ -94,8 +94,13 @@ function App({ conductor }: AppProps) {
       {/* Header (Sticky Glass) */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0E14]/80 backdrop-blur-xl border-b border-white/5 px-4 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight shrink-0">InFocus</h1>
+            <div className="flex items-center gap-3">
+                <img 
+                    src="/pwa-icon-192.png" 
+                    alt="InFocus Logo" 
+                    className="h-8 w-auto object-contain"
+                />
+                
                 {/* Role Badge */}
                 {user.role === 'admin' && (
                     <span className="flex items-center gap-1 bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -111,7 +116,7 @@ function App({ conductor }: AppProps) {
             </div>
             
             <div className="flex-1 flex justify-end gap-3">
-                 <div className="bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full flex items-center gap-2 max-w-[200px] sm:max-w-md transition-all">
+                 <div className="hidden md:flex bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[200px] sm:max-w-md transition-all">
                     <Search className="w-4 h-4 text-gray-400" />
                     <input 
                         type="text" 
@@ -389,16 +394,13 @@ function App({ conductor }: AppProps) {
             <Heart className="w-6 h-6" />
           </button>
           
-          {/* Center Visual Button */}
-          <div className="relative">
-             <button 
-                className="bg-accent-blue shadow-[0_0_20px_rgba(59,130,246,0.5)] p-4 rounded-2xl -mt-12 border-4 border-[#0B0E14] text-white hover:scale-105 transition-transform"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                aria-label="Search / Top"
-             >
-                <Search className="w-6 h-6" />
-             </button>
-          </div>
+          <button 
+            className="text-gray-400 hover:text-white transition-colors"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Search / Top"
+          >
+            <Search className="w-6 h-6" />
+          </button>
 
           <button 
             className={`transition-colors ${state.filter === 'watched' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}

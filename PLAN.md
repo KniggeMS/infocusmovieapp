@@ -17,7 +17,8 @@
 - [x] **App Branding (Splash & Icons):** Professional start-up experience.
 - [x] **FIX: TMDB ID Persistence (Schema Update)**: Ensures local movies can fetch online details.
 - [x] **AI Recommendations (via TMDB):** Discovery Feature with direct add-to-watchlist.
-- [ ] **User Management (Auth & Roles):** [IN PROGRESS] Secure access and admin privileges.
+- [x] **User Management (Auth & Roles):** Secure access, Admin badges, and Production Redirects.
+- [x] **Security (RLS):** Row-Level Security policies for Multi-User support.
 
 ## 📋 Backlog
 - [ ] **Internationalization (i18n):** Multi-language support.
@@ -26,4 +27,4 @@
 - [ ] **Social Features:** Share lists with friends.
 
 ---
-**Session Note (27.12.2025):** Last State: V2.0 Discovery Feature Complete. Build types relaxed for production. ready for Store Prep or Final Polish.
+**Session Note (31.12.2025):** Last State: V2.5 Security Update. Auth fully implemented (Login/Roles). RLS Policies active (Multi-User ready). Production Redirects configured. Ready for Deployment or i18n.

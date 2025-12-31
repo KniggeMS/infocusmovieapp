@@ -36,6 +36,8 @@ V2.0 introduces a strict separation of concerns to ensure stability and scalabil
 - **🧠 Smart Search:** Integrated with TMDB for real-time movie data (Posters, Ratings, Release Dates).
 - **☁️ Cloud Sync:** All data is synced in real-time via Supabase.
 - **🎨 Glassmorphism UI:** A beautiful, dark-themed UI with glass effects, designed for modern mobile displays.
+- **🔐 Secure Auth:** Full Email/Password authentication with Role-Based Access Control (RBAC).
+- **🛡️ Data Privacy:** Row-Level Security (RLS) ensures users only see and edit their own data.
 - **❤️ Favorites & Watched:** Organize your collection with dedicated filters and status tracking.
 - **🏆 Gamification System:** Unlockable achievements ('First Blood', 'Collector', etc.) to make tracking fun.
 - **🛡️ Duplicate Protection:** Prevents adding the same movie twice.
@@ -50,6 +52,12 @@ V2.0 introduces a strict separation of concerns to ensure stability and scalabil
 - Supabase Project (URL & Anon Key)
 - TMDB API Key
 
+### Database Setup (SQL)
+Run the migration file `supabase/migrations/20251231_setup_rls.sql` in your Supabase SQL Editor to:
+1. Enable Row-Level Security (RLS).
+2. Create Policies for User-Data isolation.
+3. Add the `user_id` column to the movies table.
+
 ### Installation
 
 1.  Clone the repository.
@@ -62,6 +70,7 @@ V2.0 introduces a strict separation of concerns to ensure stability and scalabil
     VITE_SUPABASE_URL=your_url
     VITE_SUPABASE_ANON_KEY=your_key
     VITE_TMDB_API_KEY=your_key
+    VITE_APP_URL=https://your-production-url.com (Optional, for Auth Redirects)
     ```
 4.  Run Development Server:
     ```bash
