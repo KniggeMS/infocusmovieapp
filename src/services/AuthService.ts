@@ -1,20 +1,14 @@
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { SupabaseClient, User } from '@supabase/supabase-js';
 import { UserProfile, UserRole } from '../types/auth';
 import { AppConfig } from '../core/config/AppConfig';
+import { supabase } from '../lib/supabase';
 
 export class AuthService {
   private client: SupabaseClient;
   private static instance: AuthService;
 
   private constructor() {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase environment variables');
-    }
-
-    this.client = createClient(supabaseUrl, supabaseKey);
+    this.client = supabase;
   }
 
   public static getInstance(): AuthService {

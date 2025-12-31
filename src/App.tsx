@@ -98,7 +98,7 @@ function App({ conductor }: AppProps) {
                 <img 
                     src="/pwa-icon-192.png" 
                     alt="InFocus Logo" 
-                    className="h-8 w-auto object-contain"
+                    className="h-14 w-14 rounded-full object-cover border-2 border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
                 />
                 
                 {/* Role Badge */}

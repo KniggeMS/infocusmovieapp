@@ -1,6 +1,7 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { Movie, MovieServiceAdapter } from '../types/domain';
-import { Database } from '../types/supabase'; // <--- Generierte Typen
+import { Database } from '../types/supabase';
+import { supabase } from '../lib/supabase';
 
 // Helper Type für exakte DB-Struktur
 type MovieRow = Database['public']['Tables']['movies']['Row'];
@@ -10,14 +11,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   private client: SupabaseClient<Database>;
 
   constructor() {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase environment variables');
-    }
-
-    this.client = createClient<Database>(supabaseUrl, supabaseKey);
+    this.client = supabase;
   }
 
   /**
