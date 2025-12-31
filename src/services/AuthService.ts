@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { UserProfile, UserRole } from '../types/auth';
+import { AppConfig } from '../core/config/AppConfig';
 
 export class AuthService {
   private client: SupabaseClient;
@@ -83,6 +84,9 @@ export class AuthService {
     const { data, error } = await this.client.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: AppConfig.getRedirectUrl(),
+      },
     });
 
     if (error) throw error;
