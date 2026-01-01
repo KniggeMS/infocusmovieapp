@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MovieConductor } from './core/conductor/MovieConductor';
 import { WatchlistState, Movie } from './types/domain';
 import { UserProfile } from './types/auth';
 import { AuthService } from './services/AuthService';
 import { LoginScreen } from './components/LoginScreen';
-import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield } from 'lucide-react';
+import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield, Play } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { SplashScreen } from '@capacitor/splash-screen';
 
@@ -13,6 +14,8 @@ interface AppProps {
 }
 
 function App({ conductor }: AppProps) {
+  const { t } = useTranslation();
+  
   // Auth State
   const [user, setUser] = useState<UserProfile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -74,7 +77,7 @@ function App({ conductor }: AppProps) {
 
   // Show Loading Screen while checking auth
   if (authLoading) {
-      return <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center text-white">Loading...</div>;
+      return <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center text-white">{t('common.loading')}</div>;
   }
 
   // Show Login Screen if no user
@@ -105,12 +108,12 @@ function App({ conductor }: AppProps) {
                 {user.role === 'admin' && (
                     <span className="flex items-center gap-1 bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                         <Shield className="w-3 h-3" />
-                        Admin
+                        {t('auth.admin')}
                     </span>
                 )}
                 {user.role === 'manager' && (
                     <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Manager
+                        {t('auth.manager')}
                     </span>
                 )}
             </div>
@@ -119,8 +122,10 @@ function App({ conductor }: AppProps) {
                  <div className="hidden md:flex bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[200px] sm:max-w-md transition-all">
                     <Search className="w-4 h-4 text-gray-400" />
                     <input 
+                        id="search-movies"
+                        name="search"
                         type="text" 
-                        placeholder="Search..." 
+                        placeholder={t('common.search')} 
                         value={searchTerm}
                         onChange={handleSearchChange}
                         className="bg-transparent border-none focus:outline-none w-full text-white placeholder-gray-400"
@@ -131,7 +136,7 @@ function App({ conductor }: AppProps) {
                 <button 
                     onClick={handleLogout}
                     className="bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 p-3 rounded-2xl transition-colors border border-white/5"
-                    title="Sign Out"
+                    title={t('common.signout')}
                 >
                     <LogOut className="w-5 h-5" />
                 </button>
@@ -145,7 +150,7 @@ function App({ conductor }: AppProps) {
         {/* Status Indicators */}
         {state.status === 'loading' && (
           <div className="text-center py-4 text-accent-glow animate-pulse font-medium">
-            Synchronizing...
+            {t('common.loading')}
           </div>
         )}
 
@@ -198,15 +203,15 @@ function App({ conductor }: AppProps) {
                 {/* Section 1: KPIs */}
                 <div className="grid grid-cols-3 gap-3">
                    <div className="bg-white/5 border border-white/5 p-4 rounded-2xl text-center backdrop-blur-sm">
-                      <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Total</div>
+                      <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">{t('stats.total')}</div>
                       <div className="text-2xl font-bold text-white">{state.statistics.totalMovies}</div>
                    </div>
                    <div className="bg-white/5 border border-white/5 p-4 rounded-2xl text-center backdrop-blur-sm">
-                      <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Watched</div>
+                      <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">{t('stats.watched')}</div>
                       <div className="text-2xl font-bold text-blue-400">{state.statistics.watchedCount}</div>
                    </div>
                    <div className="bg-white/5 border border-white/5 p-4 rounded-2xl text-center backdrop-blur-sm">
-                      <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Hours</div>
+                      <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">{t('stats.hours')}</div>
                       <div className="text-2xl font-bold text-yellow-400">{(state.statistics.totalRuntimeMinutes / 60).toFixed(1)}</div>
                    </div>
                 </div>
@@ -216,7 +221,7 @@ function App({ conductor }: AppProps) {
                     <div className="bg-white/5 border border-white/5 rounded-3xl p-6 backdrop-blur-sm">
                         <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                            <Popcorn className="w-5 h-5 text-accent-glow" /> 
-                           Favorite Genres
+                           {t('stats.genres')}
                         </h3>
                         <div className="h-[250px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
@@ -258,7 +263,7 @@ function App({ conductor }: AppProps) {
                     <div className="bg-white/5 border border-white/5 rounded-3xl p-6 backdrop-blur-sm">
                         <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                            <Library className="w-5 h-5 text-blue-400" /> 
-                           Timeline
+                           {t('stats.timeline')}
                         </h3>
                         <div className="h-[250px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
@@ -363,8 +368,8 @@ function App({ conductor }: AppProps) {
                 {state.status === 'idle' && state.items.length === 0 && !state.error && (
                 <div className="text-center py-20 text-gray-500">
                     <div className="text-4xl mb-4 opacity-50">🍿</div>
-                    <p className="text-lg font-medium">No movies found</p>
-                    <p className="text-sm mt-1 opacity-60">Search for a title to begin.</p>
+                    <p className="text-lg font-medium">{t('common.noResults')}</p>
+                    <p className="text-sm mt-1 opacity-60">{t('common.beginSearch')}</p>
                 </div>
                 )}
             </>
@@ -381,7 +386,7 @@ function App({ conductor }: AppProps) {
                 conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
                 conductor.dispatch({ type: 'LOAD_MOVIES' });
             }}
-            aria-label="Home"
+            aria-label={t('nav.home')}
           >
             <Home className="w-6 h-6" />
           </button>
@@ -389,7 +394,7 @@ function App({ conductor }: AppProps) {
           <button 
             className={`transition-colors ${state.filter === 'favorites' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'favorites' })}
-            aria-label="Favorites"
+            aria-label={t('nav.favorites')}
           >
             <Heart className="w-6 h-6" />
           </button>
@@ -405,7 +410,7 @@ function App({ conductor }: AppProps) {
           <button 
             className={`transition-colors ${state.filter === 'watched' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'watched' })}
-            aria-label="List / Watched"
+            aria-label={t('nav.watched')}
           >
             <Eye className="w-6 h-6" />
           </button>
@@ -413,7 +418,7 @@ function App({ conductor }: AppProps) {
           <button 
             className={`transition-colors ${state.filter === 'achievements' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'achievements' })}
-            aria-label="Achievements"
+            aria-label={t('nav.achievements')}
           >
             <Zap className="w-6 h-6" />
           </button>
@@ -421,7 +426,7 @@ function App({ conductor }: AppProps) {
           <button 
             className={`transition-colors ${state.filter === 'statistics' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'statistics' })}
-            aria-label="Statistics"
+            aria-label={t('nav.statistics')}
           >
             <BarChart2 className="w-6 h-6" />
           </button>
@@ -437,7 +442,7 @@ function App({ conductor }: AppProps) {
             />
             
             {/* Modal Content */}
-            <div className="relative w-full max-w-2xl bg-[#0B0E14] sm:rounded-3xl border-t sm:border border-white/10 shadow-2xl h-[85vh] sm:h-[80vh] overflow-y-auto overflow-x-hidden animate-slide-up">
+            <div className="relative w-full max-w-3xl bg-[#0B0E14] sm:rounded-3xl border-t sm:border border-white/10 shadow-2xl h-[95vh] sm:h-[90vh] overflow-y-auto overflow-x-hidden animate-slide-up no-scrollbar">
                 
                 {/* Close Button */}
                 <button 
@@ -447,74 +452,126 @@ function App({ conductor }: AppProps) {
                     <X className="w-6 h-6" />
                 </button>
 
-                {/* Hero Image */}
-                <div className="relative h-64 sm:h-80 w-full">
-                    <img 
-                        src={state.selectedMovie.posterPath || ''} 
-                        alt={state.selectedMovie.title}
-                        className="w-full h-full object-cover opacity-60 mask-image-b"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-transparent to-transparent" />
+                {/* Hero Header (YouTube Trailer or Backdrop) */}
+                <div className="relative w-full aspect-video sm:h-[450px] overflow-hidden group">
+                    {/* Media Layer */}
+                    {state.selectedMovie.trailerKey ? (
+                        <div className="absolute inset-0 w-full h-full pointer-events-none scale-125">
+                            <iframe 
+                                className="w-full h-full object-cover"
+                                src={`https://www.youtube.com/embed/${state.selectedMovie.trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${state.selectedMovie.trailerKey}&playsinline=1&rel=0&disablekb=1&iv_load_policy=3`}
+                                title="Trailer"
+                                allow="autoplay; encrypted-media" 
+                            />
+                        </div>
+                    ) : (
+                         <img 
+                            src={state.selectedMovie.backdropPath || state.selectedMovie.posterPath || ''} 
+                            alt={state.selectedMovie.title}
+                            className="w-full h-full object-cover opacity-80"
+                        />
+                    )}
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/50 to-transparent" />
                     
-                    <div className="absolute bottom-0 left-0 p-6 w-full flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                        <div>
-                            <h2 className="text-3xl font-bold text-white mb-2 leading-tight shadow-black drop-shadow-lg">
+                    {/* Content Container (Bottom Left) */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 flex flex-col justify-end h-full">
+                        
+                        {/* Title & Meta */}
+                        <div className="mb-6 z-10">
+                            <h2 className="text-3xl sm:text-5xl font-bold text-white mb-3 leading-tight drop-shadow-2xl">
                                 {state.selectedMovie.title}
                             </h2>
-                            <div className="flex items-center gap-4 text-sm text-gray-300">
+                            <div className="flex items-center gap-4 text-sm sm:text-base text-gray-200 font-medium drop-shadow-md">
                                 {state.selectedMovie.releaseDate && <span>{state.selectedMovie.releaseDate.split('-')[0]}</span>}
                                 {state.selectedMovie.runtime && <span>{state.selectedMovie.runtime} min</span>}
-                                {state.selectedMovie.voteAverage && <span className="text-yellow-400">★ {state.selectedMovie.voteAverage.toFixed(1)}</span>}
+                                {state.selectedMovie.voteAverage && <span className="text-green-400 font-bold">{Math.round(state.selectedMovie.voteAverage * 10)}% {t('common.match')}</span>}
+                                {state.selectedMovie.genres && state.selectedMovie.genres.slice(0, 2).map(g => (
+                                    <span key={g} className="text-gray-300">• {g}</span>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Add to Watchlist Button */}
-                        <div className="shrink-0">
+                        {/* Action Buttons Row */}
+                        <div className="flex flex-wrap items-center gap-4 z-10">
+                            
+                            {/* Play Trailer Button (If exists) */}
+                            {state.selectedMovie.trailerKey && (
+                                <button 
+                                    onClick={() => window.open(`https://youtube.com/watch?v=${state.selectedMovie!.trailerKey}`, '_blank')}
+                                    className="flex items-center gap-3 bg-white text-black hover:bg-gray-200 transition-all px-6 py-3 rounded-lg font-bold text-base sm:text-lg shadow-xl hover:scale-105 active:scale-95"
+                                >
+                                    <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-black" />
+                                    {t('common.playTrailer')}
+                                </button>
+                            )}
+
+                            {/* Add/Library Button */}
                             {state.items.some(m => m.tmdbId === Number(state.selectedMovie?.id) || m.id === state.selectedMovie?.id) ? (
-                                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-gray-300 text-sm font-bold border border-white/5">
-                                    <Check className="w-4 h-4" />
-                                    In Library
-                                </div>
+                                <button 
+                                    className="flex items-center gap-3 bg-gray-500/30 backdrop-blur-md text-white/90 px-6 py-3 rounded-lg font-bold text-base sm:text-lg border border-white/10 cursor-default"
+                                >
+                                    <Check className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    {t('common.inLibrary')}
+                                </button>
                             ) : (
                                 <button 
                                     onClick={() => handleAddMovie(state.selectedMovie!)}
-                                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors px-4 py-2 rounded-xl text-white text-sm font-bold shadow-lg shadow-blue-900/20"
+                                    className="flex items-center gap-3 bg-gray-600/60 hover:bg-gray-600/80 backdrop-blur-md text-white transition-all px-6 py-3 rounded-lg font-bold text-base sm:text-lg border border-white/20 shadow-lg hover:scale-105 active:scale-95"
                                 >
-                                    <Plus className="w-4 h-4" />
-                                    Add to Watchlist
+                                    <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    {t('common.addToWatchlist')}
                                 </button>
                             )}
+
+                        </div>
+
+                        {/* Poster (Hidden on mobile, visible on desktop overlap) */}
+                        <div className="hidden sm:block absolute -bottom-16 right-10 w-32 aspect-[2/3] rounded-lg shadow-2xl border-2 border-white/10 z-20 overflow-hidden transform rotate-3 hover:rotate-0 transition-all duration-500">
+                             <img 
+                                src={state.selectedMovie.posterPath || ''} 
+                                alt="Poster" 
+                                className="w-full h-full object-cover"
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-6">
+                {/* Content Body */}
+                <div className="p-6 sm:p-10 space-y-8 bg-[#0B0E14]">
                     
                     {/* Plot */}
                     <div>
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Plot</h3>
-                        <p className="text-gray-300 leading-relaxed text-base">
+                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">{t('common.plot')}</h3>
+                        <p className="text-gray-200 leading-relaxed text-lg font-light">
                             {state.selectedMovie.overview || 'No overview available.'}
                         </p>
                     </div>
 
-                    {/* Director */}
-                    {state.selectedMovie.director && (
+                    {/* Metadata Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-4 border-y border-white/5">
+                        {state.selectedMovie.director && (
+                            <div>
+                                <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.director')}</h3>
+                                <div className="text-white font-medium">{state.selectedMovie.director}</div>
+                            </div>
+                        )}
                         <div>
-                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Director</h3>
-                             <div className="text-white font-medium">{state.selectedMovie.director}</div>
+                             <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.released')}</h3>
+                             <div className="text-white font-medium">{state.selectedMovie.releaseDate ? t('common.released') : t('common.upcoming')}</div>
                         </div>
-                    )}
+                         {/* More fields can go here */}
+                    </div>
 
                     {/* Cast */}
                     {state.selectedMovie.cast && state.selectedMovie.cast.length > 0 && (
                         <div>
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Top Cast</h3>
-                            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">{t('common.cast')}</h3>
+                            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
                                 {state.selectedMovie.cast.map((actor, idx) => (
-                                    <div key={idx} className="flex flex-col items-center gap-2 min-w-[80px]">
-                                        <div className="w-16 h-16 rounded-full overflow-hidden bg-white/10 border border-white/5">
+                                    <div key={idx} className="flex flex-col items-center gap-2 min-w snap-start">
+                                        <div className="w-20 h-20 rounded-full overflow-hidden bg-white/10 border border-white/5 shadow-lg">
                                             {actor.profilePath ? (
                                                 <img src={actor.profilePath} alt={actor.name} className="w-full h-full object-cover" />
                                             ) : (
@@ -522,8 +579,8 @@ function App({ conductor }: AppProps) {
                                             )}
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs font-bold text-white truncate w-20">{actor.name}</div>
-                                            <div className="text-[10px] text-gray-400 truncate w-20">{actor.character}</div>
+                                            <div className="text-xs font-bold text-white truncate w-24">{actor.name}</div>
+                                            <div className="text-[10px] text-gray-400 truncate w-24">{actor.character}</div>
                                         </div>
                                     </div>
                                 ))}
@@ -533,22 +590,22 @@ function App({ conductor }: AppProps) {
 
                     {/* Where to Watch */}
                     {state.selectedMovie.watchProviders && (
-                        <div>
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Where to Watch</h3>
+                        <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
+                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">{t('common.providers')}</h3>
                             
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 {/* Stream (Flatrate) */}
                                 {state.selectedMovie.watchProviders.flatrate && state.selectedMovie.watchProviders.flatrate.length > 0 && (
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-gray-500 w-12 shrink-0">Stream</span>
-                                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs font-bold text-gray-500 w-12 shrink-0 uppercase">Stream</span>
+                                        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                                             {state.selectedMovie.watchProviders.flatrate.map((provider, idx) => (
                                                 <img 
                                                     key={idx} 
                                                     src={provider.logoPath} 
                                                     alt={provider.providerName} 
                                                     title={provider.providerName}
-                                                    className="w-10 h-10 rounded-xl shadow-lg border border-white/10"
+                                                    className="w-12 h-12 rounded-xl shadow-lg border border-white/10 hover:scale-110 transition-transform cursor-help"
                                                 />
                                             ))}
                                         </div>
@@ -557,16 +614,16 @@ function App({ conductor }: AppProps) {
 
                                 {/* Rent */}
                                 {state.selectedMovie.watchProviders.rent && state.selectedMovie.watchProviders.rent.length > 0 && (
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-gray-500 w-12 shrink-0">Rent</span>
-                                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs font-bold text-gray-500 w-12 shrink-0 uppercase">Rent</span>
+                                        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                                             {state.selectedMovie.watchProviders.rent.map((provider, idx) => (
                                                 <img 
                                                     key={idx} 
                                                     src={provider.logoPath} 
                                                     alt={provider.providerName} 
                                                     title={provider.providerName}
-                                                    className="w-10 h-10 rounded-xl shadow-lg border border-white/10 opacity-80 hover:opacity-100 transition-opacity"
+                                                    className="w-10 h-10 rounded-xl shadow-lg border border-white/10 opacity-70 hover:opacity-100 transition-all grayscale hover:grayscale-0"
                                                 />
                                             ))}
                                         </div>
@@ -575,16 +632,16 @@ function App({ conductor }: AppProps) {
 
                                 {/* Buy */}
                                 {state.selectedMovie.watchProviders.buy && state.selectedMovie.watchProviders.buy.length > 0 && (
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-gray-500 w-12 shrink-0">Buy</span>
-                                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-xs font-bold text-gray-500 w-12 shrink-0 uppercase">Buy</span>
+                                        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                                             {state.selectedMovie.watchProviders.buy.map((provider, idx) => (
                                                 <img 
                                                     key={idx} 
                                                     src={provider.logoPath} 
                                                     alt={provider.providerName} 
                                                     title={provider.providerName}
-                                                    className="w-10 h-10 rounded-xl shadow-lg border border-white/10 opacity-80 hover:opacity-100 transition-opacity"
+                                                    className="w-10 h-10 rounded-xl shadow-lg border border-white/10 opacity-70 hover:opacity-100 transition-all grayscale hover:grayscale-0"
                                                 />
                                             ))}
                                         </div>
@@ -606,15 +663,15 @@ function App({ conductor }: AppProps) {
                     {/* Recommendations */}
                     {state.selectedMovie.recommendations && state.selectedMovie.recommendations.length > 0 && (
                         <div>
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">You might also like</h3>
-                            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                                {state.selectedMovie.recommendations.map((rec) => (
+                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">{t('common.recommendations')}</h3>
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                                {state.selectedMovie.recommendations.slice(0, 5).map((rec) => (
                                     <div 
                                         key={rec.id} 
                                         onClick={() => conductor.dispatch({ type: 'SELECT_MOVIE', payload: rec.id })}
-                                        className="flex flex-col gap-2 min-w-[100px] w-[100px] cursor-pointer group"
+                                        className="flex flex-col gap-2 cursor-pointer group"
                                     >
-                                        <div className="aspect-[2/3] rounded-lg overflow-hidden bg-white/10 border border-white/5 relative">
+                                        <div className="aspect-[2/3] rounded-xl overflow-hidden bg-white/10 border border-white/5 relative shadow-lg">
                                             {rec.posterPath ? (
                                                 <img 
                                                     src={rec.posterPath} 
@@ -625,7 +682,7 @@ function App({ conductor }: AppProps) {
                                                 <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">N/A</div>
                                             )}
                                         </div>
-                                        <div className="text-xs font-medium text-gray-300 truncate group-hover:text-blue-400 transition-colors">
+                                        <div className="text-xs font-bold text-gray-300 truncate group-hover:text-blue-400 transition-colors">
                                             {rec.title}
                                         </div>
                                     </div>
@@ -633,11 +690,6 @@ function App({ conductor }: AppProps) {
                             </div>
                         </div>
                     )}
-                    
-                    {/* Action Buttons */}
-                    <div className="pt-4 flex gap-3">
-                         {/* Here we could add Add/Remove/Favorite buttons if we wanted strict context actions inside modal */}
-                    </div>
                 </div>
             </div>
         </div>

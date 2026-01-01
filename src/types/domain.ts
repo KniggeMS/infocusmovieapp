@@ -19,6 +19,8 @@ export interface Movie {
   tmdbId?: number;
   title: string;
   posterPath: string | null;
+  backdropPath?: string | null; // High-res landscape image
+  trailerKey?: string | null; // YouTube Video Key
   runtime?: number | null;
   releaseDate: string | null;
   overview: string | null;

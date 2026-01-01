@@ -139,9 +139,9 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     }
 
     try {
-      // Append credits, watch/providers AND recommendations
+      // Append credits, watch/providers, recommendations AND videos
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${apiKey}&language=de-DE&append_to_response=credits,watch/providers,recommendations`
+        `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${apiKey}&language=de-DE&append_to_response=credits,watch/providers,recommendations,videos`
       );
 
       if (!response.ok) {
@@ -161,6 +161,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
         character: c.character,
         profilePath: c.profile_path ? `https://image.tmdb.org/t/p/w200${c.profile_path}` : null
       }));
+
+      // Find Trailer (YouTube)
+      const trailer = data.videos?.results?.find(
+        (v: any) => v.site === 'YouTube' && v.type === 'Trailer'
+      );
 
       // Map Recommendations
       const recommendations = (data.recommendations?.results || []).slice(0, 10).map((rec: any) => ({
@@ -194,6 +199,10 @@ export class SupabaseMovieService implements MovieServiceAdapter {
         posterPath: data.poster_path 
           ? `https://image.tmdb.org/t/p/w500${data.poster_path}` 
           : null,
+        backdropPath: data.backdrop_path
+          ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}`
+          : null,
+        trailerKey: trailer ? trailer.key : null,
         releaseDate: data.release_date || null,
         runtime: data.runtime || null,
         voteAverage: data.vote_average || null,
