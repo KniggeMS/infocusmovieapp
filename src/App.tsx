@@ -478,19 +478,11 @@ function App({ conductor }: AppProps) {
                     {/* Content Container (Bottom Left) */}
                     <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-10 flex flex-col justify-end h-full z-20 pointer-events-none">
                         
-                        {/* Title & Meta */}
+                        {/* Title Only */}
                         <div className="mb-4 sm:mb-6 z-10 pointer-events-none">
                             <h2 className="text-2xl sm:text-5xl font-bold text-white mb-2 sm:mb-3 leading-tight drop-shadow-2xl line-clamp-2">
                                 {state.selectedMovie.title}
                             </h2>
-                            <div className="flex items-center gap-3 text-xs sm:text-base text-gray-200 font-medium drop-shadow-md">
-                                {state.selectedMovie.releaseDate && <span>{state.selectedMovie.releaseDate.split('-')[0]}</span>}
-                                {state.selectedMovie.runtime && <span>{state.selectedMovie.runtime} min</span>}
-                                {state.selectedMovie.voteAverage && <span className="text-green-400 font-bold">{Math.round(state.selectedMovie.voteAverage * 10)}% {t('common.match')}</span>}
-                                {state.selectedMovie.genres && state.selectedMovie.genres.slice(0, 2).map(g => (
-                                    <span key={g} className="text-gray-300">• {g}</span>
-                                ))}
-                            </div>
                         </div>
 
                         {/* Action Buttons Row */}
@@ -541,6 +533,16 @@ function App({ conductor }: AppProps) {
                 {/* Content Body */}
                 <div className="p-5 sm:p-10 space-y-6 sm:space-y-8 bg-[#0B0E14] relative z-30">
                     
+                    {/* Metadata (Moved here) */}
+                    <div className="mt-6 mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-400">
+                        {state.selectedMovie.releaseDate && <span>{state.selectedMovie.releaseDate.split('-')[0]}</span>}
+                        {state.selectedMovie.runtime && <span>• {state.selectedMovie.runtime} min</span>}
+                        {state.selectedMovie.voteAverage && <span className="text-green-400 font-bold">• {Math.round(state.selectedMovie.voteAverage * 10)}% {t('common.match')}</span>}
+                        {state.selectedMovie.genres && state.selectedMovie.genres.slice(0, 2).map(g => (
+                            <span key={g} className="text-gray-300">• {g}</span>
+                        ))}
+                    </div>
+
                     {/* Plot */}
                     <div>
                         <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">{t('common.plot')}</h3>
