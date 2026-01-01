@@ -18,10 +18,17 @@
 - [x] **UI Fix:** Netflix-style Hero Header (Backdrop instead of cropped poster).
 - [x] **Trailer Integration:** YouTube Trailer support (Background Autoplay Muted + Modal toggle).
 
-## ✅ Phase 10: Internationalization (i18n)
+## 🚧 Phase 10: Internationalization (i18n)
 - [x] **Setup:** react-i18next & Language Detector.
 - [x] **UI:** Language Toggle (DE/EN) on Auth/Login Screen.
 - [x] **Content:** Translate common strings (Nav, Actions, Errors).
+- [ ] **Validation:** Verify mobile layouts and translation completeness.
+
+## ⚠️ Current Issues / Next Session
+- [ ] **Mobile UI Fixes:** Resolve layout bugs introduced in V2.6 (Detail Header on small screens).
+- [ ] **Supabase Stability:** Verify connection persistence after app sleep/resume.
+- [ ] **i18n Polish:** Audit all translation keys and fallback behavior.
+- [ ] **Deployment:** Deploy polished version (Phase 11).
 
 ## 📋 Backlog
 - [x] **Cast & Crew:** Detailed view for actors and directors.
@@ -30,5 +37,5 @@
 - [ ] **Unit Testing:** Increase coverage for Conductor and Services.
 
 ---
-**Global Status:** 🟢 Stable V2.6 (Multi-Language & Visuals)
-**Session Note (01.01.2026):** Implemented Phase 9 (Trailers) & Phase 10 (i18n). App is now multi-lingual and visually polished. Next: Social Features or Maintenance.
+**Global Status:** 🟠 Phase 10: Bugfixing & Polish
+**Session Note (01.01.2026):** V2.6 implemented (Trailers, i18n). Codebase is feature-complete but requires visual debugging on mobile devices and final i18n verification before stable release.
