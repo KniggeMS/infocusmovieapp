@@ -1,93 +1,67 @@
-# InFocus CineLog V2 (Hybrid Mobile App)
+# InFocus CineLog
 
-InFocus CineLog is a modern, AI-powered watchlist application designed for film enthusiasts. It leverages a hybrid architecture to run seamlessly on the web and as a native Android application.
+**InFocus CineLog** is a modern, offline-capable Progressive Web App (PWA) designed for tracking movies, visualizing watch habits with statistics, and discovering new content via AI-powered recommendations. It is built to bridge the gap between a web application and a native mobile experience.
 
 ## ⚡ Tech Stack
 
-- **Frontend:** React 19, TypeScript, Vite
-- **Styling:** Tailwind CSS (Custom Glassmorphism Design System)
-- **State Management:** Custom **Conductor Pattern** (No Redux/Context hell)
-- **Backend / Database:** Supabase (PostgreSQL)
-- **Data Source:** TMDB (The Movie Database) API
-- **Mobile Runtime:** Capacitor (Android)
+This project leverages a cutting-edge stack for performance and developer experience:
 
-## 🏗️ Architecture: The Conductor Pattern
+*   **Core:** React 19, TypeScript
+*   **Build Tool:** Vite 5
+*   **Styling:** Tailwind CSS (Glassmorphism Design)
+*   **Backend:** Supabase (PostgreSQL, Auth, Realtime)
+*   **PWA/Mobile:** Vite PWA Plugin, Capacitor (Android)
+*   **Icons:** Lucide React
 
-V2.0 introduces a strict separation of concerns to ensure stability and scalability:
+## 🏗️ Architecture
 
-1.  **The Conductor (`src/core/conductor/`):**
-    - The "Brain" of the application.
-    - Holds the `WatchlistState`.
-    - Processes `UserIntents` (e.g., `LOAD_MOVIES`, `ADD_MOVIE`).
-    - Handles "Loop of Death" protection and Optimistic UI updates.
+### Singleton Supabase Client (`src/lib/supabase.ts`)
 
-2.  **The View (`src/components/` & `App.tsx`):**
-    - "Dumb" components that only render props.
-    - Subscribes to the Conductor to receive state updates.
-    - Dispatches intents via `conductor.dispatch()`.
+A key architectural improvement in version 2.4+ is the implementation of the **Singleton Pattern** for the Supabase client.
 
-3.  **The Adapters (`src/services/`):**
-    - Abstraction layer for API calls (Supabase/TMDB).
-    - Ensures the core logic remains independent of specific backend implementations.
+*   **Problem:** Previous versions instantiated `createClient` in multiple services (`AuthService`, `MovieService`). This led to "Multiple GoTrueClient instances detected" warnings and potential race conditions where the authentication state became out of sync.
+*   **Solution:** We now export a single, shared `supabase` instance from `src/lib/supabase.ts`.
+*   **Benefit:** This ensures a stable, unified authentication state across the entire application and eliminates redundant connection overhead.
 
-## ✨ Features
+### Conductor Pattern (`src/core/conductor`)
 
-- **📱 Native Android App:** Built with Capacitor for a native feel.
-- **🧠 Smart Search:** Integrated with TMDB for real-time movie data (Posters, Ratings, Release Dates).
-- **☁️ Cloud Sync:** All data is synced in real-time via Supabase.
-- **🎨 Glassmorphism UI:** A beautiful, dark-themed UI with glass effects, designed for modern mobile displays.
-- **🔐 Secure Auth:** Full Email/Password authentication with Role-Based Access Control (RBAC).
-- **🛡️ Data Privacy:** Row-Level Security (RLS) ensures users only see and edit their own data.
-- **❤️ Favorites & Watched:** Organize your collection with dedicated filters and status tracking.
-- **🏆 Gamification System:** Unlockable achievements ('First Blood', 'Collector', etc.) to make tracking fun.
-- **🛡️ Duplicate Protection:** Prevents adding the same movie twice.
-- **🎬 Deep Dive:** Full Cast, Crew & Plot Details.
-- **📺 Streaming Guide:** Watch Providers (Netflix, Amazon, etc.) via JustWatch.
-- **✨ Polished UI:** Custom App Icon & Splash Screen.
+The application state is managed by a custom "Conductor". This pattern strictly separates business logic from UI components, making the application easier to test and reducing "prop drilling".
+
+## 📱 PWA & Mobile Features
+
+*   **Installable:** The app includes a complete `manifest.json` and high-resolution icons (`/public/pwa-icon-512.png`), allowing it to be installed on home screens.
+*   **Offline-First:** Critical data is managed locally, ensuring the UI remains responsive even with poor network connectivity.
+*   **Native Feel:** The bottom navigation and splash screen are optimized for a native-like experience on mobile devices.
+
+## 📂 Project Structure
+
+*   **`/src/core`**: The brain of the app. Contains the `Conductor` (State Management) and core configuration.
+*   **`/src/services`**: API adapters. `AuthService` and `SupabaseMovieService` reside here, handling external communication.
+*   **`/src/lib`**: Central infrastructure. Contains the singleton `supabase.ts` client.
+*   **`/src/types`**: TypeScript interfaces (`domain.ts`, `auth.ts`, `supabase.ts`) ensuring type safety across the stack.
+*   **`/public`**: Static assets like PWA icons and the manifest file.
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js & npm
-- Supabase Project (URL & Anon Key)
-- TMDB API Key
-
-### Database Setup (SQL)
-Run the migration file `supabase/migrations/20251231_setup_rls.sql` in your Supabase SQL Editor to:
-1. Enable Row-Level Security (RLS).
-2. Create Policies for User-Data isolation.
-3. Add the `user_id` column to the movies table.
-
-### Installation
-
-1.  Clone the repository.
-2.  Install dependencies:
+1.  **Install Dependencies:**
     ```bash
     npm install
     ```
-3.  Configure Environment (`.env`):
+
+2.  **Environment Setup:**
+    Create a `.env` file in the root directory and add your Supabase credentials:
     ```env
-    VITE_SUPABASE_URL=your_url
-    VITE_SUPABASE_ANON_KEY=your_key
-    VITE_TMDB_API_KEY=your_key
-    VITE_APP_URL=https://your-production-url.com (Optional, for Auth Redirects)
+    VITE_SUPABASE_URL=your_project_url
+    VITE_SUPABASE_ANON_KEY=your_anon_key
+    VITE_TMDB_API_KEY=your_tmdb_key
     ```
-4.  Run Development Server:
+
+3.  **Run Development Server:**
     ```bash
     npm run dev
     ```
 
-### Build for Android
-
-1.  Build the web assets:
+4.  **Build for Production:**
     ```bash
     npm run build
-    ```
-2.  Sync with Capacitor:
-    ```bash
-    npx cap sync
-    ```
-3.  Open in Android Studio:
-    ```bash
-    npx cap open android
     ```

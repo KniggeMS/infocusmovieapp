@@ -1,16 +1,3 @@
-# InFocus CineLog - Development Plan
-
-## ✅ Completed (Phase 1 & 2: Core & V2 Rewrite)
-- [x] **Architecture Migration:** Implemented "The Conductor Pattern" (Logic/UI Separation).
-- [x] **UI Redesign:** Modern "Apple Glassmorphism" aesthetic with Tailwind CSS.
-- [x] **Supabase Integration:** Full CRUD (Create, Read, Update, Delete) with real data.
-- [x] **TMDB API:** Real-time movie search and data fetching.
-- [x] **Android Setup:** Capacitor configuration for native mobile deployment.
-- [x] **Feature: Favorites & Watched:** Tracking status with specific UI filters.
-- [x] **Feature: Search & Filter:** Global search reset and filtering by status (Favorites/Watched).
-- [x] **Safety:** "Loop of Death" protection in Conductor.
-- [x] **Duplicate Prevention:** Unique check before adding movies to database.
-
 ## 🚧 In Progress (Phase 3: Engagement)
 - [x] **Gamification:** Re-implement Achievements and XP system.
 - [x] **Statistics (Charts):** Visual Charts for watching habits (Genres, Watch time).
@@ -19,6 +6,13 @@
 - [x] **AI Recommendations (via TMDB):** Discovery Feature with direct add-to-watchlist.
 - [x] **User Management (Auth & Roles):** Secure access, Admin badges, and Production Redirects.
 - [x] **Security (RLS):** Row-Level Security policies for Multi-User support.
+- [x] **Refactoring & UI Polish:** Code Cleanup, Singleton Client, Normalized Navigation.
+
+## 🚀 Phase 8: Production Deployment (Active)
+- [ ] **Vercel Setup:** Connect Repo & Configure Build Settings.
+- [ ] **Environment Variables:** Set VITE_SUPABASE_URL, ANON_KEY, TMDB_KEY & VITE_APP_URL in Vercel.
+- [ ] **Supabase Whitelist:** Ensure Vercel domains are allowed in Auth Settings.
+- [ ] **Final Smoke Test:** Verify Auth flow & TMDB connection in Production environment.
 
 ## 📋 Backlog
 - [ ] **Internationalization (i18n):** Multi-language support.
@@ -27,4 +21,4 @@
 - [ ] **Social Features:** Share lists with friends.
 
 ---
-**Session Note (31.12.2025):** Last State: V2.5 Security Update. Auth fully implemented (Login/Roles). RLS Policies active (Multi-User ready). Production Redirects configured. Ready for Deployment or i18n.
+**Session Note (31.12.2025):** Last State: V2.5 Refactoring Complete. UI Polish applied (Nav/Header). Auth Service stabilized. Ready for Vercel Deployment.
