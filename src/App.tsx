@@ -377,61 +377,6 @@ function App({ conductor }: AppProps) {
 
       </div>
 
-      {/* Bottom Navigation (Fixed) */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#0B0E14]/90 backdrop-blur-2xl border-t border-white/5 px-6 py-4 flex justify-between items-center z-50 max-w-4xl mx-auto w-full md:rounded-t-3xl md:mb-0">
-          <button 
-            className={`transition-colors ${state.filter === 'all' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
-            onClick={() => {
-                setSearchTerm('');
-                conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
-                conductor.dispatch({ type: 'LOAD_MOVIES' });
-            }}
-            aria-label={t('nav.home')}
-          >
-            <Home className="w-6 h-6" />
-          </button>
-          
-          <button 
-            className={`transition-colors ${state.filter === 'favorites' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
-            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'favorites' })}
-            aria-label={t('nav.favorites')}
-          >
-            <Heart className="w-6 h-6" />
-          </button>
-          
-          <button 
-            className="text-gray-400 hover:text-white transition-colors"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            aria-label="Search / Top"
-          >
-            <Search className="w-6 h-6" />
-          </button>
-
-          <button 
-            className={`transition-colors ${state.filter === 'watched' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
-            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'watched' })}
-            aria-label={t('nav.watched')}
-          >
-            <Eye className="w-6 h-6" />
-          </button>
-          
-          <button 
-            className={`transition-colors ${state.filter === 'achievements' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
-            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'achievements' })}
-            aria-label={t('nav.achievements')}
-          >
-            <Zap className="w-6 h-6" />
-          </button>
-          
-          <button 
-            className={`transition-colors ${state.filter === 'statistics' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
-            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'statistics' })}
-            aria-label={t('nav.statistics')}
-          >
-            <BarChart2 className="w-6 h-6" />
-          </button>
-      </nav>
-
       {/* Movie Detail Modal */}
       {state.selectedMovie && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center animate-fade-in">
@@ -447,18 +392,18 @@ function App({ conductor }: AppProps) {
                 {/* Close Button */}
                 <button 
                     onClick={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
-                    className="absolute top-4 right-4 z-20 bg-black/50 p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-md transition-all"
+                    className="absolute top-4 right-4 z-[120] bg-black/50 p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-md transition-all pointer-events-auto"
                 >
                     <X className="w-6 h-6" />
                 </button>
 
                 {/* Hero Header (YouTube Trailer or Backdrop) */}
-                <div className="relative w-full aspect-video sm:h-[450px] overflow-hidden group">
+                <div className="relative w-full aspect-[16/10] sm:aspect-video sm:h-[450px] overflow-hidden group">
                     {/* Media Layer */}
                     {state.selectedMovie.trailerKey ? (
-                        <div className="absolute inset-0 w-full h-full pointer-events-none scale-125">
+                        <div className="absolute inset-0 w-full h-full pointer-events-none sm:scale-125">
                             <iframe 
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover opacity-80 sm:opacity-100"
                                 src={`https://www.youtube.com/embed/${state.selectedMovie.trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${state.selectedMovie.trailerKey}&playsinline=1&rel=0&disablekb=1&iv_load_policy=3`}
                                 title="Trailer"
                                 allow="autoplay; encrypted-media" 
@@ -473,17 +418,17 @@ function App({ conductor }: AppProps) {
                     )}
 
                     {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/40 to-transparent" />
                     
                     {/* Content Container (Bottom Left) */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 flex flex-col justify-end h-full">
+                    <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-10 flex flex-col justify-end h-full z-20 pointer-events-none">
                         
                         {/* Title & Meta */}
-                        <div className="mb-6 z-10">
-                            <h2 className="text-3xl sm:text-5xl font-bold text-white mb-3 leading-tight drop-shadow-2xl">
+                        <div className="mb-4 sm:mb-6 z-10 pointer-events-none">
+                            <h2 className="text-2xl sm:text-5xl font-bold text-white mb-2 sm:mb-3 leading-tight drop-shadow-2xl line-clamp-2">
                                 {state.selectedMovie.title}
                             </h2>
-                            <div className="flex items-center gap-4 text-sm sm:text-base text-gray-200 font-medium drop-shadow-md">
+                            <div className="flex items-center gap-3 text-xs sm:text-base text-gray-200 font-medium drop-shadow-md">
                                 {state.selectedMovie.releaseDate && <span>{state.selectedMovie.releaseDate.split('-')[0]}</span>}
                                 {state.selectedMovie.runtime && <span>{state.selectedMovie.runtime} min</span>}
                                 {state.selectedMovie.voteAverage && <span className="text-green-400 font-bold">{Math.round(state.selectedMovie.voteAverage * 10)}% {t('common.match')}</span>}
@@ -494,15 +439,15 @@ function App({ conductor }: AppProps) {
                         </div>
 
                         {/* Action Buttons Row */}
-                        <div className="flex flex-wrap items-center gap-4 z-10">
+                        <div className="flex flex-wrap items-center gap-3 z-[110] pointer-events-auto">
                             
                             {/* Play Trailer Button (If exists) */}
                             {state.selectedMovie.trailerKey && (
                                 <button 
                                     onClick={() => window.open(`https://youtube.com/watch?v=${state.selectedMovie!.trailerKey}`, '_blank')}
-                                    className="flex items-center gap-3 bg-white text-black hover:bg-gray-200 transition-all px-6 py-3 rounded-lg font-bold text-base sm:text-lg shadow-xl hover:scale-105 active:scale-95"
+                                    className="flex items-center gap-2 bg-white text-black hover:bg-gray-200 transition-all px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg shadow-xl active:scale-95"
                                 >
-                                    <Play className="w-5 h-5 sm:w-6 sm:h-6 fill-black" />
+                                    <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
                                     {t('common.playTrailer')}
                                 </button>
                             )}
@@ -510,17 +455,17 @@ function App({ conductor }: AppProps) {
                             {/* Add/Library Button */}
                             {state.items.some(m => m.tmdbId === Number(state.selectedMovie?.id) || m.id === state.selectedMovie?.id) ? (
                                 <button 
-                                    className="flex items-center gap-3 bg-gray-500/30 backdrop-blur-md text-white/90 px-6 py-3 rounded-lg font-bold text-base sm:text-lg border border-white/10 cursor-default"
+                                    className="flex items-center gap-2 bg-gray-500/30 backdrop-blur-md text-white/90 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg border border-white/10 cursor-default"
                                 >
-                                    <Check className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                                     {t('common.inLibrary')}
                                 </button>
                             ) : (
                                 <button 
                                     onClick={() => handleAddMovie(state.selectedMovie!)}
-                                    className="flex items-center gap-3 bg-gray-600/60 hover:bg-gray-600/80 backdrop-blur-md text-white transition-all px-6 py-3 rounded-lg font-bold text-base sm:text-lg border border-white/20 shadow-lg hover:scale-105 active:scale-95"
+                                    className="flex items-center gap-2 bg-gray-600/60 hover:bg-gray-600/80 backdrop-blur-md text-white transition-all px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg border border-white/20 shadow-lg hover:scale-105 active:scale-95"
                                 >
-                                    <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                                     {t('common.addToWatchlist')}
                                 </button>
                             )}
@@ -539,12 +484,12 @@ function App({ conductor }: AppProps) {
                 </div>
 
                 {/* Content Body */}
-                <div className="p-6 sm:p-10 space-y-8 bg-[#0B0E14]">
+                <div className="p-5 sm:p-10 space-y-6 sm:space-y-8 bg-[#0B0E14] relative z-30">
                     
                     {/* Plot */}
                     <div>
-                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">{t('common.plot')}</h3>
-                        <p className="text-gray-200 leading-relaxed text-lg font-light">
+                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">{t('common.plot')}</h3>
+                        <p className="text-gray-200 leading-relaxed text-base sm:text-lg font-light">
                             {state.selectedMovie.overview || 'No overview available.'}
                         </p>
                     </div>

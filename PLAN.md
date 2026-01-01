@@ -1,3 +1,10 @@
+## ⚠️ CRITICAL BLOCKERS
+- [ ] **Supabase Sync Failure:** '404 movies not found' (Local Cache mismatch) -> Priorität: Hoch.
+- [x] **Mobile Detail Modal:** Add-Button (Regression V2.6) fixed via Z-Index & Layout Audit.
+
+## Arbeitsweise
+- Jeder UI-Fix erfordert eine Computer Use Simulation (Layout-Audit).
+
 ## 🚧 In Progress (Phase 3: Engagement)
 - [x] **Gamification:** Re-implement Achievements and XP system.
 - [x] **Statistics (Charts):** Visual Charts for watching habits (Genres, Watch time).
@@ -21,14 +28,13 @@
 ## 🚧 Phase 10: Internationalization (i18n)
 - [x] **Setup:** react-i18next & Language Detector.
 - [x] **UI:** Language Toggle (DE/EN) on Auth/Login Screen.
-- [x] **Content:** Translate common strings (Nav, Actions, Errors).
-- [ ] **Validation:** Verify mobile layouts and translation completeness.
+- [x] **Mobile UI:** Accessibility Fix for Modal Buttons (Mobile Viewport).
+- [ ] **Content & Testing:** Translate common strings & verify mobile layouts.
 
-## ⚠️ Current Issues / Next Session
-- [ ] **Mobile UI Fixes:** Resolve layout bugs introduced in V2.6 (Detail Header on small screens).
-- [ ] **Supabase Stability:** Verify connection persistence after app sleep/resume.
-- [ ] **i18n Polish:** Audit all translation keys and fallback behavior.
-- [ ] **Deployment:** Deploy polished version (Phase 11).
+## ⚠️ Next Steps (Prioritized)
+1. [ ] **FIX: Backend Local Sync:** Debug Supabase 404 errors.
+2. [ ] **VERIFY: i18n:** Complete translation audit.
+3. [ ] **Deploy:** Phase 11.
 
 ## 📋 Backlog
 - [x] **Cast & Crew:** Detailed view for actors and directors.
@@ -37,5 +43,5 @@
 - [ ] **Unit Testing:** Increase coverage for Conductor and Services.
 
 ---
-**Global Status:** 🟠 Phase 10: Bugfixing & Polish
-**Session Note (01.01.2026):** V2.6 implemented (Trailers, i18n). Codebase is feature-complete but requires visual debugging on mobile devices and final i18n verification before stable release.
+**Global Status:** 🔵 Phase 10: i18n & Mobile UI Fixes (V2.6.2)
+**Session Note:** Mobile UI fixed (Z-Index). Login Screen localized. Critical backend issue (404s) remains active.
