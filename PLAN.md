@@ -43,5 +43,5 @@
 - [ ] **Unit Testing:** Increase coverage for Conductor and Services.
 
 ---
-**Global Status:** 🔵 Phase 10: i18n & Mobile UI Fixes (V2.6.2)
-**Session Note:** Mobile UI fixed (Z-Index). Login Screen localized. Critical backend issue (404s) remains active.
+**Global Status:** 🟡 Phase 10: Real-Device Testing (Android/iPhone)
+**Session Note:** V2.6.2 auf GitHub/Main gepusht. Fokus: Verifikation der Modal-Klickbarkeit auf Smartphones. Lokales Backend-Problem (Supabase 404) bleibt bestehen, beeinträchtigt aber nicht zwingend das Cloud-Deployment (Vercel).

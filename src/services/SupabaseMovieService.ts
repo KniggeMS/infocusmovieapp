@@ -108,7 +108,17 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     return this.searchTMDB(query);
   }
 
+  /**
+   * Simple UUID validation regex.
+   */
+  private isUUID(str: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  }
+
   async getById(id: string): Promise<Movie | null> {
+    if (!this.isUUID(id)) return null;
+    
     try {
       const { data, error } = await this.client
         .from('movies')
@@ -117,14 +127,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
         .single();
 
       if (error) {
-        // Warning usually sufficient for getById not found
-        console.warn('Supabase getById error or not found:', error.message);
+        console.warn('Supabase getById error:', error.message);
         return null;
       }
 
-      if (!data) return null;
-
-      return this.mapRowToMovie(data);
+      return data ? this.mapRowToMovie(data) : null;
     } catch (err) {
       console.error('Unexpected error in getById:', err);
       return null;
@@ -220,13 +227,10 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie> {
-    // Cast to 'any' for destructuring safety of unknown props
-    const { id, source, addedAt, ...cleanMovie } = movie as any;
+    const cleanMovie = movie as any;
 
-    // Use MovieInsert type for type safety
-    // Notice: we DO NOT send user_id. DB handles it via DEFAULT auth.uid()
     const mappedData: MovieInsert = {
-      tmdb_id: cleanMovie.tmdbId || id,
+      tmdb_id: cleanMovie.tmdbId,
       title: cleanMovie.title,
       poster_path: cleanMovie.posterPath,
       runtime: cleanMovie.runtime,
@@ -249,6 +253,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async delete(id: string): Promise<void> {
+    if (!this.isUUID(id)) {
+        console.warn('Attempted to delete non-UUID movie:', id);
+        return;
+    }
+
     const { error } = await this.client
       .from('movies')
       .delete()
@@ -260,6 +269,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async update(id: string, updates: Partial<any>): Promise<void> {
+    if (!this.isUUID(id)) {
+        console.warn('Attempted to update non-UUID movie:', id);
+        return;
+    }
+
     const { error } = await this.client
       .from('movies')
       .update(updates)

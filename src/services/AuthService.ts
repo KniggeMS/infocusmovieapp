@@ -23,20 +23,32 @@ export class AuthService {
    * If no profile exists, defaults to 'user'.
    */
   private async fetchUserRole(userId: string): Promise<UserRole> {
-    const { data, error } = await this.client
-      .from('profiles')
-      .select('role')
-      .eq('id', userId)
-      .single();
+    try {
+      // Try to get existing profile
+      const { data, error } = await this.client
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
 
-    if (error || !data) {
-      // Create a default profile if it doesn't exist (optional, but good for self-healing)
-      // For now, just return default 'user' role
-      console.warn('Could not fetch user role, defaulting to "user":', error?.message);
+      if (error && error.code === 'PGRST116') {
+        // Profile doesn't exist, create default one
+        const { data: newData, error: insertError } = await this.client
+          .from('profiles')
+          .upsert({ id: userId, role: 'user' })
+          .select('role')
+          .single();
+        
+        if (insertError) throw insertError;
+        return newData.role as UserRole;
+      }
+
+      if (error) throw error;
+      return data.role as UserRole;
+    } catch (e) {
+      console.warn('Error fetching/creating user role, defaulting to "user":', e);
       return 'user';
     }
-
-    return data.role as UserRole;
   }
 
   /**

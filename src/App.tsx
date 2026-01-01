@@ -377,6 +377,61 @@ function App({ conductor }: AppProps) {
 
       </div>
 
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#0B0E14]/90 backdrop-blur-2xl border-t border-white/5 px-6 py-4 flex justify-between items-center z-50 max-w-4xl mx-auto w-full md:rounded-t-3xl">
+          <button 
+            className={`transition-colors ${state.filter === 'all' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => {
+                setSearchTerm('');
+                conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
+                conductor.dispatch({ type: 'LOAD_MOVIES' });
+            }}
+            aria-label={t('nav.home')}
+          >
+            <Home className="w-6 h-6" />
+          </button>
+          
+          <button 
+            className={`transition-colors ${state.filter === 'favorites' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'favorites' })}
+            aria-label={t('nav.favorites')}
+          >
+            <Heart className="w-6 h-6" />
+          </button>
+          
+          <button 
+            className="text-gray-400 hover:text-white transition-colors"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Search / Top"
+          >
+            <Search className="w-6 h-6" />
+          </button>
+
+          <button 
+            className={`transition-colors ${state.filter === 'watched' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'watched' })}
+            aria-label={t('nav.watched')}
+          >
+            <Eye className="w-6 h-6" />
+          </button>
+          
+          <button 
+            className={`transition-colors ${state.filter === 'achievements' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'achievements' })}
+            aria-label={t('nav.achievements')}
+          >
+            <Zap className="w-6 h-6" />
+          </button>
+          
+          <button 
+            className={`transition-colors ${state.filter === 'statistics' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'statistics' })}
+            aria-label={t('nav.statistics')}
+          >
+            <BarChart2 className="w-6 h-6" />
+          </button>
+      </nav>
+
       {/* Movie Detail Modal */}
       {state.selectedMovie && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center animate-fade-in">
@@ -504,7 +559,7 @@ function App({ conductor }: AppProps) {
                         )}
                         <div>
                              <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.released')}</h3>
-                             <div className="text-white font-medium">{state.selectedMovie.releaseDate ? t('common.released') : t('common.upcoming')}</div>
+                             <div className="text-white font-medium">{state.selectedMovie.releaseDate?.split('-')[0] || 'N/A'}</div>
                         </div>
                          {/* More fields can go here */}
                     </div>
