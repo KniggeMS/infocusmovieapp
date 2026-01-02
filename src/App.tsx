@@ -5,7 +5,7 @@ import { WatchlistState, Movie } from './types/domain';
 import { UserProfile } from './types/auth';
 import { AuthService } from './services/AuthService';
 import { LoginScreen } from './components/LoginScreen';
-import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield, Play } from 'lucide-react';
+import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield, Play, User } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { SplashScreen } from '@capacitor/splash-screen';
 
@@ -23,7 +23,6 @@ function App({ conductor }: AppProps) {
   // Initialize with current state from conductor
   const [state, setState] = useState<WatchlistState>(conductor.getState());
   const [searchTerm, setSearchTerm] = useState('');
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   useEffect(() => {
     // Check for existing session
@@ -120,8 +119,8 @@ function App({ conductor }: AppProps) {
             </div>
             
             <div className="flex-1 flex justify-end gap-3">
-                 <div className={`${showMobileSearch ? 'flex' : 'hidden'} md:flex bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[200px] sm:max-w-md transition-all`}>
-                    <Search className="w-4 h-4 text-gray-400" />
+                 <div className="flex bg-white/10 border border-white/10 rounded-2xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[150px] sm:max-w-md transition-all">
+                    <Search className="w-4 h-4 text-gray-400 shrink-0" />
                     <input 
                         id="search-movies"
                         name="search"
@@ -129,7 +128,7 @@ function App({ conductor }: AppProps) {
                         placeholder={t('common.search')} 
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="bg-transparent border-none focus:outline-none w-full text-white placeholder-gray-400"
+                        className="bg-transparent border-none focus:outline-none w-full text-white placeholder-gray-400 text-xs sm:text-sm"
                     />
                 </div>
                 
@@ -341,6 +340,9 @@ function App({ conductor }: AppProps) {
                             <div className="absolute bottom-0 left-0 right-0 p-3">
                                 <h3 className="font-bold text-sm truncate text-white">{movie.title}</h3>
                                 <div className="text-xs text-gray-400 flex items-center gap-2 mt-1">
+                                    <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
+                                        {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
+                                    </span>
                                     <span>{movie.releaseDate?.split('-')[0] || 'N/A'}</span>
                                     {movie.voteAverage && (
                                         <span className="flex items-center gap-1 text-accent-glow">
@@ -401,14 +403,11 @@ function App({ conductor }: AppProps) {
           </button>
           
           <button 
-            className={`transition-colors ${showMobileSearch ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
-            onClick={() => {
-              setShowMobileSearch(!showMobileSearch);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            aria-label="Search"
+            className="text-gray-400 hover:text-white transition-colors"
+            onClick={() => console.log('Profile Management Clicked')}
+            aria-label="Profile"
           >
-            <Search className="w-6 h-6" />
+            <User className="w-6 h-6" />
           </button>
 
           <button 
@@ -559,13 +558,21 @@ function App({ conductor }: AppProps) {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-4 border-y border-white/5">
                         {state.selectedMovie.director && (
                             <div>
-                                <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.director')}</h3>
+                                <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">
+                                    {state.selectedMovie.mediaType === 'tv' ? t('common.creator') : t('common.director')}
+                                </h3>
                                 <div className="text-white font-medium">{state.selectedMovie.director}</div>
                             </div>
                         )}
                         <div>
                              <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.released')}</h3>
                              <div className="text-white font-medium">{state.selectedMovie.releaseDate?.split('-')[0] || 'N/A'}</div>
+                        </div>
+                        <div>
+                             <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.type')}</h3>
+                             <div className="text-white font-medium">
+                                {state.selectedMovie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
+                             </div>
                         </div>
                          {/* More fields can go here */}
                     </div>
