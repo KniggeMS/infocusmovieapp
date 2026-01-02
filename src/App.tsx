@@ -23,6 +23,7 @@ function App({ conductor }: AppProps) {
   // Initialize with current state from conductor
   const [state, setState] = useState<WatchlistState>(conductor.getState());
   const [searchTerm, setSearchTerm] = useState('');
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   useEffect(() => {
     // Check for existing session
@@ -119,7 +120,7 @@ function App({ conductor }: AppProps) {
             </div>
             
             <div className="flex-1 flex justify-end gap-3">
-                 <div className="hidden md:flex bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[200px] sm:max-w-md transition-all">
+                 <div className={`${showMobileSearch ? 'flex' : 'hidden'} md:flex bg-white/10 border border-white/10 rounded-2xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[200px] sm:max-w-md transition-all`}>
                     <Search className="w-4 h-4 text-gray-400" />
                     <input 
                         id="search-movies"
@@ -400,9 +401,12 @@ function App({ conductor }: AppProps) {
           </button>
           
           <button 
-            className="text-gray-400 hover:text-white transition-colors"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            aria-label="Search / Top"
+            className={`transition-colors ${showMobileSearch ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => {
+              setShowMobileSearch(!showMobileSearch);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            aria-label="Search"
           >
             <Search className="w-6 h-6" />
           </button>
