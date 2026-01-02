@@ -62,4 +62,27 @@ describe('SupabaseMovieService', () => {
     expect(result.cast).toEqual([]);
     expect(result.watchProviders?.flatrate).toEqual([]);
   });
+
+  it('should map TV show details correctly', async () => {
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: 999,
+        name: 'Suits',
+        first_air_date: '2011-06-23',
+        overview: 'Legal drama',
+        credits: { crew: [], cast: [] },
+        'watch/providers': { results: {} },
+        episode_run_time: [42]
+      })
+    });
+
+    const result = await service.getMovieDetails('999', 'tv');
+
+    expect(result.id).toBe('999');
+    expect(result.title).toBe('Suits'); // Mapped from name
+    expect(result.releaseDate).toBe('2011-06-23'); // Mapped from first_air_date
+    expect(result.runtime).toBe(42); // Mapped from episode_run_time
+    expect(result.mediaType).toBe('tv');
+  });
 });

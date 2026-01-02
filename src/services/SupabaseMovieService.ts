@@ -15,7 +15,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   /**
-   * Searches for movies using the TMDB API.
+   * Searches for movies AND TV shows using the TMDB API.
    */
   private async searchTMDB(query: string): Promise<Movie[]> {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -26,7 +26,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
     try {
       const response = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}&language=de-DE`
+        `https://api.themoviedb.org/3/search/multi?api_key=${apiKey}&query=${encodeURIComponent(query)}&language=de-DE`
       );
 
       if (!response.ok) {
@@ -35,19 +35,25 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
       const data = await response.json();
       
-      return (data.results || []).map((result: any) => ({
-        id: String(result.id),
-        tmdbId: result.id,
-        title: result.title,
-        overview: result.overview,
-        posterPath: result.poster_path 
-          ? `https://image.tmdb.org/t/p/w500${result.poster_path}` 
-          : null,
-        releaseDate: result.release_date || null,
-        runtime: null, // TMDB search doesn't return runtime
-        voteAverage: result.vote_average || null,
-        source: 'tmdb'
-      }));
+      return (data.results || [])
+        .filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv')
+        .map((result: any) => {
+          const isTv = result.media_type === 'tv';
+          return {
+            id: String(result.id),
+            tmdbId: result.id,
+            title: isTv ? result.name : result.title,
+            overview: result.overview,
+            posterPath: result.poster_path 
+              ? `https://image.tmdb.org/t/p/w500${result.poster_path}` 
+              : null,
+            releaseDate: isTv ? result.first_air_date : result.release_date || null,
+            runtime: null, 
+            voteAverage: result.vote_average || null,
+            source: 'tmdb',
+            mediaType: result.media_type
+          };
+        });
     } catch (error) {
       console.error('Error searching TMDB:', error);
       return [];
@@ -56,10 +62,8 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
   /**
    * Maps a raw Supabase database row (snake_case) to the Movie domain object (camelCase).
-   * STRICTLY TYPED NOW via MovieRow
    */
   private mapRowToMovie(row: MovieRow): Movie {
-    // TypeScript kennt jetzt row.tmdb_id
     const tmdbId = row.tmdb_id ? Number(row.tmdb_id) : undefined;
 
     return {
@@ -71,8 +75,9 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       releaseDate: row.release_date || null,
       overview: row.overview || null,
       voteAverage: row.vote_average ? Number(row.vote_average) : null,
-      addedAt: row.created_at, // Ist in DB immer string
+      addedAt: row.created_at,
       source: 'database',
+      mediaType: (row.media_type as 'movie' | 'tv') || 'movie',
       watched: row.watched ?? false,
       favorite: row.favorite ?? false,
     };
@@ -80,7 +85,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
   async getTrending(): Promise<Movie[]> {
     try {
-      // "Trending" in this context is the user's recently added movies
       const { data, error } = await this.client
         .from('movies')
         .select('*')
@@ -101,7 +105,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
   /**
    * Searches for movies using the OMDb API as a fallback.
-   * Then resolves matches to TMDB objects to ensure system compatibility.
    */
   private async searchOMDb(query: string): Promise<Movie[]> {
     const omdbKey = import.meta.env.VITE_OMDB_API_KEY;
@@ -112,7 +115,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
     try {
       const response = await fetch(
-        `https://www.omdbapi.com/?apikey=${omdbKey}&s=${encodeURIComponent(query)}&type=movie`
+        `https://www.omdbapi.com/?apikey=${omdbKey}&s=${encodeURIComponent(query)}`
       );
 
       const data = await response.json();
@@ -124,7 +127,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       const promises = data.Search.map((item: any) => this.fetchTMDBByImdbId(item.imdbID));
       const results = await Promise.all(promises);
       
-      // Filter out nulls (failed resolutions)
       return results.filter((m): m is Movie => m !== null);
 
     } catch (error) {
@@ -148,22 +150,27 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       if (!response.ok) return null;
 
       const data = await response.json();
-      const movieResult = data.movie_results?.[0];
+      
+      // Prioritize TV results if it looks like a show, else movie
+      const result = data.tv_results?.[0] || data.movie_results?.[0];
 
-      if (!movieResult) return null;
+      if (!result) return null;
+
+      const isTv = !!data.tv_results?.[0];
 
       return {
-        id: String(movieResult.id),
-        tmdbId: movieResult.id,
-        title: movieResult.title,
-        overview: movieResult.overview,
-        posterPath: movieResult.poster_path 
-          ? `https://image.tmdb.org/t/p/w500${movieResult.poster_path}` 
+        id: String(result.id),
+        tmdbId: result.id,
+        title: isTv ? result.name : result.title,
+        overview: result.overview,
+        posterPath: result.poster_path 
+          ? `https://image.tmdb.org/t/p/w500${result.poster_path}` 
           : null,
-        releaseDate: movieResult.release_date || null,
+        releaseDate: isTv ? result.first_air_date : result.release_date || null,
         runtime: null,
-        voteAverage: movieResult.vote_average || null,
-        source: 'tmdb'
+        voteAverage: result.vote_average || null,
+        source: 'tmdb',
+        mediaType: isTv ? 'tv' : 'movie'
       };
     } catch (error) {
       console.error('Error resolving IMDb ID to TMDB:', error);
@@ -176,7 +183,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       return this.getTrending();
     }
     
-    // 1. Try TMDB Search
+    // 1. Try TMDB Search (Multi)
     const tmdbResults = await this.searchTMDB(query);
     if (tmdbResults.length > 0) {
         return tmdbResults;
@@ -187,9 +194,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     return this.searchOMDb(query);
   }
 
-  /**
-   * Simple UUID validation regex.
-   */
   private isUUID(str: string): boolean {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return uuidRegex.test(str);
@@ -217,17 +221,18 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     }
   }
 
-  async getMovieDetails(tmdbId: string): Promise<Movie> {
+  async getMovieDetails(tmdbId: string, mediaType: 'movie' | 'tv' = 'movie'): Promise<Movie> {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) {
         console.warn('TMDB API Key missing!');
         throw new Error('VITE_TMDB_API_KEY missing');
     }
 
+    const endpoint = mediaType === 'tv' ? `tv/${tmdbId}` : `movie/${tmdbId}`;
+
     try {
-      // Append credits, watch/providers, recommendations AND videos
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${apiKey}&language=de-DE&append_to_response=credits,watch/providers,recommendations,videos`
+        `https://api.themoviedb.org/3/${endpoint}?api_key=${apiKey}&language=de-DE&append_to_response=credits,watch/providers,recommendations,videos`
       );
 
       if (!response.ok) {
@@ -236,35 +241,34 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       }
 
       const data = await response.json();
-      
-      if (!data.id) {
-          console.warn('Fetched details missing ID', data);
-      }
+      const isTv = mediaType === 'tv';
 
-      const director = data.credits?.crew?.find((m: any) => m.job === 'Director')?.name || 'Unknown';
+      const director = data.credits?.crew?.find((m: any) => m.job === 'Director' || m.job === 'Executive Producer')?.name || 'Unknown';
+      
       const cast = (data.credits?.cast || []).slice(0, 5).map((c: any) => ({
         name: c.name,
         character: c.character,
         profilePath: c.profile_path ? `https://image.tmdb.org/t/p/w200${c.profile_path}` : null
       }));
 
-      // Find Trailer (YouTube)
       const trailer = data.videos?.results?.find(
         (v: any) => v.site === 'YouTube' && v.type === 'Trailer'
       );
 
-      // Map Recommendations
-      const recommendations = (data.recommendations?.results || []).slice(0, 10).map((rec: any) => ({
-        id: String(rec.id),
-        tmdbId: rec.id, // Explicitly set TMDB ID for recommendations
-        title: rec.title,
-        posterPath: rec.poster_path ? `https://image.tmdb.org/t/p/w300${rec.poster_path}` : null,
-        releaseDate: rec.release_date || null,
-        voteAverage: rec.vote_average || null,
-        source: 'tmdb' as const
-      }));
+      const recommendations = (data.recommendations?.results || []).slice(0, 10).map((rec: any) => {
+         const recIsTv = rec.media_type === 'tv' || (!rec.title && !!rec.name); 
+         return {
+            id: String(rec.id),
+            tmdbId: rec.id,
+            title: recIsTv ? rec.name : rec.title,
+            posterPath: rec.poster_path ? `https://image.tmdb.org/t/p/w300${rec.poster_path}` : null,
+            releaseDate: recIsTv ? rec.first_air_date : rec.release_date || null,
+            voteAverage: rec.vote_average || null,
+            source: 'tmdb' as const,
+            mediaType: recIsTv ? 'tv' : 'movie' as 'movie' | 'tv'
+         };
+      });
 
-      // Map Watch Providers (DE only)
       const providersRaw = data['watch/providers']?.results?.DE || {};
       const mapProvider = (p: any) => ({
         providerName: p.provider_name,
@@ -277,10 +281,16 @@ export class SupabaseMovieService implements MovieServiceAdapter {
         buy: (providersRaw.buy || []).map(mapProvider)
       };
 
+      // Runtime logic: TV shows have 'episode_run_time' array, movies have 'runtime' number
+      let runtime = data.runtime;
+      if (isTv && data.episode_run_time?.length > 0) {
+          runtime = data.episode_run_time[0];
+      }
+
       return {
         id: String(data.id),
-        tmdbId: data.id, // Explicitly set TMDB ID
-        title: data.title || 'Unknown Title',
+        tmdbId: data.id,
+        title: isTv ? data.name : data.title || 'Unknown Title',
         overview: data.overview || '',
         posterPath: data.poster_path 
           ? `https://image.tmdb.org/t/p/w500${data.poster_path}` 
@@ -289,10 +299,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
           ? `https://image.tmdb.org/t/p/w1280${data.backdrop_path}`
           : null,
         trailerKey: trailer ? trailer.key : null,
-        releaseDate: data.release_date || null,
-        runtime: data.runtime || null,
+        releaseDate: isTv ? data.first_air_date : data.release_date || null,
+        runtime: runtime || null,
         voteAverage: data.vote_average || null,
         source: 'tmdb',
+        mediaType: mediaType,
         genres: data.genres?.map((g: any) => g.name) || [],
         director,
         cast,
@@ -316,6 +327,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       release_date: cleanMovie.releaseDate,
       overview: cleanMovie.overview,
       vote_average: cleanMovie.voteAverage,
+      media_type: cleanMovie.mediaType || 'movie' // Persist media type
     };
 
     const { data, error } = await this.client
@@ -332,10 +344,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async delete(id: string): Promise<void> {
-    if (!this.isUUID(id)) {
-        console.warn('Attempted to delete non-UUID movie:', id);
-        return;
-    }
+    if (!this.isUUID(id)) return;
 
     const { error } = await this.client
       .from('movies')
@@ -348,10 +357,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async update(id: string, updates: Partial<any>): Promise<void> {
-    if (!this.isUUID(id)) {
-        console.warn('Attempted to update non-UUID movie:', id);
-        return;
-    }
+    if (!this.isUUID(id)) return;
 
     const { error } = await this.client
       .from('movies')

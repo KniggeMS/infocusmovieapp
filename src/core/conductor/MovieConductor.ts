@@ -368,19 +368,22 @@ export class MovieConductor {
    * Handles both database IDs (UUID) and TMDB IDs (stringified numbers).
    */
   private async handleSelectMovie(id: string): Promise<void> {
-    const existingMovie = this.state.items.find(m => m.id === id);
+    // Try to find the movie in current items (Search Results or Watchlist)
+    let existingMovie = this.state.items.find(m => m.id === id);
+    
+    // If not found, check recommendations of currently selected movie
+    if (!existingMovie && this.state.selectedMovie?.recommendations) {
+        existingMovie = this.state.selectedMovie.recommendations.find(r => r.id === id);
+    }
     
     // Resolve the ID needed for the TMDB API call
     // If it's a stored movie, we MUST use its tmdbId (if available).
     // If it's not in the DB (search result or recommendation), the 'id' IS the TMDB ID.
     let tmdbIdForApi: string;
 
-    if (existingMovie) {
+    if (existingMovie && existingMovie.source === 'database') {
         if (existingMovie.tmdbId) {
             tmdbIdForApi = existingMovie.tmdbId.toString();
-        } else if (existingMovie.source === 'tmdb') {
-             // Edge case: Item in list but technically just a search result artifact? Unlikely but safe.
-             tmdbIdForApi = existingMovie.id;
         } else {
              // It's a DB movie but has no tmdbId saved (legacy data).
              // We cannot fetch details.
@@ -389,17 +392,19 @@ export class MovieConductor {
              return;
         }
     } else {
-        // Not in DB -> It's a fresh TMDB ID from Search or Recommendations
+        // Not in DB (or DB item source='tmdb' which means search result) -> It's a fresh TMDB ID
         tmdbIdForApi = id;
     }
+
+    const mediaType = existingMovie?.mediaType || 'movie';
 
     this.updateState({ status: 'loading', error: null });
 
     try {
-        const details = await this.adapter.getMovieDetails(tmdbIdForApi);
+        const details = await this.adapter.getMovieDetails(tmdbIdForApi, mediaType);
         
-        // Use fresh details as base, override with local user flags if available
-        const finalDetails = existingMovie ? {
+        // Use fresh details as base, override with local user flags if available (and it's a DB movie)
+        const finalDetails = (existingMovie && existingMovie.source === 'database') ? {
             ...details,
             // Restore DB-specific ID and timestamps
             id: existingMovie.id, 
