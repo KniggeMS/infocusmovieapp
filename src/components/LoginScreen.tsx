@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock, Loader2, AlertCircle, Globe } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, Globe, Check } from 'lucide-react';
 import { AuthService } from '../services/AuthService';
 import { UserProfile } from '../types/auth';
 
