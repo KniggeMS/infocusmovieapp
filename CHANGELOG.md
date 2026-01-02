@@ -21,6 +21,7 @@
 - **Initial Load:** App now automatically loads the watchlist upon login without requiring user interaction.
 - **Supabase Sync:** Fixed critical 404 errors by adding missing database tables and validating UUIDs.
 - **Layout:** Optimized Mobile UI (Z-Index fixes, Metadata relocation).
+- **CI/CD:** Added `docs/` placeholder to resolve GitHub Pages build errors.
 
 ### Technical
 - Implemented `SupabaseMovieService` refactoring for polymorphic media types.
