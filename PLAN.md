@@ -40,6 +40,11 @@
 - [x] **UX:** Permanent Search Bar & Auto-Load on Start.
 - [x] **Docs:** CHANGELOG.md created.
 
+## ✅ Security Patch (V2.7.1)
+- [x] **Feature:** Password Reset & Change Password.
+- [x] **Fix:** Multi-User Data Isolation (Conductor State Reset).
+- [x] **Fix:** RLS Compliance (Explicit user_id on Insert).
+
 ## ⚠️ Next Steps
 1. [ ] **Monitor:** Watch for user feedback on V2.7.
 2. [ ] **BACKLOG:** Social Features (Friend Lists).

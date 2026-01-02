@@ -319,7 +319,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   async add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie> {
     const cleanMovie = movie as any;
 
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
     const mappedData: MovieInsert = {
+      user_id: user.id,
       tmdb_id: cleanMovie.tmdbId,
       title: cleanMovie.title,
       poster_path: cleanMovie.posterPath,

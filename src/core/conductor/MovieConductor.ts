@@ -69,6 +69,22 @@ export class MovieConductor {
   }
 
   /**
+   * Clears the current state (e.g. on logout).
+   */
+  public clear(): void {
+    this.state = {
+      items: [],
+      achievements: INITIAL_ACHIEVEMENTS,
+      statistics: INITIAL_STATISTICS,
+      selectedMovie: null,
+      status: 'idle',
+      error: null,
+      filter: 'all',
+    };
+    this.notify();
+  }
+
+  /**
    * Returns a snapshot of the current state.
    */
   public getState(): WatchlistState {

@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.7.1] - 2026-01-02
+
+### Added
+- **Password Management:**
+  - Added "Forgot Password" functionality to the login screen (email-based reset).
+  - Added "Change Password" fields to the Profile Settings for logged-in users.
+
+### Fixed
+- **Security & Privacy (Critical):**
+  - Implemented state clearing in `MovieConductor` on logout to prevent data leakage between users ("Cache Poisoning").
+  - Added explicit `user_id` mapping when adding movies to ensure strict RLS enforcement.
+  - Added automatic watchlist reload upon successful login.
+
 ## [2.7.0] - 2026-01-02
 
 ### Added

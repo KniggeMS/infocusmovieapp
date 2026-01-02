@@ -83,6 +83,20 @@ export class AuthService {
     if (error) throw error;
   }
 
+  public async updatePassword(newPassword: string): Promise<void> {
+    const { error } = await this.client.auth.updateUser({
+      password: newPassword
+    });
+    if (error) throw error;
+  }
+
+  public async resetPasswordForEmail(email: string): Promise<void> {
+    const { error } = await this.client.auth.resetPasswordForEmail(email, {
+      redirectTo: AppConfig.getRedirectUrl()
+    });
+    if (error) throw error;
+  }
+
   public async getCurrentUser(): Promise<UserProfile | null> {
     const { data: { session }, error } = await this.client.auth.getSession();
     

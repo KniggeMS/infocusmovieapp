@@ -10,11 +10,12 @@ interface LoginScreenProps {
 
 export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const { t, i18n } = useTranslation();
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const authService = AuthService.getInstance();
 
@@ -22,18 +23,23 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
-      let user;
-      if (isLogin) {
-        user = await authService.signIn(email, password);
-      } else {
-        user = await authService.signUp(email, password);
+      if (mode === 'login') {
+        const user = await authService.signIn(email, password);
+        onLoginSuccess(user);
+      } else if (mode === 'signup') {
+        const user = await authService.signUp(email, password);
+        onLoginSuccess(user);
+      } else if (mode === 'forgot') {
+        await authService.resetPasswordForEmail(email);
+        setSuccessMsg('Password reset instructions sent to your email.');
+        setLoading(false);
+        // Don't call onLoginSuccess, stay on screen to show message
       }
-      onLoginSuccess(user);
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
-    } finally {
       setLoading(false);
     }
   };
@@ -64,7 +70,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">InFocus</h1>
           <p className="text-gray-400">
-            {t('auth.subtitle')}
+            {mode === 'forgot' ? 'Reset your password' : t('auth.subtitle')}
           </p>
         </div>
 
@@ -72,6 +78,13 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           <div className="bg-red-900/50 border border-red-500/50 text-red-200 p-4 rounded-xl mb-6 flex items-center gap-3 animate-shake">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span className="text-sm font-medium">{error}</span>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="bg-green-900/50 border border-green-500/50 text-green-200 p-4 rounded-xl mb-6 flex items-center gap-3 animate-fade-in">
+            <Check className="w-5 h-5 shrink-0" />
+            <span className="text-sm font-medium">{successMsg}</span>
           </div>
         )}
 
@@ -91,21 +104,35 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('auth.password')}</label>
-            <div className="relative group">
-              <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-purple-500 transition-colors" />
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-gray-600"
-                placeholder="••••••••"
-              />
+          {mode !== 'forgot' && (
+            <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('auth.password')}</label>
+                <div className="relative group">
+                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-purple-500 transition-colors" />
+                <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-gray-600"
+                    placeholder="••••••••"
+                />
+                </div>
             </div>
-          </div>
+          )}
+
+          {mode === 'login' && (
+             <div className="flex justify-end">
+                <button 
+                    type="button"
+                    onClick={() => { setMode('forgot'); setError(null); setSuccessMsg(null); }}
+                    className="text-xs text-blue-400 hover:text-blue-300 font-bold"
+                >
+                    Forgot Password?
+                </button>
+             </div>
+          )}
 
           <button
             type="submit"
@@ -118,22 +145,27 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 {t('common.loading')}
               </>
             ) : (
-              isLogin ? t('auth.login') : t('auth.signup')
+              mode === 'login' ? t('auth.login') : (mode === 'signup' ? t('auth.signup') : 'Send Instructions')
             )}
           </button>
         </form>
 
-        <div className="mt-8 text-center">
-          <button
-            onClick={() => { setIsLogin(!isLogin); setError(null); }}
-            className="text-sm text-gray-400 hover:text-white transition-colors"
-          >
-            {isLogin ? (
-              <>{t('auth.noAccount')} <span className="text-blue-400 font-bold">{t('auth.signup')}</span></>
-            ) : (
-              <>{t('auth.hasAccount')} <span className="text-blue-400 font-bold">{t('auth.login')}</span></>
-            )}
-          </button>
+        <div className="mt-8 text-center space-y-2">
+          {mode === 'login' ? (
+             <button
+                onClick={() => { setMode('signup'); setError(null); setSuccessMsg(null); }}
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+                {t('auth.noAccount')} <span className="text-blue-400 font-bold">{t('auth.signup')}</span>
+            </button>
+          ) : (
+            <button
+                onClick={() => { setMode('login'); setError(null); setSuccessMsg(null); }}
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+                Back to <span className="text-blue-400 font-bold">{t('auth.login')}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

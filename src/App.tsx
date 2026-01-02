@@ -54,8 +54,16 @@ function App({ conductor }: AppProps) {
     return () => unsubscribe();
   }, [conductor]);
 
+  // Reload movies when user changes (Login)
+  useEffect(() => {
+    if (user) {
+        conductor.dispatch({ type: 'LOAD_MOVIES' });
+    }
+  }, [user, conductor]);
+
   const handleLogout = async () => {
     await AuthService.getInstance().signOut();
+    conductor.clear();
     setUser(null);
   };
 
