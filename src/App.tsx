@@ -5,6 +5,7 @@ import { WatchlistState, Movie } from './types/domain';
 import { UserProfile } from './types/auth';
 import { AuthService } from './services/AuthService';
 import { LoginScreen } from './components/LoginScreen';
+import { ProfileModal } from './components/ProfileModal';
 import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield, Play, User } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -23,6 +24,7 @@ function App({ conductor }: AppProps) {
   // Initialize with current state from conductor
   const [state, setState] = useState<WatchlistState>(conductor.getState());
   const [searchTerm, setSearchTerm] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     // Check for existing session
@@ -131,15 +133,6 @@ function App({ conductor }: AppProps) {
                         className="bg-transparent border-none focus:outline-none w-full text-white placeholder-gray-400 text-xs sm:text-sm"
                     />
                 </div>
-                
-                {/* Logout Button */}
-                <button 
-                    onClick={handleLogout}
-                    className="bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 p-3 rounded-2xl transition-colors border border-white/5"
-                    title={t('common.signout')}
-                >
-                    <LogOut className="w-5 h-5" />
-                </button>
             </div>
         </div>
       </header>
@@ -403,8 +396,8 @@ function App({ conductor }: AppProps) {
           </button>
           
           <button 
-            className="text-gray-400 hover:text-white transition-colors"
-            onClick={() => console.log('Profile Management Clicked')}
+            className={`transition-colors ${showProfile ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setShowProfile(true)}
             aria-label="Profile"
           >
             <User className="w-6 h-6" />
@@ -434,6 +427,17 @@ function App({ conductor }: AppProps) {
             <BarChart2 className="w-6 h-6" />
           </button>
       </nav>
+      
+      {/* Profile Modal */}
+      {showProfile && user && (
+          <ProfileModal 
+              user={user} 
+              conductor={conductor} 
+              onClose={() => setShowProfile(false)}
+              onLogout={handleLogout}
+              onUpdateUser={setUser}
+          />
+      )}
 
       {/* Movie Detail Modal */}
       {state.selectedMovie && (

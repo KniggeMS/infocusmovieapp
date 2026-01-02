@@ -19,35 +19,40 @@ export class AuthService {
   }
 
   /**
-   * Fetches the user's role from the 'profiles' table.
-   * If no profile exists, defaults to 'user'.
+   * Fetches the user's profile data.
    */
-  private async fetchUserRole(userId: string): Promise<UserRole> {
+  private async fetchUserProfile(userId: string): Promise<{ role: UserRole, displayName?: string, avatarUrl?: string }> {
     try {
-      // Try to get existing profile
       const { data, error } = await this.client
         .from('profiles')
-        .select('role')
+        .select('*')
         .eq('id', userId)
         .single();
 
       if (error && error.code === 'PGRST116') {
-        // Profile doesn't exist, create default one
         const { data: newData, error: insertError } = await this.client
           .from('profiles')
           .upsert({ id: userId, role: 'user' })
-          .select('role')
+          .select()
           .single();
         
         if (insertError) throw insertError;
-        return newData.role as UserRole;
+        return { 
+            role: newData.role as UserRole,
+            displayName: newData.display_name || undefined,
+            avatarUrl: newData.avatar_url || undefined
+        };
       }
 
       if (error) throw error;
-      return data.role as UserRole;
+      return { 
+          role: data.role as UserRole,
+          displayName: data.display_name || undefined,
+          avatarUrl: data.avatar_url || undefined
+      };
     } catch (e) {
-      console.warn('Error fetching/creating user role, defaulting to "user":', e);
-      return 'user';
+      console.warn('Error fetching profile, defaulting:', e);
+      return { role: 'user' };
     }
   }
 
@@ -55,13 +60,27 @@ export class AuthService {
    * Maps a Supabase User to our internal UserProfile.
    */
   private async mapUser(user: User): Promise<UserProfile> {
-    const role = await this.fetchUserRole(user.id);
+    const profile = await this.fetchUserProfile(user.id);
     return {
       id: user.id,
       email: user.email || '',
-      role: role,
+      role: profile.role,
+      displayName: profile.displayName,
+      avatarUrl: profile.avatarUrl,
       createdAt: user.created_at,
     };
+  }
+
+  public async updateProfile(userId: string, updates: { displayName?: string, avatarUrl?: string }): Promise<void> {
+    const { error } = await this.client
+        .from('profiles')
+        .update({
+            display_name: updates.displayName,
+            avatar_url: updates.avatarUrl
+        })
+        .eq('id', userId);
+    
+    if (error) throw error;
   }
 
   public async getCurrentUser(): Promise<UserProfile | null> {

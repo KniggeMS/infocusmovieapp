@@ -5,6 +5,8 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   createdAt: string;
+  displayName?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthState {

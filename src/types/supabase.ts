@@ -89,22 +89,22 @@ export type Database = {
       }
       profiles: {
         Row: {
-          created_at: string
-          email: string | null
           id: string
-          role: string | null
+          role: string
+          display_name: string | null
+          avatar_url: string | null
         }
         Insert: {
-          created_at?: string
-          email?: string | null
           id: string
-          role?: string | null
+          role?: string
+          display_name?: string | null
+          avatar_url?: string | null
         }
         Update: {
-          created_at?: string
-          email?: string | null
           id?: string
-          role?: string | null
+          role?: string
+          display_name?: string | null
+          avatar_url?: string | null
         }
         Relationships: []
       }
