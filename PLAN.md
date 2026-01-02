@@ -1,5 +1,5 @@
 ## ⚠️ CRITICAL BLOCKERS
-- [ ] **Supabase Sync Failure:** '404 movies not found' (Local Cache mismatch) -> Priorität: Hoch.
+- [x] **Supabase Sync Failure:** '404 movies not found' (Fixed via Schema Migration & UUID Validation).
 - [x] **Mobile Detail Modal:** Add-Button (Regression V2.6) fixed via Z-Index & Layout Audit.
 
 ## Arbeitsweise
@@ -29,12 +29,13 @@
 - [x] **Setup:** react-i18next & Language Detector.
 - [x] **UI:** Language Toggle (DE/EN) on Auth/Login Screen.
 - [x] **Mobile UI:** Accessibility Fix for Modal Buttons (Mobile Viewport).
+- [x] **UI Polish:** Metadata Block relocated & Bottom Nav fixed.
 - [ ] **Content & Testing:** Translate common strings & verify mobile layouts.
 
 ## ⚠️ Next Steps (Prioritized)
-1. [ ] **FIX: Backend Local Sync:** Debug Supabase 404 errors.
-2. [ ] **VERIFY: i18n:** Complete translation audit.
-3. [ ] **Deploy:** Phase 11.
+1. [ ] **VERIFY:** Real-Device Testing (Android/iPhone) via Vercel Deployment.
+2. [ ] **DEPLOY:** Final Production Release (V2.7).
+3. [ ] **BACKLOG:** Streaming Providers & Social Features.
 
 ## 📋 Backlog
 - [x] **Cast & Crew:** Detailed view for actors and directors.
@@ -43,5 +44,5 @@
 - [ ] **Unit Testing:** Increase coverage for Conductor and Services.
 
 ---
-**Global Status:** 🟡 Phase 10: Real-Device Testing (Android/iPhone)
-**Session Note:** V2.6.2 auf GitHub/Main gepusht. Fokus: Verifikation der Modal-Klickbarkeit auf Smartphones. Lokales Backend-Problem (Supabase 404) bleibt bestehen, beeinträchtigt aber nicht zwingend das Cloud-Deployment (Vercel).
+**Global Status:** ✅ Daily Goal Achieved (UI & Backend Stable)
+**Session Note:** Erfolgreicher Abschluss der heutigen Session. V2.6.2 & V2.6.5 (UI Polish) sind live. Kritische Blocker (Mobile Z-Index, Supabase 404) wurden behoben. Das System ist bereit für QA.
