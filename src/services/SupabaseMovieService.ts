@@ -99,13 +99,92 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     }
   }
 
+  /**
+   * Searches for movies using the OMDb API as a fallback.
+   * Then resolves matches to TMDB objects to ensure system compatibility.
+   */
+  private async searchOMDb(query: string): Promise<Movie[]> {
+    const omdbKey = import.meta.env.VITE_OMDB_API_KEY;
+    if (!omdbKey) {
+      console.warn('VITE_OMDB_API_KEY is missing. Skipping OMDb fallback.');
+      return [];
+    }
+
+    try {
+      const response = await fetch(
+        `https://www.omdbapi.com/?apikey=${omdbKey}&s=${encodeURIComponent(query)}&type=movie`
+      );
+
+      const data = await response.json();
+      if (data.Response === 'False' || !data.Search) {
+        return [];
+      }
+
+      // Resolve matches to TMDB objects
+      const promises = data.Search.map((item: any) => this.fetchTMDBByImdbId(item.imdbID));
+      const results = await Promise.all(promises);
+      
+      // Filter out nulls (failed resolutions)
+      return results.filter((m): m is Movie => m !== null);
+
+    } catch (error) {
+      console.error('Error searching OMDb:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Resolves an IMDb ID to a TMDB Movie object using the /find endpoint.
+   */
+  private async fetchTMDBByImdbId(imdbId: string): Promise<Movie | null> {
+    const tmdbKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!tmdbKey) return null;
+
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/find/${imdbId}?api_key=${tmdbKey}&external_source=imdb_id`
+      );
+      
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      const movieResult = data.movie_results?.[0];
+
+      if (!movieResult) return null;
+
+      return {
+        id: String(movieResult.id),
+        tmdbId: movieResult.id,
+        title: movieResult.title,
+        overview: movieResult.overview,
+        posterPath: movieResult.poster_path 
+          ? `https://image.tmdb.org/t/p/w500${movieResult.poster_path}` 
+          : null,
+        releaseDate: movieResult.release_date || null,
+        runtime: null,
+        voteAverage: movieResult.vote_average || null,
+        source: 'tmdb'
+      };
+    } catch (error) {
+      console.error('Error resolving IMDb ID to TMDB:', error);
+      return null;
+    }
+  }
+
   async search(query: string): Promise<Movie[]> {
     if (!query || query.trim().length === 0) {
       return this.getTrending();
     }
     
-    // Switch to TMDB search for real data
-    return this.searchTMDB(query);
+    // 1. Try TMDB Search
+    const tmdbResults = await this.searchTMDB(query);
+    if (tmdbResults.length > 0) {
+        return tmdbResults;
+    }
+
+    // 2. Fallback to OMDb Search
+    console.log('TMDB search yielded no results, trying OMDb fallback...');
+    return this.searchOMDb(query);
   }
 
   /**
