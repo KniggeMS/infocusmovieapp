@@ -25,17 +25,35 @@
 - [x] **UI Fix:** Netflix-style Hero Header (Backdrop instead of cropped poster).
 - [x] **Trailer Integration:** YouTube Trailer support (Background Autoplay Muted + Modal toggle).
 
-## 🚧 Phase 10: Internationalization (i18n)
+## 🚧 Phase 10: Internationalization (i18n) & Final Polish
 - [x] **Setup:** react-i18next & Language Detector.
 - [x] **UI:** Language Toggle (DE/EN) on Auth/Login Screen.
 - [x] **Mobile UI:** Accessibility Fix for Modal Buttons (Mobile Viewport).
 - [x] **UI Polish:** Metadata Block relocated & Bottom Nav fixed.
-- [ ] **Content & Testing:** Translate common strings & verify mobile layouts.
+- [x] **TV Show Support:** Added multi-search (TMDB) & media_type persistence (Suits test passed).
+- [x] **i18n Audit:** Ensure all new TV metadata strings are translated.
+- [x] **Content & Testing:** Final verification of mobile layouts.
 
-## ⚠️ Next Steps (Prioritized)
-1. [ ] **VERIFY:** Real-Device Testing (Android/iPhone) via Vercel Deployment.
-2. [ ] **DEPLOY:** Final Production Release (V2.7).
-3. [ ] **BACKLOG:** Streaming Providers & Social Features.
+## ✅ Phase 11: Production Release (V2.7)
+- [x] **Feature:** Profile Management (Edit Name, Settings, Data Export).
+- [x] **Feature:** Admin Import Tools.
+- [x] **UX:** Permanent Search Bar & Auto-Load on Start.
+- [x] **Docs:** CHANGELOG.md created.
+
+## ⚠️ Next Steps
+1. [ ] **Monitor:** Watch for user feedback on V2.7.
+2. [ ] **BACKLOG:** Social Features (Friend Lists).
+
+## 📋 Backlog
+- [x] **Cast & Crew:** Detailed view for actors and directors.
+- [x] **Streaming Providers:** "Where to watch" integration (JustWatch API).
+- [ ] **Social Features:** Share lists with friends.
+- [x] **Unit Testing:** Increased coverage for Conductor and Services.
+
+---
+**Global Status:** ✅ V2.7 RELEASED
+**Session Note:** Erfolgreicher Sprint. TV-Support und Profil-Management sind live. Die App ist stabil, performant und bietet nun volle Funktionalität für Filme & Serien inkl. Datenhoheit für den User (Export).
+
 
 ## 📋 Backlog
 - [x] **Cast & Crew:** Detailed view for actors and directors.
