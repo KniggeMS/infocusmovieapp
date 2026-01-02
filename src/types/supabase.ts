@@ -44,6 +44,7 @@ export type Database = {
           created_at: string
           favorite: boolean | null
           id: string
+          media_type: string | null
           overview: string | null
           poster_path: string | null
           release_date: string | null
@@ -58,6 +59,7 @@ export type Database = {
           created_at?: string
           favorite?: boolean | null
           id?: string
+          media_type?: string | null
           overview?: string | null
           poster_path?: string | null
           release_date?: string | null
@@ -72,6 +74,7 @@ export type Database = {
           created_at?: string
           favorite?: boolean | null
           id?: string
+          media_type?: string | null
           overview?: string | null
           poster_path?: string | null
           release_date?: string | null

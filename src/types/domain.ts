@@ -27,6 +27,7 @@ export interface Movie {
   voteAverage: number | null;
   addedAt?: string;
   source?: 'tmdb' | 'database';
+  mediaType?: 'movie' | 'tv';
   watched?: boolean;
   favorite?: boolean;
   genres?: string[];
@@ -82,7 +83,7 @@ export interface MovieServiceAdapter {
   search(query: string): Promise<Movie[]>;
   getById(id: string): Promise<Movie | null>;
   getTrending(): Promise<Movie[]>;
-  getMovieDetails(tmdbId: string): Promise<Movie>;
+  getMovieDetails(tmdbId: string, mediaType?: 'movie' | 'tv'): Promise<Movie>;
   add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie>;
   delete(id: string): Promise<void>;
   update(id: string, updates: Partial<any>): Promise<void>;
