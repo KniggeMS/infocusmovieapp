@@ -48,6 +48,7 @@
 
 ## ✅ User Personalization (V2.8.0)
 - [x] **Feature:** Avatar Generation (DiceBear Integration).
+- [x] **Feature:** Remove Avatar functionality.
 - [x] **QA:** Full Smoke Test Suite (`tests/e2e/smoke_suite.spec.ts`).
 
 ## ⚠️ Next Steps

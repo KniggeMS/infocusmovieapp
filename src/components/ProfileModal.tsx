@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, User, Settings, Database, LogOut, Upload, Download, Save, RefreshCw, Shield } from 'lucide-react';
+import { X, User, Settings, Database, LogOut, Upload, Download, Save, RefreshCw, Shield, Trash2 } from 'lucide-react';
 import { UserProfile } from '../types/auth';
 import { AuthService } from '../services/AuthService';
 import { MovieConductor } from '../core/conductor/MovieConductor';
@@ -31,6 +31,10 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
     const seed = Math.random().toString(36).substring(7);
     const newUrl = generateAvatarUrl(seed);
     setAvatarUrl(newUrl);
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl('');
   };
   
   const handleSaveProfile = async () => {
@@ -191,13 +195,24 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                                         displayName ? displayName[0].toUpperCase() : user.email[0].toUpperCase()
                                     )}
                                 </div>
-                                <button 
-                                    onClick={handleGenerateAvatar}
-                                    className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full shadow-lg border border-[#1A1D24] transition-all active:scale-90 active:rotate-180"
-                                    title={t('profile.generateAvatar')}
-                                >
-                                    <RefreshCw className="w-3 h-3" />
-                                </button>
+                                <div className="absolute -bottom-1 -right-1 flex gap-1">
+                                    <button 
+                                        onClick={handleGenerateAvatar}
+                                        className="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full shadow-lg border border-[#1A1D24] transition-all active:scale-90 active:rotate-180"
+                                        title={t('profile.generateAvatar')}
+                                    >
+                                        <RefreshCw className="w-3 h-3" />
+                                    </button>
+                                    {avatarUrl && (
+                                        <button 
+                                            onClick={handleRemoveAvatar}
+                                            className="bg-red-600 hover:bg-red-500 text-white p-1.5 rounded-full shadow-lg border border-[#1A1D24] transition-all active:scale-90"
+                                            title={t('profile.removeAvatar')}
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div>
                                 <div className="text-white font-bold text-lg">{user.email}</div>
