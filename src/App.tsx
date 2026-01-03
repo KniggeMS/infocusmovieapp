@@ -57,7 +57,12 @@ function App({ conductor }: AppProps) {
   // Reload movies when user changes (Login)
   useEffect(() => {
     if (user) {
-        conductor.dispatch({ type: 'LOAD_MOVIES' });
+        // Small timeout to ensure Supabase Auth Header is propagated
+        const timer = setTimeout(() => {
+            conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
+            conductor.dispatch({ type: 'LOAD_MOVIES' });
+        }, 100);
+        return () => clearTimeout(timer);
     }
   }, [user, conductor]);
 

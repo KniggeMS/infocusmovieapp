@@ -362,6 +362,7 @@ export class MovieConductor {
 
     try {
       const movies = await this.adapter.getTrending();
+      console.log(`Conductor: Loaded ${movies.length} movies.`);
       const newAchievements = this.checkAchievements(movies);
       const newStats = this.calculateStatistics(movies);
       
