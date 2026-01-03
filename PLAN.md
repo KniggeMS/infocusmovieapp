@@ -56,6 +56,7 @@
 - [x] **Tech:** Semantic CSS Variables & Tailwind Refactoring.
 - [x] **UI:** New "Appearance" Tab in ProfileModal.
 - [x] **QA:** Theme Switching E2E Test (`tests/e2e/theme_switching.spec.ts`).
+- [x] **DevOps:** GitHub Action for automated Android APK builds.
 
 ## ⚠️ Next Steps
 1. [ ] **BACKLOG:** Social Features (Friend Lists).
