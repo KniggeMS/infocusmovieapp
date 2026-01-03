@@ -21,7 +21,7 @@ export class AuthService {
   /**
    * Fetches the user's profile data.
    */
-  private async fetchUserProfile(userId: string): Promise<{ role: UserRole, displayName?: string, avatarUrl?: string }> {
+  private async fetchUserProfile(userId: string): Promise<{ role: UserRole, displayName?: string, avatarUrl?: string, theme?: 'light' | 'dark' | 'glass' }> {
     try {
       const { data, error } = await this.client
         .from('profiles')
@@ -40,7 +40,8 @@ export class AuthService {
         return { 
             role: newData.role as UserRole,
             displayName: newData.display_name || undefined,
-            avatarUrl: newData.avatar_url || undefined
+            avatarUrl: newData.avatar_url || undefined,
+            theme: newData.theme || 'dark'
         };
       }
 
@@ -48,11 +49,12 @@ export class AuthService {
       return { 
           role: data.role as UserRole,
           displayName: data.display_name || undefined,
-          avatarUrl: data.avatar_url || undefined
+          avatarUrl: data.avatar_url || undefined,
+          theme: data.theme || 'dark'
       };
     } catch (e) {
       console.warn('Error fetching profile, defaulting:', e);
-      return { role: 'user' };
+      return { role: 'user', theme: 'dark' };
     }
   }
 
@@ -67,16 +69,18 @@ export class AuthService {
       role: profile.role,
       displayName: profile.displayName,
       avatarUrl: profile.avatarUrl,
+      theme: profile.theme,
       createdAt: user.created_at,
     };
   }
 
-  public async updateProfile(userId: string, updates: { displayName?: string, avatarUrl?: string }): Promise<void> {
+  public async updateProfile(userId: string, updates: { displayName?: string, avatarUrl?: string, theme?: 'light' | 'dark' | 'glass' }): Promise<void> {
     const { error } = await this.client
         .from('profiles')
         .update({
             display_name: updates.displayName,
-            avatar_url: updates.avatarUrl
+            avatar_url: updates.avatarUrl,
+            theme: updates.theme
         })
         .eq('id', userId);
     

@@ -7,6 +7,7 @@ export interface UserProfile {
   createdAt: string;
   displayName?: string;
   avatarUrl?: string;
+  theme?: 'light' | 'dark' | 'glass';
 }
 
 export interface AuthState {

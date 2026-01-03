@@ -50,7 +50,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-app-bg flex items-center justify-center p-4 relative">
       {/* Background Ambience */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse" />
@@ -60,16 +60,16 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       {/* Language Toggle */}
       <button 
         onClick={toggleLanguage}
-        className="absolute top-6 right-6 z-20 flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full px-3 py-1.5 text-sm text-gray-400 hover:text-white transition-all backdrop-blur-md"
+        className="absolute top-6 right-6 z-20 flex items-center gap-2 bg-app-secondary hover:bg-app-secondary/80 border border-app-border rounded-full px-3 py-1.5 text-sm text-app-text-muted hover:text-app-text transition-all backdrop-blur-md"
       >
         <Globe className="w-4 h-4" />
         <span className="uppercase font-bold tracking-wide">{i18n.language.split('-')[0]}</span>
       </button>
 
-      <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative z-10 animate-fade-in">
+      <div className="w-full max-w-md bg-app-card-bg/50 backdrop-blur-xl border border-app-border rounded-3xl p-8 shadow-2xl relative z-10 animate-fade-in">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">InFocus</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-bold text-app-text mb-2 tracking-tight">InFocus</h1>
+          <p className="text-app-text-muted">
             {mode === 'forgot' ? t('auth.resetPasswordTitle') : t('auth.subtitle')}
           </p>
         </div>
@@ -90,15 +90,15 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('auth.email')}</label>
+            <label className="text-xs font-bold text-app-text-muted uppercase tracking-wider ml-1">{t('auth.email')}</label>
             <div className="relative group">
-              <Mail className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
+              <Mail className="absolute left-4 top-3.5 w-5 h-5 text-app-text-muted group-focus-within:text-blue-500 transition-colors" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-gray-600"
+                className="w-full bg-app-bg/40 border border-app-border rounded-xl py-3 pl-12 pr-4 text-app-text focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-app-text-muted"
                 placeholder="name@example.com"
               />
             </div>
@@ -106,16 +106,16 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 
           {mode !== 'forgot' && (
             <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">{t('auth.password')}</label>
+                <label className="text-xs font-bold text-app-text-muted uppercase tracking-wider ml-1">{t('auth.password')}</label>
                 <div className="relative group">
-                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-purple-500 transition-colors" />
+                <Lock className="absolute left-4 top-3.5 w-5 h-5 text-app-text-muted group-focus-within:text-purple-500 transition-colors" />
                 <input
                     type="password"
                     required
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-gray-600"
+                    className="w-full bg-app-bg/40 border border-app-border rounded-xl py-3 pl-12 pr-4 text-app-text focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-app-text-muted"
                     placeholder="••••••••"
                 />
                 </div>
@@ -154,14 +154,14 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           {mode === 'login' ? (
              <button
                 onClick={() => { setMode('signup'); setError(null); setSuccessMsg(null); }}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
+                className="text-sm text-app-text-muted hover:text-app-text transition-colors"
             >
                 {t('auth.noAccount')} <span className="text-blue-400 font-bold">{t('auth.signup')}</span>
             </button>
           ) : (
             <button
                 onClick={() => { setMode('login'); setError(null); setSuccessMsg(null); }}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
+                className="text-sm text-app-text-muted hover:text-app-text transition-colors"
             >
                 {t('common.back')} to <span className="text-blue-400 font-bold">{t('auth.login')}</span>
             </button>

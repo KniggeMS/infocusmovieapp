@@ -32,6 +32,9 @@ function App({ conductor }: AppProps) {
       try {
         const currentUser = await AuthService.getInstance().getCurrentUser();
         setUser(currentUser);
+        if (currentUser?.theme) {
+            document.documentElement.setAttribute('data-theme', currentUser.theme);
+        }
       } catch (e) {
         console.error('Auth check failed:', e);
       } finally {
@@ -92,7 +95,7 @@ function App({ conductor }: AppProps) {
 
   // Show Loading Screen while checking auth
   if (authLoading) {
-      return <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center text-white">{t('common.loading')}</div>;
+      return <div className="min-h-screen bg-app-bg flex items-center justify-center text-app-text">{t('common.loading')}</div>;
   }
 
   // Show Login Screen if no user
@@ -107,16 +110,16 @@ function App({ conductor }: AppProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-white font-sans pb-24">
+    <div className="min-h-screen bg-app-bg text-app-text font-sans pb-24">
       
       {/* Header (Sticky Glass) */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B0E14]/80 backdrop-blur-xl border-b border-white/5 px-4 py-4">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-app-bg/80 backdrop-blur-xl border-b border-app-border px-4 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
                 <img 
                     src="/pwa-icon-192.png" 
                     alt="InFocus Logo" 
-                    className="h-14 w-14 rounded-full object-cover border-2 border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                    className="h-14 w-14 rounded-full object-cover border-2 border-app-border shadow-[0_0_15px_rgba(255,255,255,0.1)]"
                 />
                 
                 {/* Role Badge */}
@@ -134,8 +137,8 @@ function App({ conductor }: AppProps) {
             </div>
             
             <div className="flex-1 flex justify-end gap-3">
-                 <div className="flex bg-white/10 border border-white/10 rounded-2xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[150px] sm:max-w-md transition-all">
-                    <Search className="w-4 h-4 text-gray-400 shrink-0" />
+                 <div className="flex bg-app-secondary border border-app-border rounded-2xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[150px] sm:max-w-md transition-all">
+                    <Search className="w-4 h-4 text-app-text-muted shrink-0" />
                     <input 
                         id="search-movies"
                         name="search"
@@ -143,7 +146,7 @@ function App({ conductor }: AppProps) {
                         placeholder={t('common.search')} 
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="bg-transparent border-none focus:outline-none w-full text-white placeholder-gray-400 text-xs sm:text-sm"
+                        className="bg-transparent border-none focus:outline-none w-full text-app-text placeholder-app-text-muted text-xs sm:text-sm"
                     />
                 </div>
             </div>
@@ -305,7 +308,7 @@ function App({ conductor }: AppProps) {
                         <div 
                             key={movie.id} 
                             onClick={() => conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id })}
-                            className="relative aspect-[2/3] rounded-2xl overflow-hidden group shadow-lg bg-gray-800 cursor-pointer"
+                            className="relative aspect-[2/3] rounded-2xl overflow-hidden group shadow-lg bg-app-card-bg cursor-pointer"
                         >
                             {/* Image */}
                             {movie.posterPath ? (
@@ -315,7 +318,7 @@ function App({ conductor }: AppProps) {
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-800">
+                                <div className="w-full h-full flex items-center justify-center text-app-text-muted bg-app-card-bg">
                                     No Image
                                 </div>
                             )}
@@ -328,14 +331,14 @@ function App({ conductor }: AppProps) {
                                 {movie.source === 'tmdb' ? (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }}
-                                        className="bg-black/40 backdrop-blur-md p-2 rounded-full transition-all shadow-lg text-white hover:bg-accent-blue"
+                                        className="bg-black/40 backdrop-blur-md p-2 rounded-full transition-all shadow-lg text-app-text hover:bg-accent-blue"
                                     >
                                         <Plus className="w-4 h-4" />
                                     </button>
                                 ) : (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
-                                        className="bg-black/40 backdrop-blur-md p-2 rounded-full text-white hover:bg-red-500 transition-all shadow-lg"
+                                        className="bg-black/40 backdrop-blur-md p-2 rounded-full text-app-text hover:bg-red-500 transition-all shadow-lg"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -344,9 +347,9 @@ function App({ conductor }: AppProps) {
 
                             {/* Text Content */}
                             <div className="absolute bottom-0 left-0 right-0 p-3">
-                                <h3 className="font-bold text-sm truncate text-white">{movie.title}</h3>
-                                <div className="text-xs text-gray-400 flex items-center gap-2 mt-1">
-                                    <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
+                                <h3 className="font-bold text-sm truncate text-app-text">{movie.title}</h3>
+                                <div className="text-xs text-app-text-muted flex items-center gap-2 mt-1">
+                                    <span className="bg-app-secondary px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
                                         {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
                                     </span>
                                     <span>{movie.releaseDate?.split('-')[0] || 'N/A'}</span>
@@ -359,7 +362,7 @@ function App({ conductor }: AppProps) {
                                 {movie.source !== 'tmdb' && (
                                     <div className="flex items-center gap-3 mt-2">
                                         <Heart 
-                                            className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.favorite ? "fill-red-500 text-red-500" : "text-gray-400"}`} 
+                                            className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.favorite ? "fill-red-500 text-red-500" : "text-app-text-muted"}`} 
                                             onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
                                         />
                                         <Eye 
@@ -375,7 +378,7 @@ function App({ conductor }: AppProps) {
 
                 {/* Empty State */}
                 {state.status === 'idle' && state.items.length === 0 && !state.error && (
-                <div className="text-center py-20 text-gray-500">
+                <div className="text-center py-20 text-app-text-muted">
                     <div className="text-4xl mb-4 opacity-50">🍿</div>
                     <p className="text-lg font-medium">{t('common.noResults')}</p>
                     <p className="text-sm mt-1 opacity-60">{t('common.beginSearch')}</p>
@@ -387,9 +390,9 @@ function App({ conductor }: AppProps) {
       </div>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#0B0E14]/90 backdrop-blur-2xl border-t border-white/5 px-6 py-4 flex justify-between items-center z-50 max-w-4xl mx-auto w-full md:rounded-t-3xl">
+      <nav className="fixed bottom-0 left-0 right-0 bg-app-bg/90 backdrop-blur-2xl border-t border-app-border px-6 py-4 flex justify-between items-center z-50 max-w-4xl mx-auto w-full md:rounded-t-3xl">
           <button 
-            className={`transition-colors ${state.filter === 'all' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            className={`transition-colors ${state.filter === 'all' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'}`}
             onClick={() => {
                 setSearchTerm('');
                 conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
@@ -401,7 +404,7 @@ function App({ conductor }: AppProps) {
           </button>
           
           <button 
-            className={`transition-colors ${state.filter === 'favorites' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            className={`transition-colors ${state.filter === 'favorites' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'favorites' })}
             aria-label={t('nav.favorites')}
           >
@@ -409,7 +412,7 @@ function App({ conductor }: AppProps) {
           </button>
           
           <button 
-            className={`transition-colors ${showProfile ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            className={`transition-colors ${showProfile ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'}`}
             onClick={() => setShowProfile(true)}
             aria-label="Profile"
           >
@@ -417,7 +420,7 @@ function App({ conductor }: AppProps) {
           </button>
 
           <button 
-            className={`transition-colors ${state.filter === 'watched' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            className={`transition-colors ${state.filter === 'watched' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'watched' })}
             aria-label={t('nav.watched')}
           >
@@ -425,7 +428,7 @@ function App({ conductor }: AppProps) {
           </button>
           
           <button 
-            className={`transition-colors ${state.filter === 'achievements' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            className={`transition-colors ${state.filter === 'achievements' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'achievements' })}
             aria-label={t('nav.achievements')}
           >
@@ -433,7 +436,7 @@ function App({ conductor }: AppProps) {
           </button>
           
           <button 
-            className={`transition-colors ${state.filter === 'statistics' ? 'text-blue-500' : 'text-gray-400 hover:text-white'}`}
+            className={`transition-colors ${state.filter === 'statistics' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'}`}
             onClick={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'statistics' })}
             aria-label={t('nav.statistics')}
           >
@@ -462,12 +465,12 @@ function App({ conductor }: AppProps) {
             />
             
             {/* Modal Content */}
-            <div className="relative w-full max-w-3xl bg-[#0B0E14] sm:rounded-3xl border-t sm:border border-white/10 shadow-2xl h-[95vh] sm:h-[90vh] overflow-y-auto overflow-x-hidden animate-slide-up no-scrollbar">
+            <div className="relative w-full max-w-3xl bg-app-bg sm:rounded-3xl border-t sm:border border-app-border shadow-2xl h-[95vh] sm:h-[90vh] overflow-y-auto overflow-x-hidden animate-slide-up no-scrollbar">
                 
                 {/* Close Button */}
                 <button 
                     onClick={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
-                    className="absolute top-4 right-4 z-[120] bg-black/50 p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-md transition-all pointer-events-auto"
+                    className="absolute top-4 right-4 z-[120] bg-black/50 p-2 rounded-full text-app-text/80 hover:text-app-text hover:bg-app-secondary backdrop-blur-md transition-all pointer-events-auto"
                 >
                     <X className="w-6 h-6" />
                 </button>
@@ -493,14 +496,14 @@ function App({ conductor }: AppProps) {
                     )}
 
                     {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E14] via-[#0B0E14]/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-app-bg via-app-bg/40 to-transparent" />
                     
                     {/* Content Container (Bottom Left) */}
                     <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-10 flex flex-col justify-end h-full z-20 pointer-events-none">
                         
                         {/* Title Only */}
                         <div className="mb-4 sm:mb-6 z-10 pointer-events-none">
-                            <h2 className="text-2xl sm:text-5xl font-bold text-white mb-2 sm:mb-3 leading-tight drop-shadow-2xl line-clamp-2">
+                            <h2 className="text-2xl sm:text-5xl font-bold text-app-text mb-2 sm:mb-3 leading-tight drop-shadow-2xl line-clamp-2">
                                 {state.selectedMovie.title}
                             </h2>
                         </div>
@@ -512,9 +515,9 @@ function App({ conductor }: AppProps) {
                             {state.selectedMovie.trailerKey && (
                                 <button 
                                     onClick={() => window.open(`https://youtube.com/watch?v=${state.selectedMovie!.trailerKey}`, '_blank')}
-                                    className="flex items-center gap-2 bg-white text-black hover:bg-gray-200 transition-all px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg shadow-xl active:scale-95"
+                                    className="flex items-center gap-2 bg-app-text text-app-bg hover:bg-app-text/90 transition-all px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg shadow-xl active:scale-95"
                                 >
-                                    <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-black" />
+                                    <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                                     {t('common.playTrailer')}
                                 </button>
                             )}
@@ -522,7 +525,7 @@ function App({ conductor }: AppProps) {
                             {/* Add/Library Button */}
                             {state.items.some(m => m.tmdbId === Number(state.selectedMovie?.id) || m.id === state.selectedMovie?.id) ? (
                                 <button 
-                                    className="flex items-center gap-2 bg-gray-500/30 backdrop-blur-md text-white/90 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg border border-white/10 cursor-default"
+                                    className="flex items-center gap-2 bg-app-secondary/30 backdrop-blur-md text-app-text/90 px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg border border-app-border cursor-default"
                                 >
                                     <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                                     {t('common.inLibrary')}
@@ -530,7 +533,7 @@ function App({ conductor }: AppProps) {
                             ) : (
                                 <button 
                                     onClick={() => handleAddMovie(state.selectedMovie!)}
-                                    className="flex items-center gap-2 bg-gray-600/60 hover:bg-gray-600/80 backdrop-blur-md text-white transition-all px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg border border-white/20 shadow-lg hover:scale-105 active:scale-95"
+                                    className="flex items-center gap-2 bg-app-secondary/60 hover:bg-app-secondary/80 backdrop-blur-md text-app-text transition-all px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-lg border border-app-border shadow-lg hover:scale-105 active:scale-95"
                                 >
                                     <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                                     {t('common.addToWatchlist')}
@@ -540,7 +543,7 @@ function App({ conductor }: AppProps) {
                         </div>
 
                         {/* Poster (Hidden on mobile, visible on desktop overlap) */}
-                        <div className="hidden sm:block absolute -bottom-16 right-10 w-32 aspect-[2/3] rounded-lg shadow-2xl border-2 border-white/10 z-20 overflow-hidden transform rotate-3 hover:rotate-0 transition-all duration-500">
+                        <div className="hidden sm:block absolute -bottom-16 right-10 w-32 aspect-[2/3] rounded-lg shadow-2xl border-2 border-app-border z-20 overflow-hidden transform rotate-3 hover:rotate-0 transition-all duration-500">
                              <img 
                                 src={state.selectedMovie.posterPath || ''} 
                                 alt="Poster" 
@@ -551,66 +554,65 @@ function App({ conductor }: AppProps) {
                 </div>
 
                 {/* Content Body */}
-                <div className="p-5 sm:p-10 space-y-6 sm:space-y-8 bg-[#0B0E14] relative z-30">
+                <div className="p-5 sm:p-10 space-y-6 sm:space-y-8 bg-app-bg relative z-30">
                     
                     {/* Metadata (Moved here) */}
-                    <div className="mt-6 mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-400">
+                    <div className="mt-6 mb-4 flex flex-wrap items-center gap-3 text-sm text-app-text-muted">
                         {state.selectedMovie.releaseDate && <span>{state.selectedMovie.releaseDate.split('-')[0]}</span>}
                         {state.selectedMovie.runtime && <span>• {state.selectedMovie.runtime} min</span>}
                         {state.selectedMovie.voteAverage && <span className="text-green-400 font-bold">• {Math.round(state.selectedMovie.voteAverage * 10)}% {t('common.match')}</span>}
                         {state.selectedMovie.genres && state.selectedMovie.genres.slice(0, 2).map(g => (
-                            <span key={g} className="text-gray-300">• {g}</span>
+                            <span key={g} className="text-app-text-muted opacity-80">• {g}</span>
                         ))}
                     </div>
 
                     {/* Plot */}
                     <div>
-                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">{t('common.plot')}</h3>
-                        <p className="text-gray-200 leading-relaxed text-base sm:text-lg font-light">
+                        <h3 className="text-sm font-bold text-app-text-muted uppercase tracking-wider mb-2 sm:mb-3">{t('common.plot')}</h3>
+                        <p className="text-app-text leading-relaxed text-base sm:text-lg font-light">
                             {state.selectedMovie.overview || 'No overview available.'}
                         </p>
                     </div>
 
                     {/* Metadata Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-4 border-y border-white/5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-4 border-y border-app-border">
                         {state.selectedMovie.director && (
                             <div>
-                                <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">
+                                <h3 className="text-xs font-bold text-app-text-muted uppercase mb-1">
                                     {state.selectedMovie.mediaType === 'tv' ? t('common.creator') : t('common.director')}
                                 </h3>
-                                <div className="text-white font-medium">{state.selectedMovie.director}</div>
+                                <div className="text-app-text font-medium">{state.selectedMovie.director}</div>
                             </div>
                         )}
                         <div>
-                             <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.released')}</h3>
-                             <div className="text-white font-medium">{state.selectedMovie.releaseDate?.split('-')[0] || 'N/A'}</div>
+                             <h3 className="text-xs font-bold text-app-text-muted uppercase mb-1">{t('common.released')}</h3>
+                             <div className="text-app-text font-medium">{state.selectedMovie.releaseDate?.split('-')[0] || 'N/A'}</div>
                         </div>
                         <div>
-                             <h3 className="text-xs font-bold text-gray-500 uppercase mb-1">{t('common.type')}</h3>
-                             <div className="text-white font-medium">
+                             <h3 className="text-xs font-bold text-app-text-muted uppercase mb-1">{t('common.type')}</h3>
+                             <div className="text-app-text font-medium">
                                 {state.selectedMovie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
                              </div>
                         </div>
-                         {/* More fields can go here */}
                     </div>
 
                     {/* Cast */}
                     {state.selectedMovie.cast && state.selectedMovie.cast.length > 0 && (
                         <div>
-                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">{t('common.cast')}</h3>
+                            <h3 className="text-sm font-bold text-app-text-muted uppercase tracking-wider mb-4">{t('common.cast')}</h3>
                             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
                                 {state.selectedMovie.cast.map((actor, idx) => (
                                     <div key={idx} className="flex flex-col items-center gap-2 min-w snap-start">
-                                        <div className="w-20 h-20 rounded-full overflow-hidden bg-white/10 border border-white/5 shadow-lg">
+                                        <div className="w-20 h-20 rounded-full overflow-hidden bg-app-secondary border border-app-border shadow-lg">
                                             {actor.profilePath ? (
                                                 <img src={actor.profilePath} alt={actor.name} className="w-full h-full object-cover" />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">N/A</div>
+                                                <div className="w-full h-full flex items-center justify-center text-xs text-app-text-muted">N/A</div>
                                             )}
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-xs font-bold text-white truncate w-24">{actor.name}</div>
-                                            <div className="text-[10px] text-gray-400 truncate w-24">{actor.character}</div>
+                                            <div className="text-xs font-bold text-app-text truncate w-24">{actor.name}</div>
+                                            <div className="text-[10px] text-app-text-muted truncate w-24">{actor.character}</div>
                                         </div>
                                     </div>
                                 ))}
@@ -620,14 +622,14 @@ function App({ conductor }: AppProps) {
 
                     {/* Where to Watch */}
                     {state.selectedMovie.watchProviders && (
-                        <div className="bg-white/5 rounded-2xl p-6 border border-white/5">
-                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">{t('common.providers')}</h3>
+                        <div className="bg-app-secondary rounded-2xl p-6 border border-app-border">
+                            <h3 className="text-sm font-bold text-app-text-muted uppercase tracking-wider mb-4">{t('common.providers')}</h3>
                             
                             <div className="space-y-6">
                                 {/* Stream (Flatrate) */}
                                 {state.selectedMovie.watchProviders.flatrate && state.selectedMovie.watchProviders.flatrate.length > 0 && (
                                     <div className="flex items-center gap-4">
-                                        <span className="text-xs font-bold text-gray-500 w-12 shrink-0 uppercase">Stream</span>
+                                        <span className="text-xs font-bold text-app-text-muted w-12 shrink-0 uppercase">Stream</span>
                                         <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                                             {state.selectedMovie.watchProviders.flatrate.map((provider, idx) => (
                                                 <img 
@@ -635,7 +637,7 @@ function App({ conductor }: AppProps) {
                                                     src={provider.logoPath} 
                                                     alt={provider.providerName} 
                                                     title={provider.providerName}
-                                                    className="w-12 h-12 rounded-xl shadow-lg border border-white/10 hover:scale-110 transition-transform cursor-help"
+                                                    className="w-12 h-12 rounded-xl shadow-lg border border-app-border hover:scale-110 transition-transform cursor-help"
                                                 />
                                             ))}
                                         </div>
@@ -645,7 +647,7 @@ function App({ conductor }: AppProps) {
                                 {/* Rent */}
                                 {state.selectedMovie.watchProviders.rent && state.selectedMovie.watchProviders.rent.length > 0 && (
                                     <div className="flex items-center gap-4">
-                                        <span className="text-xs font-bold text-gray-500 w-12 shrink-0 uppercase">Rent</span>
+                                        <span className="text-xs font-bold text-app-text-muted w-12 shrink-0 uppercase">Rent</span>
                                         <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                                             {state.selectedMovie.watchProviders.rent.map((provider, idx) => (
                                                 <img 
@@ -653,7 +655,7 @@ function App({ conductor }: AppProps) {
                                                     src={provider.logoPath} 
                                                     alt={provider.providerName} 
                                                     title={provider.providerName}
-                                                    className="w-10 h-10 rounded-xl shadow-lg border border-white/10 opacity-70 hover:opacity-100 transition-all grayscale hover:grayscale-0"
+                                                    className="w-10 h-10 rounded-xl shadow-lg border border-app-border opacity-70 hover:opacity-100 transition-all grayscale hover:grayscale-0"
                                                 />
                                             ))}
                                         </div>
@@ -663,7 +665,7 @@ function App({ conductor }: AppProps) {
                                 {/* Buy */}
                                 {state.selectedMovie.watchProviders.buy && state.selectedMovie.watchProviders.buy.length > 0 && (
                                     <div className="flex items-center gap-4">
-                                        <span className="text-xs font-bold text-gray-500 w-12 shrink-0 uppercase">Buy</span>
+                                        <span className="text-xs font-bold text-app-text-muted w-12 shrink-0 uppercase">Buy</span>
                                         <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                                             {state.selectedMovie.watchProviders.buy.map((provider, idx) => (
                                                 <img 
@@ -671,7 +673,7 @@ function App({ conductor }: AppProps) {
                                                     src={provider.logoPath} 
                                                     alt={provider.providerName} 
                                                     title={provider.providerName}
-                                                    className="w-10 h-10 rounded-xl shadow-lg border border-white/10 opacity-70 hover:opacity-100 transition-all grayscale hover:grayscale-0"
+                                                    className="w-10 h-10 rounded-xl shadow-lg border border-app-border opacity-70 hover:opacity-100 transition-all grayscale hover:grayscale-0"
                                                 />
                                             ))}
                                         </div>
@@ -682,7 +684,7 @@ function App({ conductor }: AppProps) {
                                 {(!state.selectedMovie.watchProviders.flatrate?.length && 
                                   !state.selectedMovie.watchProviders.rent?.length && 
                                   !state.selectedMovie.watchProviders.buy?.length) && (
-                                    <div className="text-sm text-gray-600 italic">
+                                    <div className="text-sm text-app-text-muted italic">
                                         No streaming information available for your region.
                                     </div>
                                 )}
@@ -693,7 +695,7 @@ function App({ conductor }: AppProps) {
                     {/* Recommendations */}
                     {state.selectedMovie.recommendations && state.selectedMovie.recommendations.length > 0 && (
                         <div>
-                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">{t('common.recommendations')}</h3>
+                            <h3 className="text-sm font-bold text-app-text-muted uppercase tracking-wider mb-4">{t('common.recommendations')}</h3>
                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                                 {state.selectedMovie.recommendations.slice(0, 5).map((rec) => (
                                     <div 
@@ -701,7 +703,7 @@ function App({ conductor }: AppProps) {
                                         onClick={() => conductor.dispatch({ type: 'SELECT_MOVIE', payload: rec.id })}
                                         className="flex flex-col gap-2 cursor-pointer group"
                                     >
-                                        <div className="aspect-[2/3] rounded-xl overflow-hidden bg-white/10 border border-white/5 relative shadow-lg">
+                                        <div className="aspect-[2/3] rounded-xl overflow-hidden bg-app-secondary border border-app-border relative shadow-lg">
                                             {rec.posterPath ? (
                                                 <img 
                                                     src={rec.posterPath} 
@@ -709,10 +711,10 @@ function App({ conductor }: AppProps) {
                                                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">N/A</div>
+                                                <div className="w-full h-full flex items-center justify-center text-xs text-app-text-muted">N/A</div>
                                             )}
                                         </div>
-                                        <div className="text-xs font-bold text-gray-300 truncate group-hover:text-blue-400 transition-colors">
+                                        <div className="text-xs font-bold text-app-text-muted truncate group-hover:text-blue-400 transition-colors">
                                             {rec.title}
                                         </div>
                                     </div>

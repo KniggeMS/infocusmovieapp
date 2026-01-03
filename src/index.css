@@ -1,7 +1,9 @@
+@import './styles/themes.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  @apply bg-gray-900 text-white;
+  @apply bg-app-bg text-app-text transition-colors duration-300;
 }

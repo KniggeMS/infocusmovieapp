@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, User, Settings, Database, LogOut, Upload, Download, Save, RefreshCw, Shield, Trash2 } from 'lucide-react';
+import { X, User, Settings, Database, LogOut, Upload, Download, Save, RefreshCw, Shield, Trash2, Palette, Sun, Moon, Layers } from 'lucide-react';
 import { UserProfile } from '../types/auth';
 import { AuthService } from '../services/AuthService';
 import { MovieConductor } from '../core/conductor/MovieConductor';
@@ -17,15 +17,34 @@ interface ProfileModalProps {
 
 export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser }: ProfileModalProps) {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'data'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'data' | 'appearance'>('profile');
   const [displayName, setDisplayName] = useState(user.displayName || '');
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'glass'>(user.theme || 'dark');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Effect to apply theme immediately for preview
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+  }, [currentTheme]);
+
+  const handleThemeChange = async (theme: 'light' | 'dark' | 'glass') => {
+    setCurrentTheme(theme);
+    // Auto-save on selection? Or explicit save?
+    // Let's do explicit save for consistency, but preview is instant.
+    // Actually, UX is better if we just save it in background:
+    try {
+        await AuthService.getInstance().updateProfile(user.id, { theme });
+        onUpdateUser({ ...user, theme });
+    } catch (e) {
+        console.error('Failed to save theme', e);
+    }
+  };
 
   const handleGenerateAvatar = () => {
     const seed = Math.random().toString(36).substring(7);
@@ -128,15 +147,15 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
        
        {/* Content */}
-       <div className="bg-[#1A1D24] w-full max-w-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden relative z-10 flex flex-col max-h-[90vh]">
+       <div className="bg-app-bg w-full max-w-2xl rounded-3xl border border-app-border shadow-2xl overflow-hidden relative z-10 flex flex-col max-h-[90vh]">
           
           {/* Header */}
-          <div className="p-6 border-b border-white/5 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <div className="p-6 border-b border-app-border flex items-center justify-between">
+            <h2 className="text-xl font-bold text-app-text flex items-center gap-2">
                 <User className="w-5 h-5 text-blue-500" />
                 {t('profile.title')}
             </h2>
-            <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full text-gray-400 hover:text-white transition">
+            <button onClick={onClose} className="p-2 hover:bg-app-secondary rounded-full text-app-text-muted hover:text-app-text transition">
                 <X className="w-5 h-5" />
             </button>
           </div>
@@ -144,24 +163,31 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
           {/* Body */}
           <div className="flex flex-1 overflow-hidden">
             {/* Sidebar (Tabs) */}
-            <div className="w-1/3 bg-black/20 border-r border-white/5 p-4 space-y-2 hidden sm:block">
+            <div className="w-1/3 bg-app-secondary/30 border-r border-app-border p-4 space-y-2 hidden sm:block">
                 <button 
                     onClick={() => setActiveTab('profile')}
-                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'profile' ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:bg-white/5'}`}
+                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'profile' ? 'bg-blue-600/20 text-blue-400' : 'text-app-text-muted hover:bg-app-secondary/50'}`}
                 >
                     <User className="w-4 h-4" />
                     {t('profile.tabProfile')}
                 </button>
                 <button 
                     onClick={() => setActiveTab('settings')}
-                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'settings' ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:bg-white/5'}`}
+                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'settings' ? 'bg-blue-600/20 text-blue-400' : 'text-app-text-muted hover:bg-app-secondary/50'}`}
                 >
                     <Settings className="w-4 h-4" />
                     {t('profile.tabSettings')}
                 </button>
                 <button 
+                    onClick={() => setActiveTab('appearance')}
+                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'appearance' ? 'bg-blue-600/20 text-blue-400' : 'text-app-text-muted hover:bg-app-secondary/50'}`}
+                >
+                    <Palette className="w-4 h-4" />
+                    {t('profile.tabAppearance')}
+                </button>
+                <button 
                     onClick={() => setActiveTab('data')}
-                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'data' ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:bg-white/5'}`}
+                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'data' ? 'bg-blue-600/20 text-blue-400' : 'text-app-text-muted hover:bg-app-secondary/50'}`}
                 >
                     <Database className="w-4 h-4" />
                     {t('profile.tabData')}
@@ -173,9 +199,10 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                 
                 {/* Mobile Tabs */}
                 <div className="flex sm:hidden gap-2 mb-6 overflow-x-auto pb-2">
-                     <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'profile' ? 'bg-blue-600 text-white' : 'bg-white/5 text-gray-400'}`}>{t('profile.tabProfile')}</button>
-                     <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'settings' ? 'bg-blue-600 text-white' : 'bg-white/5 text-gray-400'}`}>{t('profile.tabSettings')}</button>
-                     <button onClick={() => setActiveTab('data')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'data' ? 'bg-blue-600 text-white' : 'bg-white/5 text-gray-400'}`}>{t('profile.tabData')}</button>
+                     <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'profile' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabProfile')}</button>
+                     <button onClick={() => setActiveTab('appearance')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'appearance' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabAppearance')}</button>
+                     <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'settings' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabSettings')}</button>
+                     <button onClick={() => setActiveTab('data')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'data' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabData')}</button>
                 </div>
 
                 {message && (
@@ -188,7 +215,7 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                     <div className="space-y-6 animate-fade-in">
                         <div className="flex items-center gap-4">
                             <div className="relative group">
-                                <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-2xl font-bold overflow-hidden border-2 border-white/10 shadow-lg">
+                                <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-2xl font-bold overflow-hidden border-2 border-app-border shadow-lg">
                                     {avatarUrl ? (
                                         <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
@@ -198,7 +225,7 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                                 <div className="absolute -bottom-1 -right-1 flex gap-1">
                                     <button 
                                         onClick={handleGenerateAvatar}
-                                        className="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full shadow-lg border border-[#1A1D24] transition-all active:scale-90 active:rotate-180"
+                                        className="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full shadow-lg border border-app-bg transition-all active:scale-90 active:rotate-180"
                                         title={t('profile.generateAvatar')}
                                     >
                                         <RefreshCw className="w-3 h-3" />
@@ -206,7 +233,7 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                                     {avatarUrl && (
                                         <button 
                                             onClick={handleRemoveAvatar}
-                                            className="bg-red-600 hover:bg-red-500 text-white p-1.5 rounded-full shadow-lg border border-[#1A1D24] transition-all active:scale-90"
+                                            className="bg-red-600 hover:bg-red-500 text-white p-1.5 rounded-full shadow-lg border border-app-bg transition-all active:scale-90"
                                             title={t('profile.removeAvatar')}
                                         >
                                             <Trash2 className="w-3 h-3" />
@@ -215,8 +242,8 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                                 </div>
                             </div>
                             <div>
-                                <div className="text-white font-bold text-lg">{user.email}</div>
-                                <div className="text-gray-500 text-sm flex items-center gap-1">
+                                <div className="text-app-text font-bold text-lg">{user.email}</div>
+                                <div className="text-app-text-muted text-sm flex items-center gap-1">
                                     {user.role === 'admin' && <Shield className="w-3 h-3 text-red-400" />}
                                     <span className="uppercase tracking-wider">{user.role}</span>
                                 </div>
@@ -224,12 +251,12 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-500 uppercase">{t('profile.displayName')}</label>
+                            <label className="text-xs font-bold text-app-text-muted uppercase">{t('profile.displayName')}</label>
                             <input 
                                 type="text" 
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
 
@@ -247,52 +274,52 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                 {activeTab === 'settings' && (
                     <div className="space-y-6 animate-fade-in">
                          <div className="space-y-2">
-                            <label className="text-xs font-bold text-gray-500 uppercase">{t('profile.language')}</label>
+                            <label className="text-xs font-bold text-app-text-muted uppercase">{t('profile.language')}</label>
                             <div className="grid grid-cols-2 gap-3">
                                 <button 
                                     onClick={() => i18n.changeLanguage('en')}
-                                    className={`p-4 rounded-xl border text-center transition-all ${i18n.language === 'en' ? 'bg-blue-600/20 border-blue-500 text-white' : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'}`}
+                                    className={`p-4 rounded-xl border text-center transition-all ${i18n.language === 'en' ? 'bg-blue-600/20 border-blue-500 text-app-text' : 'bg-app-secondary/30 border-transparent text-app-text-muted hover:bg-app-secondary/50'}`}
                                 >
                                     🇬🇧 English
                                 </button>
                                 <button 
                                     onClick={() => i18n.changeLanguage('de')}
-                                    className={`p-4 rounded-xl border text-center transition-all ${i18n.language === 'de' ? 'bg-blue-600/20 border-blue-500 text-white' : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'}`}
+                                    className={`p-4 rounded-xl border text-center transition-all ${i18n.language === 'de' ? 'bg-blue-600/20 border-blue-500 text-app-text' : 'bg-app-secondary/30 border-transparent text-app-text-muted hover:bg-app-secondary/50'}`}
                                 >
                                     🇩🇪 Deutsch
                                 </button>
                             </div>
                         </div>
 
-                        <div className="space-y-2 pt-4 border-t border-white/5">
-                            <label className="text-xs font-bold text-gray-500 uppercase">{t('profile.changePassword')}</label>
+                        <div className="space-y-2 pt-4 border-t border-app-border">
+                            <label className="text-xs font-bold text-app-text-muted uppercase">{t('profile.changePassword')}</label>
                             <input 
                                 type="password" 
                                 placeholder={t('profile.newPassword')}
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none mb-2"
+                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none mb-2"
                             />
                             <input 
                                 type="password" 
                                 placeholder={t('profile.confirmPassword')}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             <button 
                                 onClick={handleUpdatePassword}
                                 disabled={loading || !newPassword}
-                                className="w-full bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl font-bold transition-all disabled:opacity-50 mt-2"
+                                className="w-full bg-app-secondary hover:bg-app-secondary/80 text-app-text px-4 py-2 rounded-xl font-bold transition-all disabled:opacity-50 mt-2"
                             >
                                 {t('profile.updatePassword')}
                             </button>
                         </div>
 
-                        <div className="pt-6 border-t border-white/5">
+                        <div className="pt-6 border-t border-app-border">
                             <button 
                                 onClick={clearCache}
-                                className="w-full bg-white/5 hover:bg-red-500/10 text-gray-400 hover:text-red-400 p-4 rounded-xl flex items-center justify-between transition-colors"
+                                className="w-full bg-app-secondary/20 hover:bg-red-500/10 text-app-text-muted hover:text-red-400 p-4 rounded-xl flex items-center justify-between transition-colors"
                             >
                                 <span className="flex items-center gap-2">
                                     <RefreshCw className="w-4 h-4" />
@@ -301,8 +328,70 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                             </button>
                         </div>
                         
-                        <div className="text-center text-xs text-gray-600 mt-8">
-                            InFocus v2.7.0
+                        <div className="text-center text-xs text-app-text-muted/50 mt-8">
+                            InFocus v2.8.1
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'appearance' && (
+                    <div className="space-y-6 animate-fade-in">
+                        <h3 className="text-app-text font-bold mb-4">{t('profile.theme')}</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            
+                            {/* DARK */}
+                            <button
+                                onClick={() => handleThemeChange('dark')}
+                                className={`group relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden ${currentTheme === 'dark' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-app-border hover:border-blue-500/50'}`}
+                            >
+                                <div className="absolute inset-0 bg-[#111827]" />
+                                <div className="relative z-10 flex flex-col items-center gap-3 py-4">
+                                    <div className="p-3 bg-gray-800 rounded-full text-white">
+                                        <Moon className="w-6 h-6" />
+                                    </div>
+                                    <span className="text-gray-200 font-medium">{t('profile.themeDark')}</span>
+                                </div>
+                                {currentTheme === 'dark' && (
+                                    <div className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
+                                )}
+                            </button>
+
+                            {/* LIGHT */}
+                            <button
+                                onClick={() => handleThemeChange('light')}
+                                className={`group relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden ${currentTheme === 'light' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-app-border hover:border-blue-500/50'}`}
+                            >
+                                <div className="absolute inset-0 bg-white" />
+                                <div className="relative z-10 flex flex-col items-center gap-3 py-4">
+                                    <div className="p-3 bg-gray-100 rounded-full text-gray-900">
+                                        <Sun className="w-6 h-6" />
+                                    </div>
+                                    <span className="text-gray-900 font-medium">{t('profile.themeLight')}</span>
+                                </div>
+                                {currentTheme === 'light' && (
+                                    <div className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
+                                )}
+                            </button>
+
+                            {/* GLASS */}
+                            <button
+                                onClick={() => handleThemeChange('glass')}
+                                className={`group relative p-4 rounded-2xl border-2 text-left transition-all overflow-hidden ${currentTheme === 'glass' ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-app-border hover:border-blue-500/50'}`}
+                            >
+                                {/* Simulated Glass Background */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-blue-900/40" />
+                                <div className="absolute inset-0 backdrop-blur-md bg-white/5" />
+                                
+                                <div className="relative z-10 flex flex-col items-center gap-3 py-4">
+                                    <div className="p-3 bg-white/10 backdrop-blur-xl rounded-full text-white border border-white/20">
+                                        <Layers className="w-6 h-6" />
+                                    </div>
+                                    <span className="text-white font-medium shadow-black drop-shadow-md">{t('profile.themeGlass')}</span>
+                                </div>
+                                {currentTheme === 'glass' && (
+                                    <div className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
+                                )}
+                            </button>
                         </div>
                     </div>
                 )}
@@ -310,15 +399,15 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                 {activeTab === 'data' && (
                     <div className="space-y-6 animate-fade-in">
                         
-                        <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                            <h3 className="text-white font-bold mb-2 flex items-center gap-2">
+                        <div className="bg-app-secondary/20 rounded-2xl p-4 border border-app-border">
+                            <h3 className="text-app-text font-bold mb-2 flex items-center gap-2">
                                 <Download className="w-4 h-4 text-green-400" />
                                 {t('profile.export')}
                             </h3>
-                            <p className="text-xs text-gray-400 mb-4">{t('profile.exportDesc')}</p>
+                            <p className="text-xs text-app-text-muted mb-4">{t('profile.exportDesc')}</p>
                             <button 
                                 onClick={handleExport}
-                                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                className="bg-app-secondary hover:bg-app-secondary/80 text-app-text px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                             >
                                 Download JSON
                             </button>
@@ -330,14 +419,14 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                                     <Upload className="w-4 h-4" />
                                     {t('profile.import')}
                                 </h3>
-                                <p className="text-xs text-gray-400 mb-4">{t('profile.importDesc')}</p>
+                                <p className="text-xs text-app-text-muted mb-4">{t('profile.importDesc')}</p>
                                 <input 
                                     ref={fileInputRef}
                                     type="file" 
                                     accept=".json"
                                     onChange={handleImport}
                                     disabled={loading}
-                                    className="block w-full text-sm text-gray-400
+                                    className="block w-full text-sm text-app-text-muted
                                         file:mr-4 file:py-2 file:px-4
                                         file:rounded-full file:border-0
                                         file:text-sm file:font-semibold
@@ -354,7 +443,7 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
           </div>
           
           {/* Footer */}
-          <div className="p-4 border-t border-white/5 bg-black/20 flex justify-between items-center">
+          <div className="p-4 border-t border-app-border bg-app-secondary/30 flex justify-between items-center">
              <button onClick={onLogout} className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-bold px-4 py-2">
                 <LogOut className="w-4 h-4" />
                 {t('common.signout')}

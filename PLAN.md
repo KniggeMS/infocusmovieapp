@@ -51,15 +51,17 @@
 - [x] **Feature:** Remove Avatar functionality.
 - [x] **QA:** Full Smoke Test Suite (`tests/e2e/smoke_suite.spec.ts`).
 
+## ✅ Visual Overhaul (V2.9.0)
+- [x] **Feature:** Multi-Theme System (Light, Dark, Glassmorphism).
+- [x] **Tech:** Semantic CSS Variables & Tailwind Refactoring.
+- [x] **UI:** New "Appearance" Tab in ProfileModal.
+- [x] **QA:** Theme Switching E2E Test (`tests/e2e/theme_switching.spec.ts`).
+
 ## ⚠️ Next Steps
 1. [ ] **BACKLOG:** Social Features (Friend Lists).
-2. [ ] **Monitor:** Watch for user feedback on V2.8.0.
+2. [ ] **Monitor:** Watch for user feedback on V2.9.0.
 
 ## 📋 Backlog
-- [ ] **Feature:** Multi-Theme System (Light, Dark, Glassmorphism).
-  - Requires CSS Variables refactoring of all hardcoded Tailwind colors.
-  - New "Appearance" tab in ProfileModal.
-  - Persistence in Supabase `profiles`.
 - [x] **Cast & Crew:** Detailed view for actors and directors.
 - [x] **Streaming Providers:** "Where to watch" integration (JustWatch API).
 - [ ] **Social Features:** Share lists with friends.

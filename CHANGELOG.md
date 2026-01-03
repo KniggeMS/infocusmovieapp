@@ -1,20 +1,18 @@
 # Changelog
 
-## [2.8.0] - 2026-01-03
+## [2.9.0] - 2026-01-03
 
 ### Added
-- **Avatar Generation:**
-  - Integrated DiceBear API for generating random "Bottts" avatars.
-  - Added "Shuffle" button in the profile modal to roll new avatars.
-  - Avatars are persisted in the Supabase profile.
-- **QA & Testing:**
-  - Introduced `Smoke Suite` (`smoke_suite.spec.ts`) for full user journey testing.
-  - Automated screenshot generation for E2E reports.
+- **Multi-Theme System:**
+  - Introduced full theming support with three modes: **Dark** (Default), **Light**, and **Glassmorphism**.
+  - Added new "Appearance" (Darstellung) tab in the Profile Modal.
+  - Themes are persisted in the user profile across devices.
+  - Refactored entire UI to use semantic CSS variables for consistent styling.
 
-### Improved
-- **i18n:** Full translation support for all password management and profile customization fields.
+## [2.8.1] - 2026-01-03
 
-## [2.7.1] - 2026-01-02
+### Added
+- **Avatar Management:** Added "Remove Avatar" functionality to revert to initials.
 
 ### Added
 - **Password Management:**
