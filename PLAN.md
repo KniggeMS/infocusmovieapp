@@ -54,26 +54,17 @@
 ## ⚠️ Next Steps
 1. [ ] **BACKLOG:** Social Features (Friend Lists).
 2. [ ] **Monitor:** Watch for user feedback on V2.8.0.
-1. [ ] **Monitor:** Watch for user feedback on V2.7.
-2. [ ] **BACKLOG:** Social Features (Friend Lists).
 
 ## 📋 Backlog
-- [x] **Cast & Crew:** Detailed view for actors and directors.
-- [x] **Streaming Providers:** "Where to watch" integration (JustWatch API).
-- [ ] **Social Features:** Share lists with friends.
-- [x] **Unit Testing:** Increased coverage for Conductor and Services.
-
----
-**Global Status:** ✅ V2.7 RELEASED
-**Session Note:** Erfolgreicher Sprint. TV-Support und Profil-Management sind live. Die App ist stabil, performant und bietet nun volle Funktionalität für Filme & Serien inkl. Datenhoheit für den User (Export).
-
-
-## 📋 Backlog
+- [ ] **Feature:** Multi-Theme System (Light, Dark, Glassmorphism).
+  - Requires CSS Variables refactoring of all hardcoded Tailwind colors.
+  - New "Appearance" tab in ProfileModal.
+  - Persistence in Supabase `profiles`.
 - [x] **Cast & Crew:** Detailed view for actors and directors.
 - [x] **Streaming Providers:** "Where to watch" integration (JustWatch API).
 - [ ] **Social Features:** Share lists with friends.
 - [ ] **Unit Testing:** Increase coverage for Conductor and Services.
 
 ---
-**Global Status:** ✅ Daily Goal Achieved (UI & Backend Stable)
-**Session Note:** Erfolgreicher Abschluss der heutigen Session. V2.6.2 & V2.6.5 (UI Polish) sind live. Kritische Blocker (Mobile Z-Index, Supabase 404) wurden behoben. Das System ist bereit für QA.
+**Global Status:** ✅ V2.8.1 RELEASED (Stable)
+**Session Note:** V2.8 abgeschlossen (Avatare, Smoke Suite). Theme-System für V2.9 geplant.
