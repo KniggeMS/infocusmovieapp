@@ -44,8 +44,11 @@
 - [x] **Feature:** Password Reset & Change Password.
 - [x] **Fix:** Multi-User Data Isolation (Conductor State Reset).
 - [x] **Fix:** RLS Compliance (Explicit user_id on Insert).
+- [x] **Verification:** Automated E2E Test (`tests/e2e/auth_isolation.spec.ts`) passed.
 
 ## ⚠️ Next Steps
+1. [ ] **Feature:** Avatar Upload (Profile Customization).
+2. [ ] **Monitor:** Watch for user feedback on V2.7.1.
 1. [ ] **Monitor:** Watch for user feedback on V2.7.
 2. [ ] **BACKLOG:** Social Features (Friend Lists).
 

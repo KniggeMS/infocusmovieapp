@@ -12,6 +12,7 @@
   - Implemented state clearing in `MovieConductor` on logout to prevent data leakage between users ("Cache Poisoning").
   - Added explicit `user_id` mapping when adding movies to ensure strict RLS enforcement.
   - Added automatic watchlist reload upon successful login.
+  - **Verified:** End-to-End Test (`auth_isolation.spec.ts`) confirms strict data isolation between users.
 
 ## [2.7.0] - 2026-01-02
 
