@@ -5,6 +5,7 @@ import { UserProfile } from '../types/auth';
 import { AuthService } from '../services/AuthService';
 import { MovieConductor } from '../core/conductor/MovieConductor';
 import { Movie } from '../types/domain';
+import { generateAvatarUrl } from '../lib/avatar';
 
 interface ProfileModalProps {
   user: UserProfile;
@@ -18,18 +19,26 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'data'>('profile');
   const [displayName, setDisplayName] = useState(user.displayName || '');
+  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-      const [newPassword, setNewPassword] = useState('');
-      const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleGenerateAvatar = () => {
+    const seed = Math.random().toString(36).substring(7);
+    const newUrl = generateAvatarUrl(seed);
+    setAvatarUrl(newUrl);
+  };
   
-      const handleSaveProfile = async () => {    setLoading(true);
+  const handleSaveProfile = async () => {
+    setLoading(true);
     setMessage(null);
     try {
-        await AuthService.getInstance().updateProfile(user.id, { displayName });
-        onUpdateUser({ ...user, displayName });
+        await AuthService.getInstance().updateProfile(user.id, { displayName, avatarUrl });
+        onUpdateUser({ ...user, displayName, avatarUrl });
         setMessage({ type: 'success', text: 'Profile updated!' });
     } catch (e) {
         setMessage({ type: 'error', text: 'Failed to update profile.' });
@@ -174,8 +183,21 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                 {activeTab === 'profile' && (
                     <div className="space-y-6 animate-fade-in">
                         <div className="flex items-center gap-4">
-                            <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-2xl font-bold">
-                                {user.displayName ? user.displayName[0].toUpperCase() : user.email[0].toUpperCase()}
+                            <div className="relative group">
+                                <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-2xl font-bold overflow-hidden border-2 border-white/10 shadow-lg">
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        displayName ? displayName[0].toUpperCase() : user.email[0].toUpperCase()
+                                    )}
+                                </div>
+                                <button 
+                                    onClick={handleGenerateAvatar}
+                                    className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full shadow-lg border border-[#1A1D24] transition-all active:scale-90 active:rotate-180"
+                                    title={t('profile.generateAvatar')}
+                                >
+                                    <RefreshCw className="w-3 h-3" />
+                                </button>
                             </div>
                             <div>
                                 <div className="text-white font-bold text-lg">{user.email}</div>
