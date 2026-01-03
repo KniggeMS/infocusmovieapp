@@ -34,7 +34,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         onLoginSuccess(user);
       } else if (mode === 'forgot') {
         await authService.resetPasswordForEmail(email);
-        setSuccessMsg('Password reset instructions sent to your email.');
+        setSuccessMsg(t('auth.resetSuccess'));
         setLoading(false);
         // Don't call onLoginSuccess, stay on screen to show message
       }
@@ -70,7 +70,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">InFocus</h1>
           <p className="text-gray-400">
-            {mode === 'forgot' ? 'Reset your password' : t('auth.subtitle')}
+            {mode === 'forgot' ? t('auth.resetPasswordTitle') : t('auth.subtitle')}
           </p>
         </div>
 
@@ -129,7 +129,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                     onClick={() => { setMode('forgot'); setError(null); setSuccessMsg(null); }}
                     className="text-xs text-blue-400 hover:text-blue-300 font-bold"
                 >
-                    Forgot Password?
+                    {t('auth.forgotPassword')}
                 </button>
              </div>
           )}
@@ -145,7 +145,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 {t('common.loading')}
               </>
             ) : (
-              mode === 'login' ? t('auth.login') : (mode === 'signup' ? t('auth.signup') : 'Send Instructions')
+              mode === 'login' ? t('auth.login') : (mode === 'signup' ? t('auth.signup') : t('auth.sendInstructions'))
             )}
           </button>
         </form>
@@ -163,7 +163,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 onClick={() => { setMode('login'); setError(null); setSuccessMsg(null); }}
                 className="text-sm text-gray-400 hover:text-white transition-colors"
             >
-                Back to <span className="text-blue-400 font-bold">{t('auth.login')}</span>
+                {t('common.back')} to <span className="text-blue-400 font-bold">{t('auth.login')}</span>
             </button>
           )}
         </div>

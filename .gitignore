@@ -23,3 +23,6 @@ history.jsonl
 Thumbs.db
 .vercel
 .env*.local
+
+# Screenshots
+.screenshots/

@@ -38,30 +38,29 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
     }
   };
 
-      const handleUpdatePassword = async () => {
-          if (newPassword !== confirmPassword) {
-              setMessage({ type: 'error', text: 'Passwords do not match.' });
-              return;
-          }
-          if (newPassword.length < 6) {
-              setMessage({ type: 'error', text: 'Password must be at least 6 characters.' });
-              return;
-          }
-  
-          setLoading(true);
-          setMessage(null);
-          try {
-              await AuthService.getInstance().updatePassword(newPassword);
-              setMessage({ type: 'success', text: 'Password updated successfully!' });
-              setNewPassword('');
-              setConfirmPassword('');
-          } catch (e: any) {
-              setMessage({ type: 'error', text: e.message || 'Failed to update password.' });
-          } finally {
-              setLoading(false);
-          }
-      };
-  
+          const handleUpdatePassword = async () => {
+              if (newPassword !== confirmPassword) {
+                  setMessage({ type: 'error', text: t('profile.passwordMatchError') });
+                  return;
+              }
+              if (newPassword.length < 6) {
+                  setMessage({ type: 'error', text: t('profile.passwordLengthError') });
+                  return;
+              }
+      
+              setLoading(true);
+              setMessage(null);
+              try {
+                  await AuthService.getInstance().updatePassword(newPassword);
+                  setMessage({ type: 'success', text: t('profile.passwordSuccess') });
+                  setNewPassword('');
+                  setConfirmPassword('');
+              } catch (e: any) {
+                  setMessage({ type: 'error', text: e.message || 'Failed to update password.' });
+              } finally {
+                  setLoading(false);
+              }
+          };  
       const handleExport = () => {    const data = JSON.stringify(conductor.getState().items, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -229,17 +228,17 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                         </div>
 
                         <div className="space-y-2 pt-4 border-t border-white/5">
-                            <label className="text-xs font-bold text-gray-500 uppercase">Change Password</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase">{t('profile.changePassword')}</label>
                             <input 
                                 type="password" 
-                                placeholder="New Password"
+                                placeholder={t('profile.newPassword')}
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none mb-2"
                             />
                             <input 
                                 type="password" 
-                                placeholder="Confirm Password"
+                                placeholder={t('profile.confirmPassword')}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -249,7 +248,7 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                                 disabled={loading || !newPassword}
                                 className="w-full bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl font-bold transition-all disabled:opacity-50 mt-2"
                             >
-                                Update Password
+                                {t('profile.updatePassword')}
                             </button>
                         </div>
 
