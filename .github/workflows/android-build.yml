@@ -32,6 +32,9 @@ jobs:
       - name: Build Web App
         run: npm run build
 
+      - name: Verify Build Output
+        run: ls -la dist/
+
       - name: Sync Capacitor
         run: npx cap sync android
 
@@ -39,7 +42,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace --info
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
