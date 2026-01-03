@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.8.0] - 2026-01-03
+
+### Added
+- **Avatar Generation:**
+  - Integrated DiceBear API for generating random "Bottts" avatars.
+  - Added "Shuffle" button in the profile modal to roll new avatars.
+  - Avatars are persisted in the Supabase profile.
+- **QA & Testing:**
+  - Introduced `Smoke Suite` (`smoke_suite.spec.ts`) for full user journey testing.
+  - Automated screenshot generation for E2E reports.
+
+### Improved
+- **i18n:** Full translation support for all password management and profile customization fields.
+
 ## [2.7.1] - 2026-01-02
 
 ### Added

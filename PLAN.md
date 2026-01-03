@@ -46,9 +46,13 @@
 - [x] **Fix:** RLS Compliance (Explicit user_id on Insert).
 - [x] **Verification:** Automated E2E Test (`tests/e2e/auth_isolation.spec.ts`) passed.
 
+## ✅ User Personalization (V2.8.0)
+- [x] **Feature:** Avatar Generation (DiceBear Integration).
+- [x] **QA:** Full Smoke Test Suite (`tests/e2e/smoke_suite.spec.ts`).
+
 ## ⚠️ Next Steps
-1. [ ] **Feature:** Avatar Upload (Profile Customization).
-2. [ ] **Monitor:** Watch for user feedback on V2.7.1.
+1. [ ] **BACKLOG:** Social Features (Friend Lists).
+2. [ ] **Monitor:** Watch for user feedback on V2.8.0.
 1. [ ] **Monitor:** Watch for user feedback on V2.7.
 2. [ ] **BACKLOG:** Social Features (Friend Lists).
 
