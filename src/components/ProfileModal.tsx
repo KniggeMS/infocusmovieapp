@@ -1,23 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, User, Settings, Database, LogOut, Upload, Download, Save, RefreshCw, Shield, Trash2, Palette, Sun, Moon, Layers } from 'lucide-react';
+import { X, User, Settings, Database, LogOut, Upload, Download, Save, RefreshCw, Shield, Trash2, Palette, Sun, Moon, Layers, List, PlusCircle } from 'lucide-react';
 import { UserProfile } from '../types/auth';
 import { AuthService } from '../services/AuthService';
 import { MovieConductor } from '../core/conductor/MovieConductor';
-import { Movie } from '../types/domain';
+import { Movie, CustomList } from '../types/domain';
 import { generateAvatarUrl } from '../lib/avatar';
 
 interface ProfileModalProps {
   user: UserProfile;
   conductor: MovieConductor;
+  customLists: CustomList[];
   onClose: () => void;
   onLogout: () => void;
   onUpdateUser: (user: UserProfile) => void;
 }
 
-export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser }: ProfileModalProps) {
+export function ProfileModal({ user, conductor, customLists, onClose, onLogout, onUpdateUser }: ProfileModalProps) {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'data' | 'appearance'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'data' | 'appearance' | 'lists'>('profile');
   const [displayName, setDisplayName] = useState(user.displayName || '');
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
   const [currentTheme, setCurrentTheme] = useState<'light' | 'dark' | 'glass'>(user.theme || 'dark');
@@ -27,6 +28,21 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [newListName, setNewListName] = useState('');
+
+  const handleCreateList = async () => {
+    if(!newListName.trim()) return;
+    setLoading(true);
+    try {
+        await conductor.dispatch({ type: 'CREATE_LIST', payload: { name: newListName } });
+        setNewListName('');
+        setMessage({ type: 'success', text: 'List created!' });
+    } catch (e) {
+        setMessage({ type: 'error', text: 'Failed to create list.' });
+    } finally {
+        setLoading(false);
+    }
+  };
 
   // Effect to apply theme immediately for preview
   useEffect(() => {
@@ -186,6 +202,13 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                     {t('profile.tabAppearance')}
                 </button>
                 <button 
+                    onClick={() => setActiveTab('lists')}
+                    className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'lists' ? 'bg-blue-600/20 text-blue-400' : 'text-app-text-muted hover:bg-app-secondary/50'}`}
+                >
+                    <List className="w-4 h-4" />
+                    My Lists
+                </button>
+                <button 
                     onClick={() => setActiveTab('data')}
                     className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${activeTab === 'data' ? 'bg-blue-600/20 text-blue-400' : 'text-app-text-muted hover:bg-app-secondary/50'}`}
                 >
@@ -201,6 +224,7 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                 <div className="flex sm:hidden gap-2 mb-6 overflow-x-auto pb-2">
                      <button onClick={() => setActiveTab('profile')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'profile' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabProfile')}</button>
                      <button onClick={() => setActiveTab('appearance')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'appearance' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabAppearance')}</button>
+                     <button onClick={() => setActiveTab('lists')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'lists' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>My Lists</button>
                      <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'settings' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabSettings')}</button>
                      <button onClick={() => setActiveTab('data')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${activeTab === 'data' ? 'bg-blue-600 text-white' : 'bg-app-secondary text-app-text-muted'}`}>{t('profile.tabData')}</button>
                 </div>
@@ -337,6 +361,8 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                 {activeTab === 'appearance' && (
                     <div className="space-y-6 animate-fade-in">
                         <h3 className="text-app-text font-bold mb-4">{t('profile.theme')}</h3>
+                        {/* ... (Theme buttons kept implicitly by not changing them here, but since I replace by context I should be careful) ... */}
+                        {/* Wait, the context is huge. I should try to target the END of appearance block or start of Data block */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             
                             {/* DARK */}
@@ -392,6 +418,56 @@ export function ProfileModal({ user, conductor, onClose, onLogout, onUpdateUser 
                                     <div className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]" />
                                 )}
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'lists' && (
+                    <div className="space-y-6 animate-fade-in">
+                        <h3 className="text-app-text font-bold mb-4">My Lists</h3>
+                        
+                        {/* Create List */}
+                        <div className="flex gap-2">
+                            <input 
+                                value={newListName}
+                                onChange={(e) => setNewListName(e.target.value)}
+                                placeholder="New List Name..."
+                                className="flex-1 bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                            <button 
+                                onClick={handleCreateList}
+                                disabled={!newListName.trim() || loading}
+                                className="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded-xl font-bold disabled:opacity-50 transition-colors flex items-center justify-center"
+                            >
+                                {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <PlusCircle className="w-5 h-5" />}
+                            </button>
+                        </div>
+
+                        {/* List of Lists */}
+                        <div className="space-y-3">
+                            {customLists.map(list => (
+                                <div key={list.id} className="flex items-center justify-between p-4 bg-app-secondary/10 border border-app-border rounded-xl group hover:bg-app-secondary/20 transition-colors">
+                                    <div>
+                                        <div className="font-bold text-app-text">{list.name}</div>
+                                        <div className="text-xs text-app-text-muted">{list.movieCount} movies</div>
+                                    </div>
+                                    <button 
+                                        onClick={() => {
+                                            if(confirm('Delete this list?')) {
+                                                conductor.dispatch({ type: 'DELETE_LIST', payload: list.id });
+                                            }
+                                        }}
+                                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-full transition opacity-0 group-hover:opacity-100"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            {customLists.length === 0 && (
+                                <div className="text-center text-app-text-muted py-8 border-2 border-dashed border-app-border rounded-xl">
+                                    No lists created yet.
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

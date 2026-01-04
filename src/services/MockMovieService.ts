@@ -1,4 +1,4 @@
-import { Movie, MovieServiceAdapter } from '../types/domain';
+import { Movie, MovieServiceAdapter, CustomList } from '../types/domain';
 
 export class MockMovieService implements MovieServiceAdapter {
   private mockDb: Movie[] = [
@@ -102,4 +102,13 @@ export class MockMovieService implements MovieServiceAdapter {
   async exists(title: string): Promise<boolean> {
     return this.mockDb.some(m => m.title.toLowerCase() === title.toLowerCase());
   }
+
+  async createList(name: string, description?: string): Promise<CustomList> {
+    return { id: 'mock-list', name, description, movieCount: 0, items: [] };
+  }
+
+  async deleteList(listId: string): Promise<void> { }
+  async getLists(): Promise<CustomList[]> { return []; }
+  async addMovieToList(listId: string, movie: Movie): Promise<void> { }
+  async removeMovieFromList(listId: string, movieId: string): Promise<void> { }
 }

@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Movie, MovieServiceAdapter } from '../types/domain';
+import { Movie, MovieServiceAdapter, CustomList } from '../types/domain';
 import { Database } from '../types/supabase';
 import { supabase } from '../lib/supabase';
 
@@ -13,6 +13,8 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   constructor() {
     this.client = supabase;
   }
+
+  // ... (Previous methods remain unchanged)
 
   /**
    * Searches for movies AND TV shows using the TMDB API.
@@ -382,4 +384,102 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
     return !!data && data.length > 0;
   }
+
+  // --- List Management ---
+
+  async createList(name: string, description?: string): Promise<CustomList> {
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const { data, error } = await this.client
+      .from('custom_lists')
+      .insert({ user_id: user.id, name, description })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    return {
+      id: data.id,
+      name: data.name,
+      description: data.description || undefined,
+      movieCount: 0,
+      items: []
+    };
+  }
+
+  async deleteList(listId: string): Promise<void> {
+    const { error } = await this.client.from('custom_lists').delete().eq('id', listId);
+    if (error) throw new Error(error.message);
+  }
+
+  async getLists(): Promise<CustomList[]> {
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) return [];
+
+    // Fetch lists with count of items. 
+    // Using simple approach first to avoid complex joins issues in client
+    const { data, error } = await this.client
+      .from('custom_lists')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (error) {
+        console.error('Error fetching lists:', error);
+        return [];
+    }
+    
+    // For now returning 0 count, can be enhanced with a separate count query or a view
+    return data.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      movieCount: 0, // Placeholder
+      items: [] 
+    }));
+  }
+
+  async addMovieToList(listId: string, movie: Movie): Promise<void> {
+    // 1. Ensure movie exists in our DB (if it's from TMDB only)
+    let movieId = movie.id;
+    if (movie.source === 'tmdb') {
+        const { data: { user } } = await this.client.auth.getUser();
+        if(!user) throw new Error('User not authenticated');
+
+        // Check if we already have it by TMDB ID
+        const { data: existing } = await this.client
+            .from('movies')
+            .select('id')
+            .eq('tmdb_id', movie.tmdbId!)
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (existing) {
+            movieId = existing.id;
+        } else {
+            // Add to DB first
+             const saved = await this.add(movie);
+             movieId = saved.id;
+        }
+    }
+
+    // 2. Link to list
+    const { error } = await this.client
+        .from('list_items')
+        .insert({ list_id: listId, movie_id: movieId });
+
+    if (error && error.code !== '23505') { // Ignore unique violation
+        throw new Error(error.message);
+    }
+  }
+
+  async removeMovieFromList(listId: string, movieId: string): Promise<void> {
+    const { error } = await this.client
+        .from('list_items')
+        .delete()
+        .match({ list_id: listId, movie_id: movieId });
+
+    if (error) throw new Error(error.message);
+  }
+}
 }

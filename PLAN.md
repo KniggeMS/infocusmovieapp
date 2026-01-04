@@ -51,6 +51,12 @@
 - [x] **Feature:** Remove Avatar functionality.
 - [x] **QA:** Full Smoke Test Suite (`tests/e2e/smoke_suite.spec.ts`).
 
+## 🚧 In Progress (Phase 4: Social & Lists)
+- [ ] **Phase 1: Database:** Schema for `custom_lists` & `list_items` + RLS Policies.
+- [ ] **Phase 2: Logic:** Conductor & Service updates for List Management.
+- [ ] **Phase 3: Sharing:** Native Share integration (WhatsApp etc.) for Movies.
+- [ ] **Phase 4: UI:** List Creation Modal & Add-to-List functionality.
+
 ## ✅ Visual Overhaul (V2.9.0)
 - [x] **Feature:** Multi-Theme System (Light, Dark, Glassmorphism).
 - [x] **Tech:** Semantic CSS Variables & Tailwind Refactoring.

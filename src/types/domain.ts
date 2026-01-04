@@ -58,6 +58,14 @@ export interface MovieStatistics {
   byDecade: { decade: string; count: number }[];
 }
 
+export interface CustomList {
+  id: string;
+  name: string;
+  description?: string;
+  movieCount: number; // Computed locally or via count
+  items?: string[]; // List of Movie IDs
+}
+
 export type UserIntent = 
   | { type: 'LOAD_MOVIES' }
   | { type: 'ADD_MOVIE'; payload: Movie }
@@ -65,18 +73,22 @@ export type UserIntent =
   | { type: 'REMOVE_MOVIE'; payload: string }
   | { type: 'TOGGLE_WATCHED'; payload: string }
   | { type: 'TOGGLE_FAVORITE'; payload: string }
-  | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' }
+  | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' }
   | { type: 'SELECT_MOVIE'; payload: string }
-  | { type: 'CLOSE_DETAILS' };
+  | { type: 'CLOSE_DETAILS' }
+  | { type: 'CREATE_LIST'; payload: { name: string, description?: string } }
+  | { type: 'DELETE_LIST'; payload: string }
+  | { type: 'ADD_TO_LIST'; payload: { listId: string, movie: Movie } };
 
 export interface WatchlistState {
   items: Movie[];
+  customLists: CustomList[];
   achievements: Achievement[];
   statistics: MovieStatistics;
   selectedMovie: Movie | null;
   status: 'idle' | 'loading' | 'error';
   error: string | null;
-  filter: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics';
+  filter: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists';
 }
 
 export interface MovieServiceAdapter {
@@ -88,4 +100,10 @@ export interface MovieServiceAdapter {
   delete(id: string): Promise<void>;
   update(id: string, updates: Partial<any>): Promise<void>;
   exists(title: string): Promise<boolean>;
+  // Lists
+  createList(name: string, description?: string): Promise<CustomList>;
+  deleteList(listId: string): Promise<void>;
+  getLists(): Promise<CustomList[]>;
+  addMovieToList(listId: string, movie: Movie): Promise<void>;
+  removeMovieFromList(listId: string, movieId: string): Promise<void>;
 }

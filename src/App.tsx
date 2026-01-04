@@ -6,9 +6,10 @@ import { UserProfile } from './types/auth';
 import { AuthService } from './services/AuthService';
 import { LoginScreen } from './components/LoginScreen';
 import { ProfileModal } from './components/ProfileModal';
-import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield, Play, User } from 'lucide-react';
+import { Search, Plus, Trash2, Home, Heart, Zap, Eye, Trophy, Lock, Popcorn, Library, BarChart2, X, Check, LogOut, Shield, Play, User, Share2, ListPlus } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { shareMovie } from './lib/share';
 
 interface AppProps {
   conductor: MovieConductor;
@@ -25,6 +26,9 @@ function App({ conductor }: AppProps) {
   const [state, setState] = useState<WatchlistState>(conductor.getState());
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfile, setShowProfile] = useState(false);
+  
+  // UI State for Actions
+  const [showListMenu, setShowListMenu] = useState(false);
 
   useEffect(() => {
     // Check for existing session
@@ -83,6 +87,16 @@ function App({ conductor }: AppProps) {
       conductor.dispatch({ type: 'LOAD_MOVIES' });
     } else if (value.length > 2) {
       conductor.dispatch({ type: 'SEARCH', payload: value });
+    }
+  };
+
+  const handleShare = async () => {
+    if (!state.selectedMovie) return;
+    const result = await shareMovie(state.selectedMovie);
+    if (result.method === 'clipboard' && result.success) {
+        // Simple fallback alert since we don't have a toast component yet
+        // In a real app, this should be a nice toast
+        alert(result.message);
     }
   };
 
@@ -449,6 +463,7 @@ function App({ conductor }: AppProps) {
           <ProfileModal 
               user={user} 
               conductor={conductor} 
+              customLists={state.customLists}
               onClose={() => setShowProfile(false)}
               onLogout={handleLogout}
               onUpdateUser={setUser}
@@ -509,7 +524,7 @@ function App({ conductor }: AppProps) {
                         </div>
 
                         {/* Action Buttons Row */}
-                        <div className="flex flex-wrap items-center gap-3 z-[110] pointer-events-auto">
+                        <div className="flex flex-wrap items-center gap-3 z-[110] pointer-events-auto relative">
                             
                             {/* Play Trailer Button (If exists) */}
                             {state.selectedMovie.trailerKey && (
@@ -539,6 +554,57 @@ function App({ conductor }: AppProps) {
                                     {t('common.addToWatchlist')}
                                 </button>
                             )}
+
+                            {/* Share Button */}
+                            <button 
+                                onClick={handleShare}
+                                className="bg-app-secondary/60 hover:bg-app-secondary/80 backdrop-blur-md text-app-text transition-all p-2.5 sm:p-3 rounded-lg border border-app-border shadow-lg hover:scale-105 active:scale-95"
+                                aria-label="Share"
+                            >
+                                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </button>
+
+                            {/* Lists Menu */}
+                            <div className="relative">
+                                <button 
+                                    onClick={() => setShowListMenu(!showListMenu)}
+                                    className="bg-app-secondary/60 hover:bg-app-secondary/80 backdrop-blur-md text-app-text transition-all p-2.5 sm:p-3 rounded-lg border border-app-border shadow-lg hover:scale-105 active:scale-95"
+                                    aria-label="Add to List"
+                                >
+                                    <ListPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+                                </button>
+
+                                {/* Dropdown */}
+                                {showListMenu && (
+                                    <div className="absolute bottom-full left-0 mb-2 w-48 bg-app-card-bg border border-app-border rounded-xl shadow-2xl overflow-hidden animate-fade-in z-[120]">
+                                        <div className="p-2 border-b border-app-border text-xs font-bold text-app-text-muted uppercase bg-app-bg/50">
+                                            Add to List
+                                        </div>
+                                        {state.customLists.length > 0 ? (
+                                            state.customLists.map(list => (
+                                                <button
+                                                    key={list.id}
+                                                    onClick={() => {
+                                                        conductor.dispatch({ 
+                                                            type: 'ADD_TO_LIST', 
+                                                            payload: { listId: list.id, movie: state.selectedMovie! } 
+                                                        });
+                                                        setShowListMenu(false);
+                                                        alert(`Added to ${list.name}`); // Simple feedback
+                                                    }}
+                                                    className="w-full text-left px-3 py-2 text-sm text-app-text hover:bg-app-secondary transition-colors truncate"
+                                                >
+                                                    {list.name}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="p-3 text-xs text-app-text-muted text-center italic">
+                                                No lists yet. Create one in your profile!
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
                         </div>
 
