@@ -21,6 +21,11 @@ const mockAdapter: MovieServiceAdapter = {
   delete: vi.fn(),
   update: vi.fn(),
   exists: vi.fn().mockResolvedValue(false),
+  createList: vi.fn(),
+  deleteList: vi.fn(),
+  getLists: vi.fn().mockResolvedValue([]),
+  addMovieToList: vi.fn(),
+  removeMovieFromList: vi.fn(),
 };
 
 // Custom Initial State for Testing
