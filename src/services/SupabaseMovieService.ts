@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 // Helper Type für exakte DB-Struktur
 type MovieRow = Database['public']['Tables']['movies']['Row'];
 type MovieInsert = Database['public']['Tables']['movies']['Insert'];
+type MovieUpdate = Database['public']['Tables']['movies']['Update'];
 
 export class SupabaseMovieService implements MovieServiceAdapter {
   private client: SupabaseClient<Database>;
@@ -362,12 +363,23 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     }
   }
 
-  async update(id: string, updates: Partial<any>): Promise<void> {
+  async update(id: string, updates: Partial<Movie>): Promise<void> {
     if (!this.isUUID(id)) return;
+
+    const dbUpdate: MovieUpdate = {};
+    // Map CamelCase to SnakeCase
+    if (updates.watched !== undefined) dbUpdate.watched = updates.watched;
+    if (updates.favorite !== undefined) dbUpdate.favorite = updates.favorite;
+    if (updates.title !== undefined) dbUpdate.title = updates.title;
+    if (updates.overview !== undefined) dbUpdate.overview = updates.overview;
+    if (updates.voteAverage !== undefined) dbUpdate.vote_average = updates.voteAverage;
+    if (updates.posterPath !== undefined) dbUpdate.poster_path = updates.posterPath;
+    
+    if (Object.keys(dbUpdate).length === 0) return;
 
     const { error } = await this.client
       .from('movies')
-      .update(updates)
+      .update(dbUpdate)
       .eq('id', id);
 
     if (error) {

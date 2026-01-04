@@ -95,7 +95,7 @@ export class MockMovieService implements MovieServiceAdapter {
     // Mock delete implementation
   }
 
-  async update(id: string, updates: Partial<any>): Promise<void> {
+  async update(id: string, updates: Partial<Movie>): Promise<void> {
     // Mock update implementation
   }
 
