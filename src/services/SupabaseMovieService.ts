@@ -429,11 +429,10 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     const { data: { user } } = await this.client.auth.getUser();
     if (!user) return [];
 
-    // Fetch lists with count of items. 
-    // Using simple approach first to avoid complex joins issues in client
+    // Fetch lists with IDs to count
     const { data, error } = await this.client
       .from('custom_lists')
-      .select('*')
+      .select('*, list_items(id)')
       .eq('user_id', user.id);
 
     if (error) {
@@ -441,14 +440,45 @@ export class SupabaseMovieService implements MovieServiceAdapter {
         return [];
     }
     
-    // For now returning 0 count, can be enhanced with a separate count query or a view
     return data.map((row: any) => ({
       id: row.id,
       name: row.name,
       description: row.description,
-      movieCount: 0, // Placeholder
-      items: [] 
+      movieCount: row.list_items ? row.list_items.length : 0,
+      items: row.list_items ? row.list_items.map((i: any) => i.id) : [] 
     }));
+  }
+
+  async getListMovies(listId: string): Promise<Movie[]> {
+     const { data, error } = await this.client
+        .from('list_items')
+        .select(`
+            movie_id,
+            movies:movie_id (*) 
+        `)
+        .eq('list_id', listId);
+
+     if (error) throw new Error(error.message);
+     
+     return data.map((item: any) => {
+         const m = item.movies;
+         if (!m) return null;
+         return {
+            id: m.id,
+            title: m.title,
+            overview: m.overview,
+            posterPath: m.poster_path,
+            releaseDate: m.release_date,
+            voteAverage: m.vote_average,
+            runtime: m.runtime,
+            mediaType: m.media_type,
+            tmdbId: m.tmdb_id,
+            watched: m.watched,
+            favorite: m.favorite,
+            source: 'database',
+            addedAt: m.created_at
+         } as Movie;
+     }).filter((m: any) => m !== null) as Movie[];
   }
 
   async addMovieToList(listId: string, movie: Movie): Promise<void> {

@@ -317,6 +317,13 @@ function App({ conductor }: AppProps) {
         ) : (
             /* Movie Grid */
             <>
+                {state.filter === 'list' && state.activeListId && (
+                    <div className="mb-6 flex items-center gap-2 text-xl font-bold text-app-text animate-fade-in">
+                        <ListPlus className="w-6 h-6 text-blue-500" />
+                        <span className="text-blue-500 mr-1">List:</span>
+                        {state.customLists.find(l => l.id === state.activeListId)?.name}
+                    </div>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {filteredItems.map((movie) => (
                         <div 

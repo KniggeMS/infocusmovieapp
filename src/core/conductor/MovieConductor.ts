@@ -44,11 +44,11 @@ export class MovieConductor {
     achievements: INITIAL_ACHIEVEMENTS,
     statistics: INITIAL_STATISTICS,
     selectedMovie: null,
-    status: 'idle',
-    error: null,
-    filter: 'all',
-  };
-
+            status: 'idle',
+            error: null,
+            filter: 'all',
+            activeListId: null,
+          };
   constructor(adapter: MovieServiceAdapter) {
     this.adapter = adapter;
   }
@@ -78,11 +78,11 @@ export class MovieConductor {
       achievements: INITIAL_ACHIEVEMENTS,
       statistics: INITIAL_STATISTICS,
       selectedMovie: null,
-      status: 'idle',
-      error: null,
-      filter: 'all',
-    };
-    this.notify();
+              status: 'idle',
+              error: null,
+              filter: 'all',
+              activeListId: null,
+            };    this.notify();
   }
 
   /**
@@ -117,7 +117,7 @@ export class MovieConductor {
         await this.handleToggleFavorite(intent.payload);
         break;
       case 'SET_FILTER':
-        this.updateState({ filter: intent.payload });
+        this.updateState({ filter: intent.payload, activeListId: null });
         break;
       case 'SELECT_MOVIE':
         await this.handleSelectMovie(intent.payload);
@@ -134,6 +134,9 @@ export class MovieConductor {
         break;
       case 'ADD_TO_LIST':
         await this.handleAddMovieToList(intent.payload.listId, intent.payload.movie);
+        break;
+      case 'SELECT_LIST':
+        await this.handleSelectList(intent.payload);
         break;
     }
   }
@@ -164,7 +167,8 @@ export class MovieConductor {
           customLists: lists,
           achievements: newAchievements, 
           statistics: newStats,
-          status: 'idle' 
+          status: 'idle',
+          activeListId: null 
       });
     } catch (error) {
       this.updateState({
@@ -329,6 +333,20 @@ export class MovieConductor {
       this.updateState({ customLists: updatedLists });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Failed to add to list' });
+    }
+  }
+
+  private async handleSelectList(listId: string): Promise<void> {
+    this.updateState({ status: 'loading', error: null, filter: 'list', activeListId: listId });
+    
+    try {
+        const movies = await this.adapter.getListMovies(listId);
+        this.updateState({ items: movies, status: 'idle' });
+    } catch (error) {
+        this.updateState({ 
+            status: 'error', 
+            error: error instanceof Error ? error.message : 'Failed to load list items' 
+        });
     }
   }
 

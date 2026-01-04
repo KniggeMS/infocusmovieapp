@@ -109,6 +109,7 @@ export class MockMovieService implements MovieServiceAdapter {
 
   async deleteList(listId: string): Promise<void> { }
   async getLists(): Promise<CustomList[]> { return []; }
+  async getListMovies(listId: string): Promise<Movie[]> { return []; }
   async addMovieToList(listId: string, movie: Movie): Promise<void> { }
   async removeMovieFromList(listId: string, movieId: string): Promise<void> { }
 }

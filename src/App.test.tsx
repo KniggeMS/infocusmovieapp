@@ -24,6 +24,7 @@ const mockAdapter: MovieServiceAdapter = {
   createList: vi.fn(),
   deleteList: vi.fn(),
   getLists: vi.fn().mockResolvedValue([]),
+  getListMovies: vi.fn().mockResolvedValue([]),
   addMovieToList: vi.fn(),
   removeMovieFromList: vi.fn(),
 };

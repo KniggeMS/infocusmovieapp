@@ -78,7 +78,8 @@ export type UserIntent =
   | { type: 'CLOSE_DETAILS' }
   | { type: 'CREATE_LIST'; payload: { name: string, description?: string } }
   | { type: 'DELETE_LIST'; payload: string }
-  | { type: 'ADD_TO_LIST'; payload: { listId: string, movie: Movie } };
+  | { type: 'ADD_TO_LIST'; payload: { listId: string, movie: Movie } }
+  | { type: 'SELECT_LIST'; payload: string }; // listId
 
 export interface WatchlistState {
   items: Movie[];
@@ -88,7 +89,8 @@ export interface WatchlistState {
   selectedMovie: Movie | null;
   status: 'idle' | 'loading' | 'error';
   error: string | null;
-  filter: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists';
+  filter: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' | 'list'; // Added 'list'
+  activeListId: string | null; // Added activeListId
 }
 
 export interface MovieServiceAdapter {
@@ -98,12 +100,13 @@ export interface MovieServiceAdapter {
   getMovieDetails(tmdbId: string, mediaType?: 'movie' | 'tv'): Promise<Movie>;
   add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie>;
   delete(id: string): Promise<void>;
-  update(id: string, updates: Partial<any>): Promise<void>;
+  update(id: string, updates: Partial<Movie>): Promise<void>;
   exists(title: string): Promise<boolean>;
   // Lists
   createList(name: string, description?: string): Promise<CustomList>;
   deleteList(listId: string): Promise<void>;
   getLists(): Promise<CustomList[]>;
+  getListMovies(listId: string): Promise<Movie[]>; // New method
   addMovieToList(listId: string, movie: Movie): Promise<void>;
   removeMovieFromList(listId: string, movieId: string): Promise<void>;
 }

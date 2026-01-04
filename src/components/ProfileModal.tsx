@@ -447,7 +447,13 @@ export function ProfileModal({ user, conductor, customLists, onClose, onLogout, 
                         <div className="space-y-3">
                             {customLists.map(list => (
                                 <div key={list.id} className="flex items-center justify-between p-4 bg-app-secondary/10 border border-app-border rounded-xl group hover:bg-app-secondary/20 transition-colors">
-                                    <div>
+                                    <div 
+                                        className="flex-1 cursor-pointer"
+                                        onClick={() => {
+                                            conductor.dispatch({ type: 'SELECT_LIST', payload: list.id });
+                                            onClose();
+                                        }}
+                                    >
                                         <div className="font-bold text-app-text">{list.name}</div>
                                         <div className="text-xs text-app-text-muted">{list.movieCount} movies</div>
                                     </div>
