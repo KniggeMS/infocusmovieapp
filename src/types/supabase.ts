@@ -114,7 +114,7 @@ export type Database = {
           poster_path?: string | null
           release_date?: string | null
           runtime?: number | null
-          title: string
+          title?: string
           tmdb_id?: number | null
           user_id?: string | null
           vote_average?: number | null
