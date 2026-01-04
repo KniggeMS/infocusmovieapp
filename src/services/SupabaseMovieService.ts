@@ -482,4 +482,3 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     if (error) throw new Error(error.message);
   }
 }
-}
