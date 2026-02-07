@@ -15,7 +15,8 @@ import {
   PenLine,
   Clock,
   Film,
-  Share2,
+  Link2,
+  Check,
 } from "lucide-react"
 
 interface FamilyEntry {
@@ -39,6 +40,7 @@ export function MovieDetail({
 }: MovieDetailProps) {
   const [inWatchlist, setInWatchlist] = useState(initialWatchlist)
   const [saving, setSaving] = useState(false)
+  const [copied, setCopied] = useState(false)
   const router = useRouter()
   const backdrop = backdropUrl(movie.backdrop_path, "w1280")
   const poster = posterUrl(movie.poster_path, "w500")
@@ -70,20 +72,21 @@ export function MovieDetail({
     setSaving(false)
   }
 
-  async function handleShare() {
-    const shareData = {
-      title: movie.title,
-      text: `Schau dir "${movie.title}" an - ${movie.tagline || movie.overview?.slice(0, 100)}`,
-      url: window.location.href,
-    }
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData)
-      } catch {
-        // User cancelled
-      }
-    } else {
+  async function handleCopyLink() {
+    try {
       await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea")
+      textArea.value = window.location.href
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textArea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -115,14 +118,18 @@ export function MovieDetail({
           <ArrowLeft className="h-5 w-5" />
         </button>
 
-        {/* Share button */}
+        {/* Copy link button */}
         <button
-          onClick={handleShare}
-          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur-sm"
+          onClick={handleCopyLink}
+          className={`absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors ${
+            copied
+              ? "bg-primary/80 text-primary-foreground"
+              : "bg-background/80 text-foreground"
+          }`}
           type="button"
-          aria-label="Teilen"
+          aria-label="Link kopieren"
         >
-          <Share2 className="h-5 w-5" />
+          {copied ? <Check className="h-5 w-5" /> : <Link2 className="h-5 w-5" />}
         </button>
       </div>
 
