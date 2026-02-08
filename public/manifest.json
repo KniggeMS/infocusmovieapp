@@ -3,20 +3,23 @@
   "short_name": "InFocus",
   "description": "Teile deine Filmerlebnisse mit deiner Familie",
   "start_url": "/feed",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#111318",
   "theme_color": "#111318",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/icon-192.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg",
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/icon-512.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ]
 }
