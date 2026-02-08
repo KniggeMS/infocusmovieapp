@@ -112,7 +112,7 @@ function LogPageContent() {
   if (step === "search") {
     return (
       <main className="mx-auto max-w-lg">
-        <header className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+        <header className="sticky top-0 z-40 glass-header px-4 py-3">
           <h1 className="mb-3 font-heading text-lg font-bold text-foreground">
             Film loggen
           </h1>
@@ -123,7 +123,7 @@ function LogPageContent() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Welchen Film hast du gesehen?"
-              className="h-11 w-full rounded-lg border border-border bg-secondary pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-11 w-full pl-10 pr-4 text-sm"
               autoFocus
             />
           </div>
@@ -147,7 +147,7 @@ function LogPageContent() {
                 <button
                   key={movie.id}
                   onClick={() => selectMovie(movie)}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary"
+                  className="glass-card flex items-center gap-3 p-3 text-left transition-all hover:bg-white/[0.08] active:scale-[0.98]"
                   type="button"
                 >
                   <div className="relative h-16 w-11 shrink-0 overflow-hidden rounded bg-secondary">
@@ -184,7 +184,7 @@ function LogPageContent() {
 
   return (
     <main className="mx-auto max-w-lg">
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-40 flex items-center justify-between glass-header px-4 py-3">
         <button
           onClick={() => {
             setStep("search")
@@ -252,7 +252,7 @@ function LogPageContent() {
             type="date"
             value={watchedAt}
             onChange={(e) => setWatchedAt(e.target.value)}
-            className="h-11 w-full rounded-lg border border-border bg-secondary px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="glass-input h-11 w-full px-4 text-sm"
           />
         </div>
 
@@ -270,14 +270,14 @@ function LogPageContent() {
             onChange={(e) => setReview(e.target.value)}
             placeholder="Was denkst du ueber den Film?"
             rows={4}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="glass-input w-full px-4 py-3 text-sm"
           />
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
         >
           {saving ? (
             <Loader2 className="h-5 w-5 animate-spin" />

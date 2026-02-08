@@ -42,7 +42,7 @@ export function FeedContent({ profile, entries, trending }: FeedContentProps) {
   return (
     <main className="mx-auto max-w-lg">
       {/* Header */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-40 flex items-center justify-between glass-header px-4 py-3">
         <div className="flex items-center gap-2">
           <Film className="h-6 w-6 text-primary" />
           <h1 className="font-heading text-xl font-bold text-foreground">
@@ -81,14 +81,14 @@ export function FeedContent({ profile, entries, trending }: FeedContentProps) {
           Familien-Aktivit&auml;t
         </h2>
         {entries.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
+          <div className="glass-card flex flex-col items-center gap-3 px-6 py-12 text-center">
             <Clock className="h-10 w-10 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               Noch keine Eintr&auml;ge. Logge deinen ersten Film!
             </p>
             <Link
               href="/log"
-              className="mt-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+              className="mt-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
             >
               Film loggen
             </Link>
@@ -143,7 +143,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
   })
 
   return (
-    <article className="overflow-hidden rounded-xl border border-border bg-card">
+    <article className="glass-card overflow-hidden">
       <div className="flex gap-3 p-4">
         {/* Poster */}
         <Link href={`/movie/${entry.tmdb_id}`} className="shrink-0">
@@ -167,7 +167,7 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
         {/* Content */}
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+            <div className="glass-avatar flex h-6 w-6 items-center justify-center text-[10px] font-bold text-primary">
               {entry.profiles?.display_name?.charAt(0).toUpperCase() || "?"}
             </div>
             <span className="text-xs font-medium text-foreground">

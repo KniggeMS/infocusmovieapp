@@ -45,7 +45,7 @@ export default function SearchPage() {
 
   return (
     <main className="mx-auto max-w-lg">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-40 glass-header px-4 py-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -53,7 +53,7 @@ export default function SearchPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filme suchen..."
-            className="h-11 w-full rounded-lg border border-border bg-secondary pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="glass-input h-11 w-full pl-10 pr-4 text-sm"
             autoFocus
           />
           {loading && (
@@ -95,7 +95,7 @@ function SearchResultCard({ movie }: { movie: TMDBMovie }) {
   return (
     <Link
       href={`/movie/${movie.id}`}
-      className="flex gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-secondary"
+      className="glass-card flex gap-3 p-3 transition-all hover:bg-white/[0.08] active:scale-[0.98]"
     >
       <div className="relative h-24 w-16 shrink-0 overflow-hidden rounded-lg bg-secondary">
         {url ? (
