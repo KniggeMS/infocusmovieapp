@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Film, Eye, Loader2 } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
+import { LanguageToggle } from "@/components/language-toggle"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { t } = useLanguage()
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -27,7 +30,7 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError("E-Mail oder Passwort falsch.")
+      setError(t("auth.invalidCredentials"))
       setLoading(false)
       return
     }
@@ -39,6 +42,9 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
+        <div className="mb-6 flex justify-end">
+          <LanguageToggle />
+        </div>
         <div className="mb-10 flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <Film className="h-7 w-7 text-primary-foreground" />
@@ -47,14 +53,14 @@ export default function LoginPage() {
             InFocus
           </h1>
           <p className="text-sm text-muted-foreground">
-            Familienfilm-Tagebuch
+            {t("auth.familyMovieDiary")}
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label htmlFor="email" className="text-sm font-medium text-foreground">
-              E-Mail
+              {t("auth.email")}
             </label>
             <input
               id="email"
@@ -63,22 +69,22 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="familie@example.com"
               required
-              className="h-12 rounded-lg border border-border bg-secondary px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-12 text-sm"
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <label htmlFor="password" className="text-sm font-medium text-foreground">
-              Passwort
+              {t("auth.password")}
             </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Passwort eingeben"
+              placeholder={t("auth.passwordPlaceholder")}
               required
-              className="h-12 rounded-lg border border-border bg-secondary px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-12 text-sm"
             />
           </div>
 
@@ -89,23 +95,23 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 flex h-12 items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="glass-button mt-2 flex h-12 items-center justify-center gap-2 bg-primary font-semibold text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
                 <Eye className="h-5 w-5" />
-                Anmelden
+                {t("auth.signIn")}
               </>
             )}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Noch kein Konto?{" "}
+          {t("auth.dontHaveAccount")}{" "}
           <Link href="/auth/sign-up" className="font-medium text-primary hover:underline">
-            Registrieren
+            {t("auth.signUp")}
           </Link>
         </p>
       </div>

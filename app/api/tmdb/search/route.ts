@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { searchMovies } from "@/lib/tmdb"
+import { searchAll } from "@/lib/tmdb"
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const data = await searchMovies(query, Number(page))
+    const data = await searchAll(query, Number(page))
     return NextResponse.json(data)
   } catch {
     return NextResponse.json({ error: "Suche fehlgeschlagen" }, { status: 500 })

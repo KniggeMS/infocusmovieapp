@@ -5,19 +5,19 @@ import Link from "next/link"
 import { posterUrl } from "@/lib/tmdb"
 import { StarRating } from "@/components/star-rating"
 import { MovieCard } from "@/components/movie-card"
-import { Heart, MessageCircle, Film, Clock } from "lucide-react"
+import { Heart, MessageCircle, Film, Clock, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useState } from "react"
 
 interface FeedEntry {
   id: string
   user_id: string
-  tmdb_id: number
-  title: string
-  poster_path: string | null
+  tmdb_movie_id: number
+  movie_title: string
+  movie_poster_path: string | null
   rating: number | null
   review: string | null
-  watched_at: string
+  watched_on: string
   created_at: string
   profiles: {
     display_name: string
@@ -40,7 +40,7 @@ interface FeedContentProps {
 
 export function FeedContent({ profile, entries, trending }: FeedContentProps) {
   return (
-    <main className="mx-auto max-w-lg">
+    <main className="mx-auto max-w-4xl">
       {/* Header */}
       <header className="sticky top-0 z-40 flex items-center justify-between glass-header px-4 py-3">
         <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ export function FeedContent({ profile, entries, trending }: FeedContentProps) {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {entries.map((entry) => (
               <FeedCard key={entry.id} entry={entry} />
             ))}
@@ -110,14 +110,21 @@ export function FeedContent({ profile, entries, trending }: FeedContentProps) {
 function FeedCard({ entry }: { entry: FeedEntry }) {
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
-  const url = posterUrl(entry.poster_path, "w185")
+  const [liking, setLiking] = useState(false)
+  const url = posterUrl(entry.movie_poster_path, "w342")
 
   async function toggleLike() {
+    if (liking) return
+    setLiking(true)
+    
     const supabase = createClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) {
+      setLiking(false)
+      return
+    }
 
     if (liked) {
       await supabase
@@ -135,75 +142,83 @@ function FeedCard({ entry }: { entry: FeedEntry }) {
       setLiked(true)
       setLikeCount((c) => c + 1)
     }
+    setLiking(false)
   }
 
-  const watchedDate = new Date(entry.watched_at).toLocaleDateString("de-DE", {
-    day: "numeric",
-    month: "short",
-  })
+  const watchedDate = entry.watched_on 
+    ? new Date(entry.watched_on).toLocaleDateString("de-DE", {
+        day: "numeric",
+        month: "short",
+      })
+    : "Kein Datum"
 
   return (
     <article className="glass-card overflow-hidden">
-      <div className="flex gap-3 p-4">
+      <div className="flex gap-4 p-4">
         {/* Poster */}
-        <Link href={`/movie/${entry.tmdb_id}`} className="shrink-0">
-          <div className="relative h-28 w-[75px] overflow-hidden rounded-lg bg-secondary">
+        <Link href={`/movie/${entry.tmdb_movie_id}`} className="shrink-0">
+          <div className="relative h-32 w-[120px] overflow-hidden rounded-lg bg-secondary">
             {url ? (
               <Image
                 src={url || "/placeholder.svg"}
-                alt={entry.title}
+                alt={entry.movie_title}
                 fill
                 className="object-cover"
-                sizes="75px"
+                sizes="120px"
               />
             ) : (
               <div className="flex h-full items-center justify-center">
-                <Film className="h-6 w-6 text-muted-foreground" />
+                <Film className="h-8 w-8 text-muted-foreground" />
               </div>
             )}
           </div>
         </Link>
 
         {/* Content */}
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex items-center gap-2">
-            <div className="glass-avatar flex h-6 w-6 items-center justify-center text-[10px] font-bold text-primary">
+            <div className="glass-avatar flex h-8 w-8 items-center justify-center text-sm font-bold text-primary flex-shrink-0">
               {entry.profiles?.display_name?.charAt(0).toUpperCase() || "?"}
             </div>
-            <span className="text-xs font-medium text-foreground">
+            <span className="text-sm font-medium text-foreground truncate">
               {entry.profiles?.display_name}
             </span>
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-xs text-muted-foreground flex-shrink-0">
               {watchedDate}
             </span>
           </div>
 
-          <Link href={`/movie/${entry.tmdb_id}`}>
-            <h3 className="truncate font-heading text-sm font-semibold text-foreground">
-              {entry.title}
+          <Link href={`/movie/${entry.tmdb_movie_id}`}>
+            <h3 className="truncate font-heading text-base font-semibold text-foreground">
+              {entry.movie_title}
             </h3>
           </Link>
 
           {entry.rating && <StarRating rating={entry.rating} size="sm" />}
 
           {entry.review && (
-            <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+            <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
               {entry.review}
             </p>
           )}
 
           {/* Actions */}
-          <div className="mt-1 flex items-center gap-4">
+          <div className="mt-2 flex items-center gap-4">
             <button
               onClick={toggleLike}
-              className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary"
+              disabled={liking}
+              className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
               type="button"
             >
-              <Heart
-                className={`h-4 w-4 ${liked ? "fill-primary text-primary" : ""}`}
-              />
+              {liking ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Heart
+                  className={`h-4 w-4 ${liked ? "fill-primary text-primary" : ""}`}
+                />
+              )}
               {likeCount > 0 && (
-                <span className="text-[10px]">{likeCount}</span>
+                <span className="text-xs">{likeCount}</span>
               )}
             </button>
           </div>

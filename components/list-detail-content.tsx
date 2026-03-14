@@ -101,7 +101,7 @@ export function ListDetailContent({
 
   return (
     <main className="mx-auto max-w-lg">
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-40 glass-header px-4 py-3">
         <button onClick={() => router.back()} type="button" aria-label="Zurueck">
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
@@ -123,7 +123,7 @@ export function ListDetailContent({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Film zur Liste hinzufuegen..."
-                className="h-10 w-full rounded-lg border border-border bg-secondary pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="glass-input h-10 w-full pl-9 pr-9 text-sm"
                 autoFocus
               />
               <button
@@ -176,7 +176,7 @@ export function ListDetailContent({
         ) : (
           <button
             onClick={() => setShowSearch(true)}
-            className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            className="mb-4 glass-card flex w-full items-center justify-center gap-2 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-white/[0.08] active:scale-[0.98]"
             type="button"
           >
             <Plus className="h-4 w-4" />

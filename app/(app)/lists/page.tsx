@@ -22,6 +22,7 @@ export default function ListsPage() {
   const [newListName, setNewListName] = useState("")
   const [newListDesc, setNewListDesc] = useState("")
   const [creatingList, setCreatingList] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadLists()
@@ -66,24 +67,33 @@ export default function ListsPage() {
       .single()
 
     if (!error && data) {
-      setLists([data, ...lists])
+      setLists(prev => [data, ...prev])
       setNewListName("")
       setNewListDesc("")
       setShowNewList(false)
+    } else if (error) {
+      setError("Fehler beim Erstellen der Liste")
+      setTimeout(() => setError(null), 3000)
     }
     setCreatingList(false)
   }
 
   async function deleteList(id: string) {
     const supabase = createClient()
-    await supabase.from("lists").delete().eq("id", id)
-    setLists(lists.filter((l) => l.id !== id))
+    const { error } = await supabase.from("lists").delete().eq("id", id)
+    
+    if (error) {
+      setError("Fehler beim Löschen der Liste")
+      setTimeout(() => setError(null), 3000)
+    } else {
+      setLists(lists.filter((l) => l.id !== id))
+    }
   }
 
   if (loading) {
     return (
       <main className="mx-auto max-w-lg">
-        <header className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+        <header className="sticky top-0 z-40 glass-header px-4 py-3">
           <h1 className="font-heading text-xl font-bold text-foreground">
             Meine Listen
           </h1>
@@ -97,22 +107,28 @@ export default function ListsPage() {
 
   return (
     <main className="mx-auto max-w-lg">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-40 glass-header px-4 py-3">
         <div className="flex items-center justify-between">
           <h1 className="font-heading text-xl font-bold text-foreground">
             Meine Listen
           </h1>
-          <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          <span className="glass-tag">
             {lists.length}
           </span>
         </div>
       </header>
 
+      {error && (
+        <div className="mx-4 mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
       <div className="px-4 pt-4">
         {/* New list button */}
         <button
           onClick={() => setShowNewList(!showNewList)}
-          className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+          className="mb-4 glass-card flex w-full items-center justify-center gap-2 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-white/[0.08] active:scale-[0.98]"
           type="button"
         >
           <Plus className="h-4 w-4" />
@@ -121,32 +137,32 @@ export default function ListsPage() {
 
         {/* New list form */}
         {showNewList && (
-          <form onSubmit={createList} className="mb-4 flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
+          <form onSubmit={createList} className="mb-4 glass-card flex flex-col gap-2 p-4">
             <input
               value={newListName}
               onChange={(e) => setNewListName(e.target.value)}
               placeholder="Listenname..."
-              className="h-10 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-10 text-sm"
               autoFocus
             />
             <input
               value={newListDesc}
               onChange={(e) => setNewListDesc(e.target.value)}
               placeholder="Beschreibung (optional)..."
-              className="h-10 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-10 text-sm"
             />
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setShowNewList(false)}
-                className="flex-1 rounded-lg border border-border bg-card py-2.5 text-sm font-medium text-muted-foreground"
+                className="glass-button flex-1 py-2.5 text-sm font-medium"
               >
                 Abbrechen
               </button>
               <button
                 type="submit"
                 disabled={creatingList || !newListName.trim()}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                className="glass-button flex-1 items-center justify-center gap-2 bg-primary py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
               >
                 {creatingList ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -160,7 +176,7 @@ export default function ListsPage() {
 
         {/* Lists */}
         {lists.length === 0 && !showNewList ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
+          <div className="glass-card flex flex-col items-center gap-3 px-6 py-12 text-center">
             <ListIcon className="h-10 w-10 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium text-foreground">
@@ -176,7 +192,7 @@ export default function ListsPage() {
             {lists.map((list) => (
               <div
                 key={list.id}
-                className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
+                className="glass-card group flex items-center gap-3 p-4 transition-all hover:bg-white/[0.08] active:scale-[0.98]"
               >
                 <Link
                   href={`/lists/${list.id}`}
@@ -197,7 +213,7 @@ export default function ListsPage() {
                       )}
                     </div>
                   </div>
-                  <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  <span className="glass-tag">
                     {list.list_items?.[0]?.count || 0} Filme
                   </span>
                 </Link>

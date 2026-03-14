@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { BookOpen, Bookmark, ListIcon, LogOut, Film } from "lucide-react"
+import { ThemeSelector } from "@/components/theme-selector"
 
 interface ProfileContentProps {
-  profile: { display_name: string; avatar_url: string | null } | null
+  profile: { display_name: string; avatar_url: string | null; theme?: string } | null
   email: string
   stats: {
     diary: number
@@ -34,7 +35,7 @@ export function ProfileContent({
 
   return (
     <main className="mx-auto max-w-lg">
-      <header className="border-b border-border px-4 py-3">
+      <header className="glass-header px-4 py-3">
         <h1 className="font-heading text-xl font-bold text-foreground">
           Profil
         </h1>
@@ -43,7 +44,7 @@ export function ProfileContent({
       <div className="px-4 pt-8">
         {/* Avatar & Name */}
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/20">
+          <div className="glass-avatar flex h-20 w-20 items-center justify-center">
             <span className="font-heading text-2xl font-bold text-primary">
               {initials}
             </span>
@@ -67,7 +68,7 @@ export function ProfileContent({
         <div className="mt-8 flex flex-col gap-3">
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+            className="glass-button flex items-center justify-center gap-2 py-3.5 text-sm font-medium text-destructive transition-all hover:bg-destructive/10"
             type="button"
           >
             <LogOut className="h-4 w-4" />
@@ -87,6 +88,11 @@ export function ProfileContent({
         </div>
       </div>
 
+      {/* Theme Selector */}
+      <div className="mt-8">
+        <ThemeSelector currentTheme={profile?.theme} />
+      </div>
+
       <div className="h-8" />
     </main>
   )
@@ -102,7 +108,7 @@ function StatCard({
   value: number
 }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card py-4">
+    <div className="glass-card flex flex-col items-center gap-1 py-4">
       <Icon className="h-5 w-5 text-primary" />
       <span className="font-heading text-xl font-bold text-foreground">
         {value}

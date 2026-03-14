@@ -29,12 +29,14 @@ interface FamilyEntry {
 
 interface MovieDetailProps {
   movie: TMDBMovieDetail
+  externalRatings: any
   isInWatchlist: boolean
   familyEntries: FamilyEntry[]
 }
 
 export function MovieDetail({
   movie,
+  externalRatings,
   isInWatchlist: initialWatchlist,
   familyEntries,
 }: MovieDetailProps) {
@@ -111,7 +113,7 @@ export function MovieDetail({
         {/* Back button */}
         <button
           onClick={() => router.back()}
-          className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground backdrop-blur-sm"
+          className="absolute left-4 top-4 glass-avatar flex h-9 w-9 items-center justify-center text-foreground"
           type="button"
           aria-label="Zurueck"
         >
@@ -121,10 +123,10 @@ export function MovieDetail({
         {/* Copy link button */}
         <button
           onClick={handleCopyLink}
-          className={`absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors ${
+          className={`absolute right-4 top-4 glass-avatar flex h-9 w-9 items-center justify-center transition-colors ${
             copied
               ? "bg-primary/80 text-primary-foreground"
-              : "bg-background/80 text-foreground"
+              : ""
           }`}
           type="button"
           aria-label="Link kopieren"
@@ -166,7 +168,7 @@ export function MovieDetail({
                 {movie.genres.slice(0, 3).map((g) => (
                   <span
                     key={g.id}
-                    className="rounded-md bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground"
+                    className="glass-tag px-2 py-0.5"
                   >
                     {g.name}
                   </span>
@@ -183,11 +185,43 @@ export function MovieDetail({
           </p>
         )}
 
+        {/* External Ratings */}
+        {externalRatings && (
+          <div className="mt-4 glass-card p-3">
+            <h4 className="mb-2 text-sm font-medium text-foreground">Externe Bewertungen</h4>
+            <div className="flex flex-wrap gap-4 text-sm">
+              {externalRatings.imdb_rating && (
+                <div className="flex items-center gap-1">
+                  <span className="font-medium">IMDb</span>
+                  <span className="text-muted-foreground">{externalRatings.imdb_rating}</span>
+                  {externalRatings.imdb_vote_count && (
+                    <span className="text-xs text-muted-foreground">
+                      ({externalRatings.imdb_vote_count.toLocaleString()})
+                    </span>
+                  )}
+                </div>
+              )}
+              {externalRatings.rotten_tomatoes_rating && (
+                <div className="flex items-center gap-1">
+                  <span className="font-medium">RT</span>
+                  <span className="text-muted-foreground">{externalRatings.rotten_tomatoes_rating}%</span>
+                </div>
+              )}
+              {movie.vote_average > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="font-medium">TMDB</span>
+                  <span className="text-muted-foreground">{movie.vote_average.toFixed(1)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="mt-4 flex gap-3">
           <Link
             href={`/log?tmdb_id=${movie.id}&title=${encodeURIComponent(movie.title)}&poster_path=${movie.poster_path || ""}`}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-primary-foreground"
+            className="glass-button flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20"
           >
             <PenLine className="h-4 w-4" />
             Loggen
@@ -195,10 +229,10 @@ export function MovieDetail({
           <button
             onClick={toggleWatchlist}
             disabled={saving}
-            className={`flex items-center justify-center gap-2 rounded-lg border px-5 py-3 text-sm font-semibold transition-colors ${
+            className={`glass-button flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold transition-colors ${
               inWatchlist
                 ? "border-primary bg-primary/10 text-primary"
-                : "border-border bg-card text-foreground hover:bg-secondary"
+                : ""
             }`}
             type="button"
           >
@@ -233,10 +267,10 @@ export function MovieDetail({
               {familyEntries.map((entry) => (
                 <div
                   key={entry.id}
-                  className="rounded-xl border border-border bg-card p-3"
+                  className="glass-card p-3"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">
+                    <div className="glass-avatar flex h-6 w-6 items-center justify-center text-[10px] font-bold text-primary">
                       {entry.profiles?.display_name?.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-xs font-medium text-foreground">

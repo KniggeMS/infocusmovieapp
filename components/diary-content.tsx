@@ -17,16 +17,22 @@ import {
   Trash2,
   Plus,
   Loader2,
+  Tv,
 } from "lucide-react"
 
 interface DiaryEntry {
   id: string
-  tmdb_id: number
-  title: string
-  poster_path: string | null
+  tmdb_movie_id: number
+  movie_title: string
+  movie_poster_path: string | null
   rating: number | null
+  imdb_rating: number | null
+  rotten_tomatoes_rating: number | null
   review: string | null
-  watched_at: string
+  watched_on: string
+  media_type: 'movie' | 'tv'
+  season_number: number | null
+  episode_number: number | null
 }
 
 interface WatchlistItem {
@@ -108,34 +114,12 @@ export function DiaryContent({
   }
 
   return (
-    <main className="mx-auto max-w-lg">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md">
-        <h1 className="px-4 pt-3 pb-2 font-heading text-xl font-bold text-foreground">
-          Meine Filme
+    <main className="mx-auto max-w-4xl">
+      <header className="sticky top-0 z-40 glass-header px-4 py-3">
+        <h1 className="font-heading text-xl font-bold text-foreground">
+          Mein Tagebuch
         </h1>
-        <div className="flex px-4">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-1 items-center justify-center gap-1.5 border-b-2 pb-2.5 pt-1 text-xs font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-                type="button"
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px]">
-                  {tab.count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+        <div className="w-16" />
       </header>
 
       <div className="px-4 pt-4">
@@ -150,55 +134,100 @@ export function DiaryContent({
                 href="/log"
               />
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {entries.map((entry) => {
-                  const url = posterUrl(entry.poster_path, "w185")
+                  const url = posterUrl(entry.movie_poster_path, "w342")
                   return (
                     <div
                       key={entry.id}
-                      className="flex gap-3 rounded-xl border border-border bg-card p-3"
+                      className="glass-card overflow-hidden"
                     >
-                      <Link href={`/movie/${entry.tmdb_id}`} className="shrink-0">
-                        <div className="relative h-20 w-[54px] overflow-hidden rounded-lg bg-secondary">
+                      <Link href={`/movie/${entry.tmdb_movie_id}`} className="block">
+                        <div className="relative h-48 w-full overflow-hidden bg-secondary">
                           {url ? (
                             <Image
                               src={url || "/placeholder.svg"}
-                              alt={entry.title}
+                              alt={entry.movie_title}
                               fill
                               className="object-cover"
-                              sizes="54px"
+                              sizes="100%"
                             />
                           ) : (
                             <div className="flex h-full items-center justify-center">
-                              <Film className="h-4 w-4 text-muted-foreground" />
+                              {entry.media_type === 'tv' ? (
+                                <Tv className="h-8 w-8 text-muted-foreground" />
+                              ) : (
+                                <Film className="h-8 w-8 text-muted-foreground" />
+                              )}
                             </div>
                           )}
                         </div>
                       </Link>
-                      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-                        <Link href={`/movie/${entry.tmdb_id}`}>
-                          <h3 className="truncate text-sm font-semibold text-foreground">
-                            {entry.title}
-                          </h3>
-                        </Link>
-                        <p className="text-[10px] text-muted-foreground">
-                          {new Date(entry.watched_at).toLocaleDateString(
-                            "de-DE",
-                            { day: "numeric", month: "long", year: "numeric" }
+
+                      <div className="p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Link href={`/movie/${entry.tmdb_movie_id}`}>
+                            <h3 className="truncate font-heading text-base font-semibold text-foreground">
+                              {entry.movie_title}
+                            </h3>
+                          </Link>
+                        </div>
+
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {entry.watched_on 
+                            ? new Date(entry.watched_on).toLocaleDateString(
+                                "de-DE",
+                                { day: "numeric", month: "long", year: "numeric" }
+                              )
+                            : "Kein Datum"
+                          }
+                          {entry.media_type === 'tv' && entry.season_number && (
+                            <span className="ml-2">
+                              S{entry.season_number}
+                              {entry.episode_number && `E${entry.episode_number}`}
+                            </span>
                           )}
                         </p>
+
                         {entry.rating && (
-                          <StarRating rating={entry.rating} size="sm" />
+                          <div className="mb-2">
+                            <StarRating rating={entry.rating} size="sm" />
+                          </div>
                         )}
+
+                        {/* External Ratings */}
+                        <div className="flex gap-2 text-xs text-muted-foreground mb-2">
+                          {entry.imdb_rating && (
+                            <span>IMDb {entry.imdb_rating}</span>
+                          )}
+                          {entry.rotten_tomatoes_rating && (
+                            <span>RT {entry.rotten_tomatoes_rating}%</span>
+                          )}
+                        </div>
+
+                        {entry.review && (
+                          <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                            {entry.review}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between mt-3">
+                          <button
+                            onClick={async () => {
+                              const supabase = createClient()
+                              await supabase
+                                .from("diary_entries")
+                                .delete()
+                                .eq("id", entry.id)
+                              router.refresh()
+                            }}
+                            className="text-muted-foreground transition-colors hover:text-destructive"
+                            type="button"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        onClick={() => deleteDiaryEntry(entry.id)}
-                        className="self-start p-1 text-muted-foreground hover:text-destructive"
-                        type="button"
-                        aria-label="Eintrag loeschen"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
                     </div>
                   )
                 })}
@@ -264,7 +293,7 @@ export function DiaryContent({
           <>
             <button
               onClick={() => setShowNewList(true)}
-              className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="mb-4 glass-card flex w-full items-center justify-center gap-2 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-white/[0.08] active:scale-[0.98]"
               type="button"
             >
               <Plus className="h-4 w-4" />
@@ -280,13 +309,13 @@ export function DiaryContent({
                   value={newListName}
                   onChange={(e) => setNewListName(e.target.value)}
                   placeholder="Listenname..."
-                  className="h-10 flex-1 rounded-lg border border-border bg-secondary px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="glass-input h-10 flex-1 text-sm"
                   autoFocus
                 />
                 <button
                   type="submit"
                   disabled={creatingList}
-                  className="flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+                  className="glass-button flex h-10 items-center justify-center px-4 text-sm font-semibold disabled:opacity-50"
                 >
                   {creatingList ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -309,7 +338,7 @@ export function DiaryContent({
                   <Link
                     key={list.id}
                     href={`/lists/${list.id}`}
-                    className="flex items-center justify-between rounded-xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
+                    className="glass-card flex items-center justify-between p-4 transition-all hover:bg-white/[0.08] active:scale-[0.98]"
                   >
                     <div>
                       <h3 className="text-sm font-semibold text-foreground">
@@ -321,7 +350,7 @@ export function DiaryContent({
                         </p>
                       )}
                     </div>
-                    <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                    <span className="glass-tag">
                       {list.list_items?.[0]?.count || 0} Filme
                     </span>
                   </Link>
@@ -349,7 +378,7 @@ function EmptyState({
   href?: string
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card px-6 py-12 text-center">
+    <div className="glass-card flex flex-col items-center gap-3 px-6 py-12 text-center">
       <Icon className="h-10 w-10 text-muted-foreground" />
       <div>
         <p className="text-sm font-medium text-foreground">{title}</p>
@@ -358,7 +387,7 @@ function EmptyState({
       {href && (
         <Link
           href={href}
-          className="mt-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+          className="mt-2 glass-button bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20"
         >
           Los geht&apos;s
         </Link>

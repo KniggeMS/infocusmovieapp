@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Film, UserPlus, Loader2 } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
+import { LanguageToggle } from "@/components/language-toggle"
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("")
@@ -15,6 +17,7 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { t } = useLanguage()
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
@@ -47,22 +50,25 @@ export default function SignUpPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm">
+        <div className="mb-6 flex justify-end">
+          <LanguageToggle />
+        </div>
         <div className="mb-10 flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <Film className="h-7 w-7 text-primary-foreground" />
           </div>
           <h1 className="font-heading text-3xl font-bold tracking-tight text-foreground">
-            Konto erstellen
+            {t("auth.createAccount")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Tritt deinem Familien-Filmclub bei
+            {t("auth.joinFamilyMovieClub")}
           </p>
         </div>
 
         <form onSubmit={handleSignUp} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label htmlFor="displayName" className="text-sm font-medium text-foreground">
-              Anzeigename
+              {t("auth.displayName")}
             </label>
             <input
               id="displayName"
@@ -71,7 +77,7 @@ export default function SignUpPage() {
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="z.B. Papa, Mama, Lisa..."
               required
-              className="h-12 rounded-lg border border-border bg-secondary px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-12 text-sm"
             />
           </div>
 
@@ -86,7 +92,7 @@ export default function SignUpPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="familie@example.com"
               required
-              className="h-12 rounded-lg border border-border bg-secondary px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-12 text-sm"
             />
           </div>
 
@@ -102,7 +108,7 @@ export default function SignUpPage() {
               placeholder="Mindestens 6 Zeichen"
               required
               minLength={6}
-              className="h-12 rounded-lg border border-border bg-secondary px-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="glass-input h-12 text-sm"
             />
           </div>
 
@@ -113,7 +119,7 @@ export default function SignUpPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 flex h-12 items-center justify-center gap-2 rounded-lg bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="glass-button mt-2 flex h-12 items-center justify-center gap-2 bg-primary font-semibold text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
