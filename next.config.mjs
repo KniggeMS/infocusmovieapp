@@ -13,6 +13,11 @@ const nextConfig = {
       },
     ],
   },
+  devIndicators: {
+    appIsrStatus: false,
+  },
+  // Allow host for dev server to fix HMR/WebSocket issues
+  allowedDevOrigins: ['infocusmovieapp-3455.dev.appwizzy.dev'],
 }
 
 export default nextConfig

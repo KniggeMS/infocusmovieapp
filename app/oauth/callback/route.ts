@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get('state')
   
   if (!code) {
-    return NextResponse.redirect('http://localhost:3000/auth/error?error=oauth_code_missing')
+    return NextResponse.redirect(new URL('/oauth/error?error=oauth_code_missing', request.url))
   }
 
   // Handle OAuth callback for MCP server
@@ -21,22 +21,22 @@ export async function GET(request: NextRequest) {
       body: JSON.stringify({
         code,
         state,
-        redirect_uri: 'http://localhost:3000/oauth/consent'
+        redirect_uri: new URL('/oauth/consent', request.url).toString()
       })
     })
 
     const result = await response.json()
     
     if (result.error) {
-      return NextResponse.redirect(`http://localhost:3000/auth/error?error=${result.error}`)
+      return NextResponse.redirect(new URL(`/oauth/error?error=${result.error}`, request.url))
     }
 
     // Store tokens securely (in production, use proper session management)
     // For now, redirect back to app
-    return NextResponse.redirect('http://localhost:3000/auth/success?mcp_configured=true')
+    return NextResponse.redirect(new URL('/oauth/success?mcp_configured=true', request.url))
     
   } catch (error) {
     console.error('OAuth callback error:', error)
-    return NextResponse.redirect('http://localhost:3000/auth/error?error=oauth_callback_failed')
+    return NextResponse.redirect(new URL('/oauth/error?error=oauth_callback_failed', request.url))
   }
 }
