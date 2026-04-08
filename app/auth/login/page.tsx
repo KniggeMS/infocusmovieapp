@@ -54,8 +54,10 @@ export default function LoginPage() {
     setError(null)
 
     const supabase = createClient()
+    // Important: The redirectTo here should be the URL that Supabase sends the user to after they click the link in their email.
+    // If we want it to hit our app/auth/callback, it handles the recovery flow via the new logic.
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?type=recovery`,
     })
 
     if (error) {
