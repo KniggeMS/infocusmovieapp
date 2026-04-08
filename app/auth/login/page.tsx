@@ -6,15 +6,17 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
-import { Film, Eye, Loader2 } from "lucide-react"
+import { Film, Eye, Loader2, Mail } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { LanguageToggle } from "@/components/language-toggle"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
   const router = useRouter()
   const { t } = useLanguage()
 
@@ -22,6 +24,8 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    
+    console.log("Attempting login for:", email);
 
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
@@ -30,13 +34,37 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(t("auth.invalidCredentials"))
+      console.error("Login error:", error);
+      setError(error.message)
       setLoading(false)
       return
     }
 
     router.push("/feed")
     router.refresh()
+  }
+
+  async function handleResetPassword() {
+    if (!email) {
+      setError("Bitte gib deine E-Mail-Adresse oben ein.")
+      return
+    }
+    
+    setResetLoading(true)
+    setError(null)
+
+    const supabase = createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
+    })
+
+    if (error) {
+      setError(error.message)
+      setResetLoading(false)
+    } else {
+      toast.success("E-Mail zum Zurücksetzen des Passworts wurde gesendet.")
+      setResetLoading(false)
+    }
   }
 
   return (
@@ -107,6 +135,19 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        <button
+          onClick={handleResetPassword}
+          disabled={resetLoading}
+          className="mt-4 flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+        >
+          {resetLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Mail className="h-4 w-4" />
+          )}
+          Passwort vergessen?
+        </button>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {t("auth.dontHaveAccount")}{" "}
