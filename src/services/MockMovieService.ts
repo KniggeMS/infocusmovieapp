@@ -99,8 +99,11 @@ export class MockMovieService implements MovieServiceAdapter {
     // Mock update implementation
   }
 
-  async exists(title: string): Promise<boolean> {
-    return this.mockDb.some(m => m.title.toLowerCase() === title.toLowerCase());
+  async exists(movie: { title: string; tmdbId?: number }): Promise<boolean> {
+    if (movie.tmdbId) {
+      return this.mockDb.some(m => m.tmdbId === movie.tmdbId);
+    }
+    return this.mockDb.some(m => m.title.toLowerCase() === movie.title.toLowerCase());
   }
 
   async createList(name: string, description?: string): Promise<CustomList> {

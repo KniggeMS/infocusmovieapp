@@ -101,7 +101,7 @@ export interface MovieServiceAdapter {
   add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie>;
   delete(id: string): Promise<void>;
   update(id: string, updates: Partial<Movie>): Promise<void>;
-  exists(title: string): Promise<boolean>;
+  exists(movie: { title: string; tmdbId?: number }): Promise<boolean>;
   // Lists
   createList(name: string, description?: string): Promise<CustomList>;
   deleteList(listId: string): Promise<void>;

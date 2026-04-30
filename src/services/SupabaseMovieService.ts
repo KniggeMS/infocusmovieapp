@@ -15,8 +15,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     this.client = supabase;
   }
 
-  // ... (Previous methods remain unchanged)
-
   /**
    * Searches for movies AND TV shows using the TMDB API.
    */
@@ -256,7 +254,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
       const trailer = data.videos?.results?.find(
         (v: any) => v.site === 'YouTube' && v.type === 'Trailer'
+      ) || data.videos?.results?.find(
+        (v: any) => v.site === 'YouTube' && v.type === 'Teaser'
       );
+      
+      console.log('[TMDB] Videos found:', data.videos?.results?.length || 0, 'Trailer selected:', trailer?.key || 'none');
 
       const recommendations = (data.recommendations?.results || []).slice(0, 10).map((rec: any) => {
          const recIsTv = rec.media_type === 'tv' || (!rec.title && !!rec.name); 
@@ -387,11 +389,22 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     }
   }
 
-  async exists(title: string): Promise<boolean> {
+  async exists(movie: { title: string; tmdbId?: number }): Promise<boolean> {
+    // Prefer TMDB ID check for accuracy
+    if (movie.tmdbId) {
+      const { data } = await this.client
+        .from('movies')
+        .select('id')
+        .eq('tmdb_id', movie.tmdbId)
+        .limit(1);
+      return !!data && data.length > 0;
+    }
+
+    // Fallback: exact title match (case-sensitive)
     const { data } = await this.client
       .from('movies')
       .select('id')
-      .ilike('title', title)
+      .eq('title', movie.title)
       .limit(1);
 
     return !!data && data.length > 0;

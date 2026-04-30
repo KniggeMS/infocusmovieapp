@@ -44,11 +44,11 @@ export class MovieConductor {
     achievements: INITIAL_ACHIEVEMENTS,
     statistics: INITIAL_STATISTICS,
     selectedMovie: null,
-            status: 'idle',
-            error: null,
-            filter: 'all',
-            activeListId: null,
-          };
+    status: 'idle',
+    error: null,
+    filter: 'all',
+    activeListId: null,
+  };
   constructor(adapter: MovieServiceAdapter) {
     this.adapter = adapter;
   }
@@ -78,11 +78,12 @@ export class MovieConductor {
       achievements: INITIAL_ACHIEVEMENTS,
       statistics: INITIAL_STATISTICS,
       selectedMovie: null,
-              status: 'idle',
-              error: null,
-              filter: 'all',
-              activeListId: null,
-            };    this.notify();
+      status: 'idle',
+      error: null,
+      filter: 'all',
+      activeListId: null,
+    };
+    this.notify();
   }
 
   /**
@@ -194,7 +195,7 @@ export class MovieConductor {
 
   private async handleAddMovie(movie: Movie): Promise<void> {
     try {
-        const exists = await this.adapter.exists(movie.title);
+        const exists = await this.adapter.exists(movie);
         if (exists) {
             console.warn(`Movie "${movie.title}" already exists in the database.`);
              this.updateState({ error: `Movie "${movie.title}" already exists!` });

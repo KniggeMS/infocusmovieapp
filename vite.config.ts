@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => {
           ]
         },
         devOptions: {
-           enabled: true 
+           enabled: false
         }
       })
     ],
@@ -58,10 +58,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: '0.0.0.0',
-      port: 3000,
-      hmr: {
-        clientPort: 443
-      }
+      port: 3000
     },
     define: {
       'process.env.API_KEY': JSON.stringify(env.API_KEY || ''),

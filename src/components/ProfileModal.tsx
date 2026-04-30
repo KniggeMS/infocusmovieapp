@@ -280,7 +280,7 @@ export function ProfileModal({ user, conductor, customLists, onClose, onLogout, 
                                 type="text" 
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
-                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
 
@@ -322,14 +322,14 @@ export function ProfileModal({ user, conductor, customLists, onClose, onLogout, 
                                 placeholder={t('profile.newPassword')}
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none mb-2"
+                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none mb-2"
                             />
                             <input 
                                 type="password" 
                                 placeholder={t('profile.confirmPassword')}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full bg-app-secondary/20 border border-app-border rounded-xl p-3 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             <button 
                                 onClick={handleUpdatePassword}
@@ -432,7 +432,7 @@ export function ProfileModal({ user, conductor, customLists, onClose, onLogout, 
                                 value={newListName}
                                 onChange={(e) => setNewListName(e.target.value)}
                                 placeholder="New List Name..."
-                                className="flex-1 bg-app-secondary/20 border border-app-border rounded-xl p-3 text-app-text focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="flex-1 bg-app-secondary/20 border border-app-border rounded-xl p-3 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             <button 
                                 onClick={handleCreateList}

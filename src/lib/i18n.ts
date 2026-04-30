@@ -109,7 +109,7 @@ const resources = {
         recommendations: "Das könnte dir auch gefallen",
         inLibrary: "In der Mediathek",
         addToWatchlist: "Auf die Watchlist",
-        playTrailer: "Trailer abspielen",
+        playTrailer: "Auf YouTube öffnen",
         released: "Veröffentlicht",
         upcoming: "Demnächst",
         match: "Übereinstimmung",

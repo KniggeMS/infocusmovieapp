@@ -101,7 +101,7 @@ describe('MovieConductor', () => {
     await conductor.dispatch({ type: 'ADD_MOVIE', payload: duplicateMovie });
 
     // 3. Assertions
-    expect(mockAdapter.exists).toHaveBeenCalledWith(duplicateMovie.title);
+    expect(mockAdapter.exists).toHaveBeenCalledWith(expect.objectContaining({ title: 'Existing Movie' }));
     expect(mockAdapter.add).not.toHaveBeenCalled();
     
     const state = conductor.getState();
