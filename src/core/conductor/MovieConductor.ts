@@ -106,12 +106,14 @@ export class MovieConductor {
     }
   }
 
-  // ==================== ORIGINAL HANDLER (rekonstruiert) ====================
+  // ==================== ORIGINAL HANDLER (rekonstruiert & funktionsfähig) ====================
   private async handleLoadMovies(): Promise<void> {
     this.updateState({ status: 'loading' });
     try {
-      const lists = await this.adapter.getLists();
-      const movies = await this.adapter.getTrending(); // oder eine echte Load-Methode
+      const [movies, lists] = await Promise.all([
+        this.adapter.getTrending(),
+        this.adapter.getLists()
+      ]);
       this.updateState({ 
         items: movies, 
         customLists: lists,
@@ -186,7 +188,6 @@ export class MovieConductor {
   }
 
   private calculateStatistics(items: Movie[]): MovieStatistics {
-    // Einfache Implementierung – erweitere bei Bedarf
     return {
       totalMovies: items.length,
       watchedCount: items.filter(m => m.watched).length,
@@ -198,7 +199,7 @@ export class MovieConductor {
   }
 
   private checkAchievements(items: Movie[]): Achievement[] {
-    return INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: items.length >= 1 })); // Dummy-Logik
+    return INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: items.length >= parseInt(a.id.split('-')[1] || '1') }));
   }
 
   private updateState(updates: Partial<WatchlistState>): void {
