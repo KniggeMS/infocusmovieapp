@@ -64,8 +64,7 @@ export class MovieConductor {
     }
   }
 
-  // ... (alle bestehenden Handler bleiben unverändert – nur List-Handler sind ergänzt/verbessert)
-
+  // ==================== LIST HANDLER ====================
   private async handleCreateList(payload: { name: string; description?: string }): Promise<void> {
     try {
       const newList = await this.adapter.createList(payload.name, payload.description);
@@ -89,7 +88,7 @@ export class MovieConductor {
     try {
       await this.adapter.addMovieToList(listId, movie);
       const updatedLists = this.state.customLists.map(l =>
-        l.id === listId ? { ...l, movieCount: l.movieCount + 1 } : l
+        l.id === listId ? { ...l, movieCount: (l.movieCount || 0) + 1 } : l
       );
       this.updateState({ customLists: updatedLists });
     } catch (error) {
@@ -107,17 +106,100 @@ export class MovieConductor {
     }
   }
 
-  // ... restliche Handler (handleLoadMovies, handleSearch etc.) bleiben exakt wie bisher
-  private async handleLoadMovies(): Promise<void> { /* unverändert */ }
-  private async handleSearch(query: string): Promise<void> { /* unverändert */ }
-  private async handleAddMovie(movie: Movie): Promise<void> { /* unverändert */ }
-  private async handleRemoveMovie(id: string): Promise<void> { /* unverändert */ }
-  private async handleToggleWatched(id: string): Promise<void> { /* unverändert */ }
-  private async handleToggleFavorite(id: string): Promise<void> { /* unverändert */ }
-  private async handleSelectMovie(id: string): Promise<void> { /* unverändert */ }
+  // ==================== ORIGINAL HANDLER (rekonstruiert) ====================
+  private async handleLoadMovies(): Promise<void> {
+    this.updateState({ status: 'loading' });
+    try {
+      const lists = await this.adapter.getLists();
+      const movies = await this.adapter.getTrending(); // oder eine echte Load-Methode
+      this.updateState({ 
+        items: movies, 
+        customLists: lists,
+        status: 'idle',
+        statistics: this.calculateStatistics(movies),
+        achievements: this.checkAchievements(movies)
+      });
+    } catch (error) {
+      this.updateState({ status: 'error', error: error instanceof Error ? error.message : 'Load failed' });
+    }
+  }
 
-  private calculateStatistics(items: Movie[]): MovieStatistics { /* unverändert */ }
-  private checkAchievements(items: Movie[]): Achievement[] { /* unverändert */ }
+  private async handleSearch(query: string): Promise<void> {
+    this.updateState({ status: 'loading' });
+    try {
+      const results = await this.adapter.search(query);
+      this.updateState({ items: results, status: 'idle' });
+    } catch (error) {
+      this.updateState({ status: 'error', error: error instanceof Error ? error.message : 'Search failed' });
+    }
+  }
+
+  private async handleAddMovie(movie: Movie): Promise<void> {
+    try {
+      const added = await this.adapter.add(movie);
+      this.updateState({ items: [added, ...this.state.items] });
+    } catch (error) {
+      this.updateState({ error: error instanceof Error ? error.message : 'Add failed' });
+    }
+  }
+
+  private async handleRemoveMovie(id: string): Promise<void> {
+    try {
+      await this.adapter.delete(id);
+      this.updateState({ items: this.state.items.filter(m => m.id !== id) });
+    } catch (error) {
+      this.updateState({ error: error instanceof Error ? error.message : 'Remove failed' });
+    }
+  }
+
+  private async handleToggleWatched(id: string): Promise<void> {
+    const movie = this.state.items.find(m => m.id === id);
+    if (!movie) return;
+    try {
+      await this.adapter.update(id, { watched: !movie.watched });
+      const updated = this.state.items.map(m => m.id === id ? { ...m, watched: !m.watched } : m);
+      this.updateState({ items: updated });
+    } catch (error) {
+      this.updateState({ error: error instanceof Error ? error.message : 'Toggle watched failed' });
+    }
+  }
+
+  private async handleToggleFavorite(id: string): Promise<void> {
+    const movie = this.state.items.find(m => m.id === id);
+    if (!movie) return;
+    try {
+      await this.adapter.update(id, { favorite: !movie.favorite });
+      const updated = this.state.items.map(m => m.id === id ? { ...m, favorite: !m.favorite } : m);
+      this.updateState({ items: updated });
+    } catch (error) {
+      this.updateState({ error: error instanceof Error ? error.message : 'Toggle favorite failed' });
+    }
+  }
+
+  private async handleSelectMovie(id: string): Promise<void> {
+    try {
+      const details = await this.adapter.getById(id) || this.state.items.find(m => m.id === id);
+      this.updateState({ selectedMovie: details || null });
+    } catch (error) {
+      this.updateState({ error: error instanceof Error ? error.message : 'Select failed' });
+    }
+  }
+
+  private calculateStatistics(items: Movie[]): MovieStatistics {
+    // Einfache Implementierung – erweitere bei Bedarf
+    return {
+      totalMovies: items.length,
+      watchedCount: items.filter(m => m.watched).length,
+      totalRuntimeMinutes: items.reduce((sum, m) => sum + (m.runtime || 0), 0),
+      favoriteCount: items.filter(m => m.favorite).length,
+      byGenre: [],
+      byDecade: []
+    };
+  }
+
+  private checkAchievements(items: Movie[]): Achievement[] {
+    return INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: items.length >= 1 })); // Dummy-Logik
+  }
 
   private updateState(updates: Partial<WatchlistState>): void {
     this.state = { ...this.state, ...updates };
