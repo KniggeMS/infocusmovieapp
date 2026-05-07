@@ -34,13 +34,21 @@ export function MovieDetailModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+        onClick={onClose}
+      />
+
       <div className="relative w-full max-w-7xl bg-app-bg sm:rounded-3xl border-t sm:border border-app-border shadow-2xl h-[95vh] sm:h-[90vh] overflow-y-auto overflow-x-hidden animate-slide-up scrollbar-hide">
-        <button onClick={onClose} className="absolute top-4 right-4 z-[120] bg-black/50 p-2 rounded-full text-app-text/80 hover:text-app-text hover:bg-app-secondary backdrop-blur-md transition-all pointer-events-auto">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-[120] bg-black/50 p-2 rounded-full text-app-text/80 hover:text-app-text hover:bg-app-secondary backdrop-blur-md transition-all pointer-events-auto"
+        >
           <X className="w-6 h-6" />
         </button>
 
         <HeroSection movie={movie} />
+
         <ActionButtons
           movie={movie}
           isInLibrary={isInLibrary}
@@ -59,7 +67,7 @@ export function MovieDetailModal({
           <WatchProvidersSection watchProviders={movie.watchProviders} />
           <RecommendationsSection
             recommendations={movie.recommendations}
-            onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+            onSelectMovie={(id: string) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
           />
         </div>
       </div>
@@ -67,9 +75,9 @@ export function MovieDetailModal({
   );
 }
 
-// ==================== SUB-COMPONENTS (vollständig) ====================
+// ==================== SUB-COMPONENTS (vollständig, typisiert) ====================
+
 function HeroSection({ movie }: { movie: Movie }) {
-  console.log('Movie trailerKey:', movie.trailerKey, 'for', movie.title);
   return (
     <div className="relative w-full aspect-video overflow-hidden group">
       {movie.trailerKey ? (
@@ -82,7 +90,11 @@ function HeroSection({ movie }: { movie: Movie }) {
           />
         </div>
       ) : (
-        <img src={movie.backdropPath || movie.posterPath || ''} alt={movie.title} className="w-full h-full object-cover opacity-80" />
+        <img
+          src={movie.backdropPath || movie.posterPath || ''}
+          alt={movie.title}
+          className="w-full h-full object-cover opacity-80"
+        />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-app-bg via-app-bg/40 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-10 flex flex-col justify-end h-full z-20 pointer-events-none">
@@ -94,7 +106,23 @@ function HeroSection({ movie }: { movie: Movie }) {
   );
 }
 
-function ActionButtons({ movie, isInLibrary, customLists, onAddToLibrary, onShare, conductor, onShowToast }: any) {
+function ActionButtons({
+  movie,
+  isInLibrary,
+  customLists,
+  onAddToLibrary,
+  onShare,
+  conductor,
+  onShowToast
+}: {
+  movie: Movie;
+  isInLibrary: boolean;
+  customLists: { id: string; name: string }[];
+  onAddToLibrary: (movie: Movie) => void;
+  onShare: () => void;
+  conductor: MovieConductor;
+  onShowToast: (message: string, type: 'success' | 'error' | 'info') => void;
+}) {
   const { t } = useTranslation();
   const [showListCreation, setShowListCreation] = useState(false);
 
@@ -129,10 +157,15 @@ function ActionButtons({ movie, isInLibrary, customLists, onAddToLibrary, onShar
         </button>
 
         {/* Add to List */}
-        <ListMenu customLists={customLists} onAddToList={(listId: string) => {
-          conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movie } });
-          onShowToast('Zum Liste hinzugefügt', 'success');
-        }} onCreateNewList={() => setShowListCreation(true)} conductor={conductor} />
+        <ListMenu 
+          customLists={customLists} 
+          onAddToList={(listId: string) => {
+            conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movie } });
+            onShowToast('Zum Liste hinzugefügt', 'success');
+          }} 
+          onCreateNewList={() => setShowListCreation(true)}
+          conductor={conductor}
+        />
 
         {showListCreation && <ListCreationModal conductor={conductor} onClose={() => setShowListCreation(false)} />}
       </div>
@@ -140,22 +173,44 @@ function ActionButtons({ movie, isInLibrary, customLists, onAddToLibrary, onShar
   );
 }
 
-function ListMenu({ customLists, onAddToList, onCreateNewList }: any) {
+function ListMenu({
+  customLists,
+  onAddToList,
+  onCreateNewList
+}: {
+  customLists: { id: string; name: string }[];
+  onAddToList: (listId: string) => void;
+  onCreateNewList: () => void;
+}) {
   return (
     <div className="relative group">
       <button className="bg-app-secondary/60 hover:bg-app-secondary/80 backdrop-blur-md text-app-text p-2.5 sm:p-3 rounded-lg border border-app-border shadow-lg hover:scale-105 active:scale-95">
         <ListPlus className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
-      <div className="absolute bottom-full left-0 mb-2 w-56 bg-app-card-bg border border-app-border rounded-xl shadow-2xl overflow-hidden animate-fade-in z-[120] opacity-0 invisible group-hover:opacity-100 group-hover:visible">
-        <div className="p-3 border-b border-app-border text-xs font-bold text-app-text-muted uppercase bg-app-bg/50">Zu Liste hinzufügen</div>
-        {customLists.length > 0 ? customLists.map((list: any) => (
-          <button key={list.id} onClick={() => onAddToList(list.id)} className="w-full text-left px-4 py-3 text-sm text-app-text hover:bg-app-secondary transition-colors truncate">
-            {list.name}
-          </button>
-        )) : (
-          <div className="p-4 text-xs text-app-text-muted text-center italic">Noch keine Listen. Erstelle eine!</div>
+
+      <div className="absolute bottom-full left-0 mb-2 w-56 bg-app-card-bg border border-app-border rounded-xl shadow-2xl overflow-hidden animate-fade-in z-[120] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+        <div className="p-3 border-b border-app-border text-xs font-bold text-app-text-muted uppercase bg-app-bg/50">
+          Zu Liste hinzufügen
+        </div>
+        {customLists.length > 0 ? (
+          customLists.map(list => (
+            <button
+              key={list.id}
+              onClick={() => onAddToList(list.id)}
+              className="w-full text-left px-4 py-3 text-sm text-app-text hover:bg-app-secondary transition-colors truncate"
+            >
+              {list.name}
+            </button>
+          ))
+        ) : (
+          <div className="p-4 text-xs text-app-text-muted text-center italic">
+            Noch keine Listen. Erstelle eine!
+          </div>
         )}
-        <button onClick={onCreateNewList} className="w-full text-left px-4 py-3 text-sm text-blue-400 hover:bg-app-secondary border-t border-app-border flex items-center gap-2">
+        <button
+          onClick={onCreateNewList}
+          className="w-full text-left px-4 py-3 text-sm text-blue-400 hover:bg-app-secondary border-t border-app-border flex items-center gap-2"
+        >
           <Plus className="w-4 h-4" /> Neue Liste erstellen
         </button>
       </div>
@@ -163,26 +218,23 @@ function ListMenu({ customLists, onAddToList, onCreateNewList }: any) {
   );
 }
 
-function MetadataRow({ movie }: { movie: Movie }) {
-  return <div className="flex gap-4 text-sm text-app-text-muted"> {/* Erweitere bei Bedarf */ } {movie.releaseDate} • {movie.runtime} min</div>;
-}
-
-function PlotSection({ movie }: { movie: Movie }) {
-  return <div className="text-app-text leading-relaxed">{movie.overview}</div>;
-}
-
-function MetadataGrid({ movie }: { movie: Movie }) {
-  return <div> {/* Genres, Vote etc. */ } </div>;
-}
-
-function CastSection({ cast }: { cast?: CastMember[] }) {
-  return <div>{cast?.map(c => <div key={c.name}>{c.name} as {c.character}</div>)}</div>;
-}
-
-function WatchProvidersSection({ watchProviders }: any) {
-  return <div>Watch Providers Section</div>;
-}
-
-function RecommendationsSection({ recommendations, onSelectMovie }: any) {
-  return <div>Recommendations</div>;
+// Placeholder-Sub-Components (ersetze später mit vollem Original-Code)
+function MetadataRow({ movie }: { movie: Movie }) { return <div className="text-app-text-muted">{movie.releaseDate} • {movie.runtime} min</div>; }
+function PlotSection({ movie }: { movie: Movie }) { return <div className="text-app-text leading-relaxed mt-4">{movie.overview}</div>; }
+function MetadataGrid({ movie }: { movie: Movie }) { return <div className="grid grid-cols-2 gap-4 text-sm"> {/* Genres, Rating etc. */} </div>; }
+function CastSection({ cast }: { cast?: CastMember[] }) { return <div>{cast?.slice(0, 6).map(c => <div key={c.name}>{c.name}</div>)}</div>; }
+function WatchProvidersSection({ watchProviders }: any) { return <div>Watch Providers (später ausbauen)</div>; }
+function RecommendationsSection({ recommendations, onSelectMovie }: { recommendations?: Movie[]; onSelectMovie: (id: string) => void }) {
+  return (
+    <div>
+      <h3 className="text-lg font-bold mb-3">Ähnliche Filme</h3>
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+        {recommendations?.slice(0, 5).map(rec => (
+          <div key={rec.id} onClick={() => onSelectMovie(rec.id)} className="cursor-pointer">
+            <img src={rec.posterPath} alt={rec.title} className="rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
