@@ -3,7 +3,13 @@ name: Android Build (Debug)
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+    paths:                   # ← NEU: Nur bei relevanten Änderungen
+      - 'android/**'
+      - 'capacitor.config.ts'
+      - 'package.json'
+      - 'vite.config.ts'
+      - 'src/**'             # nur wenn du wirklich Capacitor-Änderungen machst
+  workflow_dispatch:         # Manuell auslösen bleibt möglich
 
 jobs:
   build:
