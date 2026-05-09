@@ -197,16 +197,40 @@ export class MovieConductor {
 
   private async handleSelectMovie(id: string): Promise<void> {
     try {
+      const localMovie =
+        this.state.items.find(m => m.id === id) ||
+        (await this.adapter.getById(id)) ||
+        null;
+
+      // Resolve which TMDB id to query: prefer the saved tmdbId for DB-backed movies,
+      // fall back to the raw payload id (which is the TMDB id for tmdb-source movies).
+      const tmdbId = localMovie?.tmdbId != null ? String(localMovie.tmdbId) : (localMovie?.source === 'database' ? null : id);
+      const mediaType = localMovie?.mediaType;
+
       let details: Movie | null = null;
-      try {
-        details = await this.adapter.getMovieDetails(id);
-      } catch {
-        details = null;
+      if (tmdbId) {
+        try {
+          details = await this.adapter.getMovieDetails(tmdbId, mediaType);
+        } catch {
+          details = null;
+        }
       }
-      if (!details) {
-        details = (await this.adapter.getById(id)) || this.state.items.find(m => m.id === id) || null;
+
+      if (details && localMovie) {
+        // Preserve local identity (DB id, watched/favorite flags) so the UI keeps
+        // referring to the saved record rather than the raw TMDB result.
+        details = {
+          ...details,
+          id: localMovie.id,
+          tmdbId: localMovie.tmdbId ?? details.tmdbId,
+          source: localMovie.source ?? details.source,
+          watched: localMovie.watched ?? details.watched,
+          favorite: localMovie.favorite ?? details.favorite,
+          addedAt: localMovie.addedAt ?? details.addedAt,
+        };
       }
-      this.updateState({ selectedMovie: details });
+
+      this.updateState({ selectedMovie: details ?? localMovie });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Select failed' });
     }
