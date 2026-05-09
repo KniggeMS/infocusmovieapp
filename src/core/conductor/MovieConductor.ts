@@ -87,7 +87,6 @@ export class MovieConductor {
     try {
       await this.adapter.update(id, patch);
     } catch (error) {
-      // Revert on failure
       if (previous) {
         const reverted = this.state.items.map(m => m.id === id ? previous : m);
         this.updateState({
@@ -99,7 +98,6 @@ export class MovieConductor {
     }
   }
 
-  // ==================== LIST HANDLER ====================
   private async handleCreateList(payload: { name: string; description?: string }): Promise<void> {
     try {
       const newList = await this.adapter.createList(payload.name, payload.description);
@@ -141,7 +139,6 @@ export class MovieConductor {
     }
   }
 
-  // ==================== ORIGINAL HANDLER (rekonstruiert & funktionsfähig) ====================
   private async handleLoadMovies(): Promise<void> {
     if (this.loadInFlight) return this.loadInFlight;
     this.updateState({ status: 'loading' });
@@ -237,8 +234,6 @@ export class MovieConductor {
         (await this.adapter.getById(id)) ||
         null;
 
-      // Resolve which TMDB id to query: prefer the saved tmdbId for DB-backed movies,
-      // fall back to the raw payload id (which is the TMDB id for tmdb-source movies).
       const tmdbId = localMovie?.tmdbId != null ? String(localMovie.tmdbId) : (localMovie?.source === 'database' ? null : id);
       const mediaType = localMovie?.mediaType;
 
@@ -283,6 +278,7 @@ export class MovieConductor {
     let ratedCount = 0;
     const currentYear = new Date().getFullYear();
     let thisYearCount = 0;
+    let thisYearRuntimeMinutes = 0;  // FIX: track year runtime separately
 
     for (const m of items) {
       (m.genres || []).forEach(g => {
@@ -299,7 +295,12 @@ export class MovieConductor {
       const added = m.addedAt?.slice(0, 4);
       if (added && /^\d{4}$/.test(added)) {
         yearCount.set(added, (yearCount.get(added) || 0) + 1);
-        if (Number(added) === currentYear) thisYearCount++;
+        if (Number(added) === currentYear) {
+          thisYearCount++;
+          // FIX: accumulate runtime for this-year items only
+          const rt = typeof m.runtime === 'number' && !Number.isNaN(m.runtime) ? m.runtime : 0;
+          thisYearRuntimeMinutes += rt;
+        }
       }
 
       (m.tags || []).forEach(t => {
@@ -325,10 +326,16 @@ export class MovieConductor {
       .sort((a, b) => a.year.localeCompare(b.year));
     const topTags = sortDesc(Array.from(tagCount.entries()).map(([name, value]) => ({ name, value })));
 
+    // FIX: totalRuntimeMinutes — guard against null/undefined runtime
+    const totalRuntimeMinutes = items.reduce((sum, m) => {
+      const rt = typeof m.runtime === 'number' && !Number.isNaN(m.runtime) ? m.runtime : 0;
+      return sum + rt;
+    }, 0);
+
     return {
       totalMovies: items.length,
       watchedCount: items.filter(m => m.watched).length,
-      totalRuntimeMinutes: items.reduce((sum, m) => sum + (m.runtime || 0), 0),
+      totalRuntimeMinutes,
       favoriteCount: items.filter(m => m.favorite).length,
       byGenre: byGenre.slice(0, 8),
       byDecade,
@@ -336,6 +343,7 @@ export class MovieConductor {
       ratedCount,
       byYear,
       thisYearCount,
+      thisYearRuntimeMinutes,   // NEW field
       allTimeCount: items.length,
       topTags: topTags.slice(0, 8),
     };

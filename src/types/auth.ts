@@ -5,6 +5,8 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   createdAt: string;
+  username?: string;
+  lastLoginAt?: string;
   displayName?: string;
   avatarUrl?: string;
   theme?: 'light' | 'dark' | 'glass';

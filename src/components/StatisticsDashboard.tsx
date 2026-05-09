@@ -23,7 +23,8 @@ export function StatisticsDashboard({ statistics }: StatisticsDashboardProps) {
       return {
         total: statistics.thisYearCount ?? 0,
         watched: statistics.watchedCount,
-        hours: statistics.totalRuntimeMinutes / 60,
+        // FIX: use year-specific runtime instead of alltime value
+        hours: ((statistics as any).thisYearRuntimeMinutes ?? 0) / 60,
       };
     }
     return {
