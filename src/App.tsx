@@ -10,8 +10,9 @@ import { MovieDetailModal } from './components/MovieDetailModal';
 import { StatisticsDashboard } from './components/StatisticsDashboard';
 import { AchievementsGrid } from './components/AchievementsGrid';
 import { BottomNav } from './components/BottomNav';
+import { Recommendations } from './components/Recommendations';
 import { useToast } from './components/Toast';
-import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus } from 'lucide-react';
+import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles } from 'lucide-react';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { shareMovie } from './lib/share';
 
@@ -121,10 +122,15 @@ function App({ conductor }: AppProps) {
   }
 
   const filteredItems = state.items.filter((movie) => {
-    if (state.filter === 'favorites') return movie.favorite;
-    if (state.filter === 'watched') return movie.watched;
+    if (state.filter === 'favorites' && !movie.favorite) return false;
+    if (state.filter === 'watched' && !movie.watched) return false;
+    if (state.tagFilter && !(movie.tags || []).includes(state.tagFilter)) return false;
     return true;
   });
+
+  const allTags = Array.from(
+    new Set(state.items.flatMap((m) => m.tags || []).filter(Boolean))
+  ).sort();
 
   return (
     <div className="min-h-screen bg-app-bg text-app-text font-sans pb-24">
@@ -191,6 +197,12 @@ function App({ conductor }: AppProps) {
           <AchievementsGrid achievements={state.achievements} />
         ) : state.filter === 'statistics' ? (
           <StatisticsDashboard statistics={state.statistics} />
+        ) : state.filter === 'recommendations' ? (
+          <Recommendations
+            library={state.items}
+            conductor={conductor}
+            onAddToLibrary={handleAddMovie}
+          />
         ) : (
             /* Movie Grid */
             <>
@@ -199,6 +211,37 @@ function App({ conductor }: AppProps) {
                         <ListPlus className="w-6 h-6 text-blue-500" />
                         <span className="text-blue-500 mr-1">List:</span>
                         {state.customLists.find(l => l.id === state.activeListId)?.name}
+                    </div>
+                )}
+
+                {/* Tag filter chips: nur sichtbar, wenn Tags existieren */}
+                {allTags.length > 0 && (
+                    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="text-app-text-muted uppercase tracking-wider">Tags:</span>
+                        {state.tagFilter && (
+                            <button
+                                onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: null })}
+                                className="bg-app-secondary text-app-text-muted hover:text-app-text px-2 py-1 rounded-full border border-app-border"
+                            >
+                                Alle
+                            </button>
+                        )}
+                        {allTags.slice(0, 12).map(tag => {
+                            const active = state.tagFilter === tag;
+                            return (
+                                <button
+                                    key={tag}
+                                    onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: active ? null : tag })}
+                                    className={`px-2.5 py-1 rounded-full border transition ${
+                                        active
+                                            ? 'bg-blue-500 text-white border-blue-500'
+                                            : 'bg-blue-500/10 text-blue-300 border-blue-500/30 hover:bg-blue-500/20'
+                                    }`}
+                                >
+                                    #{tag}
+                                </button>
+                            );
+                        })}
                     </div>
                 )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -258,16 +301,30 @@ function App({ conductor }: AppProps) {
                                     )}
                                 </div>
                                 {movie.source !== 'tmdb' && (
-                                    <div className="flex items-center gap-3 mt-2">
-                                        <Heart 
-                                            className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.favorite ? "fill-red-500 text-red-500" : "text-app-text-muted"}`} 
-                                            onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
-                                        />
-                                        <Eye 
-                                            className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.watched ? "text-blue-400" : "text-gray-600"}`} 
-                                            onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }}
-                                        />
-                                    </div>
+                                    <>
+                                        {!!movie.tags?.length && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {movie.tags!.slice(0, 2).map(tag => (
+                                                    <span key={tag} className="text-[10px] bg-blue-500/15 text-blue-300 border border-blue-500/30 rounded px-1.5 py-0.5">
+                                                        #{tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-3 mt-2">
+                                            <Heart
+                                                className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.favorite ? "fill-red-500 text-red-500" : "text-app-text-muted"}`}
+                                                onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
+                                            />
+                                            <Eye
+                                                className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.watched ? "text-blue-400" : "text-gray-600"}`}
+                                                onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }}
+                                            />
+                                            {typeof movie.userRating === 'number' && movie.userRating > 0 && (
+                                                <span className="text-xs text-yellow-400 font-bold">★ {movie.userRating}</span>
+                                            )}
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -301,6 +358,7 @@ function App({ conductor }: AppProps) {
         onShowWatched={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'watched' })}
         onShowAchievements={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'achievements' })}
         onShowStatistics={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'statistics' })}
+        onShowRecommendations={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'recommendations' })}
       />
       
       {/* Profile Modal */}

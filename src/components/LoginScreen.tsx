@@ -98,7 +98,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-app-bg/40 border border-app-border rounded-xl py-3 pl-12 pr-4 text-app-text focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-app-text-muted"
+                className="auth-input w-full bg-app-bg/40 border border-app-border rounded-xl py-3 pl-12 pr-4 text-app-text focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-app-text-muted"
                 placeholder="name@example.com"
               />
             </div>
@@ -115,7 +115,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-app-bg/40 border border-app-border rounded-xl py-3 pl-12 pr-4 text-app-text focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-app-text-muted"
+                    className="auth-input w-full bg-app-bg/40 border border-app-border rounded-xl py-3 pl-12 pr-4 text-app-text focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-app-text-muted"
                     placeholder="••••••••"
                 />
                 </div>

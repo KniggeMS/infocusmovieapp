@@ -30,6 +30,9 @@ export interface Movie {
   mediaType?: 'movie' | 'tv';
   watched?: boolean;
   favorite?: boolean;
+  userRating?: number | null; // 0..10, persisted
+  notes?: string | null; // private notes
+  tags?: string[]; // free-form tags
   genres?: string[];
   cast?: CastMember[];
   director?: string;
@@ -57,6 +60,12 @@ export interface MovieStatistics {
   favoriteCount: number;
   byGenre: { name: string; value: number }[];
   byDecade: { decade: string; count: number }[];
+  averageUserRating?: number; // 0..10
+  ratedCount?: number;
+  byYear?: { year: string; count: number }[]; // by addedAt year
+  thisYearCount?: number;
+  allTimeCount?: number;
+  topTags?: { name: string; value: number }[];
 }
 
 export interface CustomList {
@@ -74,13 +83,17 @@ export type UserIntent =
   | { type: 'REMOVE_MOVIE'; payload: string }
   | { type: 'TOGGLE_WATCHED'; payload: string }
   | { type: 'TOGGLE_FAVORITE'; payload: string }
-  | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' }
+  | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' | 'recommendations' }
   | { type: 'SELECT_MOVIE'; payload: string }
   | { type: 'CLOSE_DETAILS' }
   | { type: 'CREATE_LIST'; payload: { name: string, description?: string } }
   | { type: 'DELETE_LIST'; payload: string }
   | { type: 'ADD_TO_LIST'; payload: { listId: string, movie: Movie } }
-  | { type: 'SELECT_LIST'; payload: string }; // listId
+  | { type: 'SELECT_LIST'; payload: string } // listId
+  | { type: 'UPDATE_USER_RATING'; payload: { id: string; userRating: number | null } }
+  | { type: 'UPDATE_NOTES'; payload: { id: string; notes: string } }
+  | { type: 'UPDATE_TAGS'; payload: { id: string; tags: string[] } }
+  | { type: 'SET_TAG_FILTER'; payload: string | null };
 
 export interface WatchlistState {
   items: Movie[];
@@ -90,8 +103,9 @@ export interface WatchlistState {
   selectedMovie: Movie | null;
   status: 'idle' | 'loading' | 'error';
   error: string | null;
-  filter: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' | 'list'; // Added 'list'
+  filter: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' | 'list' | 'recommendations';
   activeListId: string | null; // Added activeListId
+  tagFilter?: string | null;
 }
 
 export interface MovieServiceAdapter {

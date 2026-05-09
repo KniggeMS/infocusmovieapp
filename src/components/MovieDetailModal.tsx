@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Movie, CastMember, WatchProvider } from '../types/domain';
 import { MovieConductor } from '../core/conductor/MovieConductor';
-import { X, Play, Check, Plus, Share2, ListPlus } from 'lucide-react';
+import { X, Play, Check, Plus, Share2, ListPlus, Star, Tag, NotebookPen } from 'lucide-react';
 import { ListCreationModal } from './ListCreationModal';
 
 interface MovieDetailModalProps {
@@ -42,12 +42,19 @@ export function MovieDetailModal({
       <div className="relative w-full max-w-7xl bg-app-bg sm:rounded-3xl border-t sm:border border-app-border shadow-2xl h-[95vh] sm:h-[90vh] overflow-y-auto overflow-x-hidden animate-slide-up scrollbar-hide">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-[120] bg-black/50 p-2 rounded-full text-app-text/80 hover:text-app-text hover:bg-app-secondary backdrop-blur-md transition-all pointer-events-auto"
+          aria-label="Schließen"
+          className="fixed sm:absolute top-3 right-3 sm:top-4 sm:right-4 z-[140] bg-black/60 p-2 rounded-full text-app-text/90 hover:text-app-text hover:bg-app-secondary backdrop-blur-md transition-all pointer-events-auto"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
 
         <HeroSection movie={movie} />
+
+        <div className="px-5 sm:px-10 pt-4 sm:pt-6 pb-2 bg-app-bg relative z-30">
+          <h2 className="text-2xl sm:text-4xl font-bold text-app-text leading-tight break-words pr-12 sm:pr-16">
+            {movie.title}
+          </h2>
+        </div>
 
         <ActionButtons
           movie={movie}
@@ -59,12 +66,29 @@ export function MovieDetailModal({
           onShowToast={onShowToast}
         />
 
-        <div className="p-5 sm:p-10 space-y-6 sm:space-y-8 bg-app-bg relative z-30">
+        <div className="px-5 sm:px-10 pt-4 pb-6 sm:pt-6 sm:pb-10 space-y-5 sm:space-y-6 bg-app-bg relative z-30">
           <MetadataRow movie={movie} />
-          <PlotSection movie={movie} />
-          <MetadataGrid movie={movie} />
-          <CastSection cast={movie.cast} />
-          <WatchProvidersSection watchProviders={movie.watchProviders} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="lg:col-span-2 space-y-5 sm:space-y-6">
+              <PlotSection movie={movie} />
+              <CastSection cast={movie.cast} />
+            </div>
+            <div className="space-y-5 sm:space-y-6">
+              <MetadataGrid movie={movie} />
+              <WatchProvidersSection watchProviders={movie.watchProviders} />
+            </div>
+          </div>
+
+          {/* Persönliche Sektion: Bewertung + Notizen + Tags. Nur sichtbar, sobald der Film
+              tatsächlich in der Library liegt — vor dem Hinzufügen gibt es nichts zu speichern. */}
+          {movie.source === 'database' && (
+            <PersonalSection
+              movie={movie}
+              conductor={conductor}
+              onShowToast={onShowToast}
+            />
+          )}
+
           <RecommendationsSection
             recommendations={movie.recommendations}
             onSelectMovie={(id: string) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
@@ -75,15 +99,15 @@ export function MovieDetailModal({
   );
 }
 
-// ==================== SUB-COMPONENTS (vollständig, typisiert) ====================
+// ==================== SUB-COMPONENTS ====================
 
 function HeroSection({ movie }: { movie: Movie }) {
   return (
-    <div className="relative w-full aspect-video overflow-hidden group">
+    <div className="relative w-full aspect-video max-h-[40vh] sm:max-h-[45vh] overflow-hidden bg-black">
       {movie.trailerKey ? (
         <div className="absolute inset-0 w-full h-full pointer-events-none">
           <iframe
-            className="w-full h-full object-cover opacity-80 sm:opacity-100"
+            className="w-full h-full object-cover"
             src={`https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${movie.trailerKey}&playsinline=1&rel=0&disablekb=1&iv_load_policy=3`}
             title="Trailer"
             allow="autoplay; encrypted-media"
@@ -93,15 +117,10 @@ function HeroSection({ movie }: { movie: Movie }) {
         <img
           src={movie.backdropPath || movie.posterPath || ''}
           alt={movie.title}
-          className="w-full h-full object-cover opacity-80"
+          className="w-full h-full object-cover"
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-app-bg via-app-bg/40 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-10 flex flex-col justify-end h-full z-20 pointer-events-none">
-        <h2 className="text-2xl sm:text-5xl font-bold text-app-text mb-2 sm:mb-3 leading-tight drop-shadow-2xl line-clamp-2">
-          {movie.title}
-        </h2>
-      </div>
+      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-app-bg to-transparent pointer-events-none" />
     </div>
   );
 }
@@ -127,9 +146,8 @@ function ActionButtons({
   const [showListCreation, setShowListCreation] = useState(false);
 
   return (
-    <div className="px-5 sm:px-10 -mt-16 sm:-mt-20 relative z-[110]">
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Play Trailer */}
+    <div className="px-5 sm:px-10 pt-1 pb-2 relative z-30">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         {movie.trailerKey ? (
           <button onClick={() => window.open(`https://youtube.com/watch?v=${movie.trailerKey}`, '_blank')} className="flex items-center gap-2 bg-app-text text-app-bg hover:bg-app-text/90 px-3 py-2 rounded-lg font-medium text-sm shadow-lg active:scale-95">
             <Play className="w-4 h-4 fill-current" /> {t('common.playTrailer')}
@@ -140,7 +158,6 @@ function ActionButtons({
           </button>
         )}
 
-        {/* Add to Library */}
         {isInLibrary ? (
           <button className="flex items-center gap-2 bg-app-secondary/30 backdrop-blur-md text-app-text/90 px-3 py-2 rounded-lg font-medium text-sm border border-app-border cursor-default">
             <Check className="w-4 h-4" /> {t('common.inLibrary')}
@@ -151,17 +168,15 @@ function ActionButtons({
           </button>
         )}
 
-        {/* Share */}
         <button onClick={onShare} className="bg-app-secondary/60 hover:bg-app-secondary/80 backdrop-blur-md text-app-text p-2 rounded-lg border border-app-border shadow-lg hover:scale-105 active:scale-95">
           <Share2 className="w-4 h-4" />
         </button>
 
-        {/* Add to List */}
         <ListMenu
           customLists={customLists}
           onAddToList={(listId: string) => {
             conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movie } });
-            onShowToast('Zum Liste hinzugefügt', 'success');
+            onShowToast('Zur Liste hinzugefügt', 'success');
           }}
           onCreateNewList={() => setShowListCreation(true)}
         />
@@ -217,23 +232,272 @@ function ListMenu({
   );
 }
 
-// Placeholder-Sub-Components (ersetze später mit vollem Original-Code)
-function MetadataRow({ movie }: { movie: Movie }) { return <div className="text-app-text-muted">{movie.releaseDate} • {movie.runtime} min</div>; }
-function PlotSection({ movie }: { movie: Movie }) { return <div className="text-app-text leading-relaxed mt-4">{movie.overview}</div>; }
-function MetadataGrid({ movie }: { movie: Movie }) { return <div className="grid grid-cols-2 gap-4 text-sm"> {/* Genres, Rating etc. */} </div>; }
-function CastSection({ cast }: { cast?: CastMember[] }) { return <div>{cast?.slice(0, 6).map(c => <div key={c.name}>{c.name}</div>)}</div>; }
-function WatchProvidersSection({ watchProviders }: any) { return <div>Watch Providers (später ausbauen)</div>; }
-function RecommendationsSection({ recommendations, onSelectMovie }: { recommendations?: Movie[]; onSelectMovie: (id: string) => void }) {
+function MetadataRow({ movie }: { movie: Movie }) {
+  const year = movie.releaseDate?.slice(0, 4);
+  const parts: string[] = [];
+  if (year) parts.push(year);
+  if (movie.runtime) parts.push(`${movie.runtime} min`);
+  if (movie.mediaType) parts.push(movie.mediaType === 'tv' ? 'Serie' : 'Film');
   return (
-    <div>
-      <h3 className="text-lg font-bold mb-3">Ähnliche Filme</h3>
+    <div className="flex flex-wrap items-center gap-3 text-sm text-app-text-muted">
+      {parts.map((p, i) => (
+        <span key={i} className="px-2.5 py-1 bg-app-secondary/40 rounded-full border border-app-border">{p}</span>
+      ))}
+      {movie.voteAverage != null && (
+        <span className="flex items-center gap-1 text-yellow-400 font-medium">
+          ★ {movie.voteAverage.toFixed(1)}
+        </span>
+      )}
+      {!!movie.tags?.length && (
+        <div className="flex flex-wrap gap-1.5">
+          {movie.tags!.slice(0, 4).map(tag => (
+            <span key={tag} className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/30 rounded-full px-2 py-0.5">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PlotSection({ movie }: { movie: Movie }) {
+  if (!movie.overview) return null;
+  return (
+    <section>
+      <h3 className="text-base font-semibold text-app-text-muted uppercase tracking-wider mb-2">Handlung</h3>
+      <p className="text-app-text leading-relaxed text-sm sm:text-base">{movie.overview}</p>
+    </section>
+  );
+}
+
+function MetadataGrid({ movie }: { movie: Movie }) {
+  const items: { label: string; value: string | null }[] = [
+    { label: 'Regie', value: movie.director || null },
+    { label: 'Genres', value: movie.genres?.join(', ') || null },
+    { label: 'Veröffentlichung', value: movie.releaseDate || null },
+  ];
+  const filtered = items.filter(i => i.value);
+  if (filtered.length === 0) return null;
+  return (
+    <section className="bg-app-secondary/30 border border-app-border rounded-2xl p-4 space-y-3 text-sm">
+      {filtered.map(i => (
+        <div key={i.label}>
+          <div className="text-app-text-muted text-xs uppercase tracking-wider">{i.label}</div>
+          <div className="text-app-text">{i.value}</div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function CastSection({ cast }: { cast?: CastMember[] }) {
+  if (!cast?.length) return null;
+  return (
+    <section>
+      <h3 className="text-base font-semibold text-app-text-muted uppercase tracking-wider mb-3">Besetzung</h3>
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-        {recommendations?.slice(0, 5).map(rec => (
-          <div key={rec.id} onClick={() => onSelectMovie(rec.id)} className="cursor-pointer">
-            <img src={rec.posterPath ?? ''} alt={rec.title} className="rounded-lg" />
+        {cast.slice(0, 6).map(c => (
+          <div key={c.name} className="text-center">
+            {c.profilePath ? (
+              <img src={c.profilePath} alt={c.name} className="rounded-xl aspect-[2/3] object-cover" />
+            ) : (
+              <div className="rounded-xl aspect-[2/3] bg-app-secondary flex items-center justify-center text-app-text-muted text-xs">No image</div>
+            )}
+            <div className="text-xs text-app-text mt-1 truncate">{c.name}</div>
+            <div className="text-[10px] text-app-text-muted truncate">{c.character}</div>
           </div>
         ))}
       </div>
-    </div>
+    </section>
+  );
+}
+
+function WatchProvidersSection({ watchProviders }: { watchProviders?: Movie['watchProviders'] }) {
+  const flat = watchProviders?.flatrate || [];
+  const rent = watchProviders?.rent || [];
+  const buy = watchProviders?.buy || [];
+  if (flat.length === 0 && rent.length === 0 && buy.length === 0) return null;
+
+  const renderRow = (label: string, items: WatchProvider[]) =>
+    items.length === 0 ? null : (
+      <div>
+        <div className="text-xs uppercase tracking-wider text-app-text-muted mb-2">{label}</div>
+        <div className="flex flex-wrap gap-2">
+          {items.slice(0, 6).map(p => (
+            <img key={p.providerName} title={p.providerName} src={p.logoPath} alt={p.providerName} className="w-9 h-9 rounded-lg object-contain bg-white/5 border border-app-border p-1" />
+          ))}
+        </div>
+      </div>
+    );
+  return (
+    <section className="bg-app-secondary/30 border border-app-border rounded-2xl p-4 space-y-3">
+      <h3 className="text-sm font-semibold text-app-text-muted uppercase tracking-wider">Wo zu sehen</h3>
+      {renderRow('Streaming', flat)}
+      {renderRow('Leihen', rent)}
+      {renderRow('Kaufen', buy)}
+    </section>
+  );
+}
+
+function RecommendationsSection({ recommendations, onSelectMovie }: { recommendations?: Movie[]; onSelectMovie: (id: string) => void }) {
+  if (!recommendations?.length) return null;
+  return (
+    <section>
+      <h3 className="text-base font-semibold text-app-text-muted uppercase tracking-wider mb-3">Ähnliche Filme</h3>
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+        {recommendations.slice(0, 5).map(rec => (
+          <div key={rec.id} onClick={() => onSelectMovie(rec.id)} className="cursor-pointer group">
+            {rec.posterPath ? (
+              <img src={rec.posterPath} alt={rec.title} className="rounded-lg aspect-[2/3] object-cover transition-transform group-hover:scale-105" />
+            ) : (
+              <div className="rounded-lg aspect-[2/3] bg-app-secondary text-app-text-muted text-xs flex items-center justify-center">No image</div>
+            )}
+            <div className="text-xs text-app-text mt-1 truncate">{rec.title}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ==================== Personal: Rating + Notes + Tags ====================
+
+function PersonalSection({
+  movie,
+  conductor,
+  onShowToast,
+}: {
+  movie: Movie;
+  conductor: MovieConductor;
+  onShowToast: (message: string, type: 'success' | 'error' | 'info') => void;
+}) {
+  const [rating, setRating] = useState<number | null>(movie.userRating ?? null);
+  const [notes, setNotes] = useState<string>(movie.notes ?? '');
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState<string[]>(movie.tags ?? []);
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  // Re-sync if a different movie is selected.
+  useEffect(() => {
+    setRating(movie.userRating ?? null);
+    setNotes(movie.notes ?? '');
+    setTags(movie.tags ?? []);
+  }, [movie.id]);
+
+  const persistRating = (value: number | null) => {
+    setRating(value);
+    conductor.dispatch({ type: 'UPDATE_USER_RATING', payload: { id: movie.id, userRating: value } });
+  };
+
+  const persistNotes = async () => {
+    setSavingNotes(true);
+    await conductor.dispatch({ type: 'UPDATE_NOTES', payload: { id: movie.id, notes } });
+    setSavingNotes(false);
+    onShowToast('Notiz gespeichert', 'success');
+  };
+
+  const addTag = (raw: string) => {
+    const cleaned = raw.trim().replace(/^#+/, '').toLowerCase();
+    if (!cleaned || tags.includes(cleaned)) return;
+    const next = [...tags, cleaned].slice(0, 12);
+    setTags(next);
+    setTagInput('');
+    conductor.dispatch({ type: 'UPDATE_TAGS', payload: { id: movie.id, tags: next } });
+  };
+
+  const removeTag = (tag: string) => {
+    const next = tags.filter(t => t !== tag);
+    setTags(next);
+    conductor.dispatch({ type: 'UPDATE_TAGS', payload: { id: movie.id, tags: next } });
+  };
+
+  return (
+    <section className="bg-app-secondary/30 border border-app-border rounded-2xl p-4 sm:p-5 space-y-5">
+      <h3 className="text-base font-semibold text-app-text uppercase tracking-wider flex items-center gap-2">
+        <NotebookPen className="w-4 h-4 text-blue-400" /> Mein Eintrag
+      </h3>
+
+      {/* Rating */}
+      <div>
+        <div className="text-xs text-app-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
+          <Star className="w-3.5 h-3.5" /> Eigene Bewertung
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {Array.from({ length: 10 }, (_, i) => i + 1).map(i => {
+            const active = rating !== null && i <= rating;
+            return (
+              <button
+                key={i}
+                onClick={() => persistRating(rating === i ? null : i)}
+                aria-label={`Bewertung ${i}`}
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-md text-xs font-bold transition-colors ${
+                  active
+                    ? 'bg-yellow-400/90 text-black'
+                    : 'bg-app-secondary/60 text-app-text-muted hover:bg-app-secondary'
+                }`}
+              >
+                {i}
+              </button>
+            );
+          })}
+          {rating !== null && (
+            <button
+              onClick={() => persistRating(null)}
+              className="ml-2 text-xs text-app-text-muted underline hover:text-app-text"
+            >
+              zurücksetzen
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Notes */}
+      <div>
+        <div className="text-xs text-app-text-muted uppercase tracking-wider mb-2">Notiz</div>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          onBlur={persistNotes}
+          placeholder="Was soll dir an diesem Film im Kopf bleiben?"
+          rows={3}
+          className="w-full bg-app-bg border border-app-border rounded-lg p-3 text-sm text-app-text placeholder-app-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <div className="text-[11px] text-app-text-muted mt-1">
+          {savingNotes ? 'Speichere…' : 'Wird beim Verlassen des Felds automatisch gespeichert.'}
+        </div>
+      </div>
+
+      {/* Tags */}
+      <div>
+        <div className="text-xs text-app-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
+          <Tag className="w-3.5 h-3.5" /> Tags
+        </div>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {tags.map(tag => (
+            <button
+              key={tag}
+              onClick={() => removeTag(tag)}
+              className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/30 rounded-full px-2 py-1 hover:bg-red-500/20 hover:text-red-300 transition-colors"
+              title="Entfernen"
+            >
+              #{tag} ✕
+            </button>
+          ))}
+        </div>
+        <input
+          value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ',') {
+              e.preventDefault();
+              addTag(tagInput);
+            }
+          }}
+          placeholder="Tag eingeben und Enter drücken (z.B. comfort, oscar, freitagabend)"
+          className="w-full bg-app-bg border border-app-border rounded-lg p-2 text-sm text-app-text placeholder-app-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+    </section>
   );
 }

@@ -160,4 +160,87 @@ describe('MovieConductor', () => {
         expect(novice?.unlocked).toBe(true);
     });
   });
+
+  describe('SELECT_MOVIE id resolution', () => {
+    it('uses tmdbId (not the internal DB id) when fetching details for a saved movie', async () => {
+      const savedMovie: Movie = {
+        id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', // internal Supabase UUID
+        tmdbId: 1924, // Superman
+        mediaType: 'movie',
+        title: 'Superman',
+        posterPath: null,
+        runtime: 143,
+        releaseDate: '1978-12-15',
+        overview: 'Saved record',
+        voteAverage: 7.3,
+        source: 'database',
+        watched: true,
+        favorite: false,
+      };
+
+      const tmdbDetails: Movie = {
+        id: '1924',
+        tmdbId: 1924,
+        title: 'Superman',
+        posterPath: null,
+        runtime: 143,
+        releaseDate: '1978-12-15',
+        overview: 'Trailer-rich details',
+        voteAverage: 7.3,
+        trailerKey: 'SUPERMAN-TRAILER',
+        source: 'tmdb',
+      };
+
+      const detailsSpy = vi.fn().mockResolvedValue(tmdbDetails);
+      const adapter: MovieServiceAdapter = {
+        ...mockAdapter,
+        getTrending: vi.fn().mockResolvedValue([savedMovie]),
+        getMovieDetails: detailsSpy,
+      };
+      const c = new MovieConductor(adapter);
+
+      await c.dispatch({ type: 'LOAD_MOVIES' });
+      await c.dispatch({ type: 'SELECT_MOVIE', payload: savedMovie.id });
+
+      // Adapter must be called with the TMDB id, not the UUID
+      expect(detailsSpy).toHaveBeenCalledTimes(1);
+      expect(detailsSpy).toHaveBeenCalledWith('1924', 'movie');
+
+      // Selected movie keeps the local identity but gets the TMDB trailer
+      const selected = c.getState().selectedMovie!;
+      expect(selected.id).toBe(savedMovie.id);
+      expect(selected.tmdbId).toBe(1924);
+      expect(selected.trailerKey).toBe('SUPERMAN-TRAILER');
+      expect(selected.watched).toBe(true);
+    });
+
+    it('falls back to the local item when a saved movie has no tmdbId', async () => {
+      const orphan: Movie = {
+        id: 'ffffffff-1111-2222-3333-444444444444',
+        title: 'Legacy Entry',
+        posterPath: null,
+        runtime: 90,
+        releaseDate: null,
+        overview: null,
+        voteAverage: null,
+        source: 'database',
+      };
+
+      const detailsSpy = vi.fn().mockResolvedValue({} as Movie);
+      const adapter: MovieServiceAdapter = {
+        ...mockAdapter,
+        getTrending: vi.fn().mockResolvedValue([orphan]),
+        getMovieDetails: detailsSpy,
+      };
+      const c = new MovieConductor(adapter);
+
+      await c.dispatch({ type: 'LOAD_MOVIES' });
+      await c.dispatch({ type: 'SELECT_MOVIE', payload: orphan.id });
+
+      // No TMDB call with the wrong id
+      expect(detailsSpy).not.toHaveBeenCalled();
+      // Selected movie is the local record so the modal does not show stranger trailers
+      expect(c.getState().selectedMovie?.id).toBe(orphan.id);
+    });
+  });
 });
