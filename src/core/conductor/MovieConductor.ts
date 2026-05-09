@@ -3,9 +3,9 @@ import { MovieServiceAdapter, UserIntent, WatchlistState, Movie, Achievement, Mo
 type Listener = (state: WatchlistState) => void;
 
 const INITIAL_ACHIEVEMENTS: Achievement[] = [
-  { id: 'first-blood', title: 'First Blood', description: 'Add your first movie to the collection.', iconName: 'Popcorn', unlocked: false },
-  { id: 'collector-novice', title: 'Collector Novice', description: 'Collect 5 movies.', iconName: 'Library', unlocked: false },
-  { id: 'genre-guru', title: 'Genre Guru', description: 'Collect 10 movies to become a guru.', iconName: 'Library', unlocked: false }
+  { id: 'first-blood', title: 'First Blood', description: 'Add your first movie to the collection.', iconName: 'Popcorn', unlocked: false, threshold: 1 },
+  { id: 'collector-novice', title: 'Collector Novice', description: 'Collect 5 movies.', iconName: 'Library', unlocked: false, threshold: 5 },
+  { id: 'genre-guru', title: 'Genre Guru', description: 'Collect 10 movies to become a guru.', iconName: 'Library', unlocked: false, threshold: 10 }
 ];
 
 const INITIAL_STATISTICS: MovieStatistics = {
@@ -15,6 +15,7 @@ const INITIAL_STATISTICS: MovieStatistics = {
 export class MovieConductor {
   private adapter: MovieServiceAdapter;
   private listeners: Listener[] = [];
+  private loadInFlight: Promise<void> | null = null;
   private state: WatchlistState = {
     items: [],
     customLists: [],
@@ -108,22 +109,28 @@ export class MovieConductor {
 
   // ==================== ORIGINAL HANDLER (rekonstruiert & funktionsfähig) ====================
   private async handleLoadMovies(): Promise<void> {
+    if (this.loadInFlight) return this.loadInFlight;
     this.updateState({ status: 'loading' });
-    try {
-      const [movies, lists] = await Promise.all([
-        this.adapter.getTrending(),
-        this.adapter.getLists()
-      ]);
-      this.updateState({ 
-        items: movies, 
-        customLists: lists,
-        status: 'idle',
-        statistics: this.calculateStatistics(movies),
-        achievements: this.checkAchievements(movies)
-      });
-    } catch (error) {
-      this.updateState({ status: 'error', error: error instanceof Error ? error.message : 'Load failed' });
-    }
+    this.loadInFlight = (async () => {
+      try {
+        const [movies, lists] = await Promise.all([
+          this.adapter.getTrending(),
+          this.adapter.getLists()
+        ]);
+        this.updateState({
+          items: movies,
+          customLists: lists,
+          status: 'idle',
+          statistics: this.calculateStatistics(movies),
+          achievements: this.checkAchievements(movies)
+        });
+      } catch (error) {
+        this.updateState({ status: 'error', error: error instanceof Error ? error.message : 'Load failed' });
+      } finally {
+        this.loadInFlight = null;
+      }
+    })();
+    return this.loadInFlight;
   }
 
   private async handleSearch(query: string): Promise<void> {
@@ -138,8 +145,18 @@ export class MovieConductor {
 
   private async handleAddMovie(movie: Movie): Promise<void> {
     try {
+      const alreadyExists = await this.adapter.exists({ title: movie.title, tmdbId: movie.tmdbId });
+      if (alreadyExists) {
+        this.updateState({ error: `Movie "${movie.title}" already exists!` });
+        return;
+      }
       const added = await this.adapter.add(movie);
-      this.updateState({ items: [added, ...this.state.items] });
+      const items = [added, ...this.state.items];
+      this.updateState({
+        items,
+        statistics: this.calculateStatistics(items),
+        achievements: this.checkAchievements(items)
+      });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Add failed' });
     }
@@ -180,8 +197,16 @@ export class MovieConductor {
 
   private async handleSelectMovie(id: string): Promise<void> {
     try {
-      const details = await this.adapter.getById(id) || this.state.items.find(m => m.id === id);
-      this.updateState({ selectedMovie: details || null });
+      let details: Movie | null = null;
+      try {
+        details = await this.adapter.getMovieDetails(id);
+      } catch {
+        details = null;
+      }
+      if (!details) {
+        details = (await this.adapter.getById(id)) || this.state.items.find(m => m.id === id) || null;
+      }
+      this.updateState({ selectedMovie: details });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Select failed' });
     }
@@ -199,7 +224,8 @@ export class MovieConductor {
   }
 
   private checkAchievements(items: Movie[]): Achievement[] {
-    return INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: items.length >= parseInt(a.id.split('-')[1] || '1') }));
+    const count = items.length;
+    return INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: count >= a.threshold }));
   }
 
   private updateState(updates: Partial<WatchlistState>): void {

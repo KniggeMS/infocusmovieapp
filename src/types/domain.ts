@@ -47,6 +47,7 @@ export interface Achievement {
   description: string;
   iconName: 'Popcorn' | 'Library';
   unlocked: boolean;
+  threshold: number;
 }
 
 export interface MovieStatistics {
