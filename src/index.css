@@ -32,13 +32,13 @@ body {
 
 /* Auth inputs: ensure readable text/placeholder/autofill on light backgrounds */
 .auth-input {
-  color: var(--text-main);
-  caret-color: var(--text-main);
-  -webkit-text-fill-color: var(--text-main);
+  color: #111827;
+  caret-color: #111827;
+  -webkit-text-fill-color: #111827;
 }
 
 .auth-input::placeholder {
-  color: var(--text-muted);
+  color: #6b7280;
   opacity: 1;
 }
 
@@ -46,9 +46,9 @@ body {
 .auth-input:-webkit-autofill:hover,
 .auth-input:-webkit-autofill:focus,
 .auth-input:-webkit-autofill:active {
-  -webkit-text-fill-color: var(--text-main);
-  caret-color: var(--text-main);
-  -webkit-box-shadow: 0 0 0 1000px var(--bg-card) inset;
-  box-shadow: 0 0 0 1000px var(--bg-card) inset;
+  -webkit-text-fill-color: #111827;
+  caret-color: #111827;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+  box-shadow: 0 0 0 1000px #ffffff inset;
   transition: background-color 9999s ease-in-out 0s;
 }
