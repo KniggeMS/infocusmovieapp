@@ -89,6 +89,10 @@ export type Database = {
           user_id: string | null
           vote_average: number | null
           watched: boolean | null
+          user_rating: number | null
+          notes: string | null
+          tags: string[] | null
+          genres: string[] | null
         }
         Insert: {
           created_at?: string
@@ -104,6 +108,10 @@ export type Database = {
           user_id?: string | null
           vote_average?: number | null
           watched?: boolean | null
+          user_rating?: number | null
+          notes?: string | null
+          tags?: string[] | null
+          genres?: string[] | null
         }
         Update: {
           created_at?: string
@@ -119,6 +127,10 @@ export type Database = {
           user_id?: string | null
           vote_average?: number | null
           watched?: boolean | null
+          user_rating?: number | null
+          notes?: string | null
+          tags?: string[] | null
+          genres?: string[] | null
         }
         Relationships: []
       }

@@ -66,6 +66,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
    */
   private mapRowToMovie(row: MovieRow): Movie {
     const tmdbId = row.tmdb_id ? Number(row.tmdb_id) : undefined;
+    const anyRow = row as any;
 
     return {
       id: row.id.toString(),
@@ -81,6 +82,10 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       mediaType: (row.media_type as 'movie' | 'tv') || 'movie',
       watched: row.watched ?? false,
       favorite: row.favorite ?? false,
+      userRating: anyRow.user_rating ?? null,
+      notes: anyRow.notes ?? null,
+      tags: Array.isArray(anyRow.tags) ? anyRow.tags : [],
+      genres: Array.isArray(anyRow.genres) ? anyRow.genres : undefined,
     };
   }
 
@@ -89,7 +94,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       const { data, error } = await this.client
         .from('movies')
         .select('*')
-        .limit(20)
+        .limit(500)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -336,20 +341,31 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       release_date: cleanMovie.releaseDate,
       overview: cleanMovie.overview,
       vote_average: cleanMovie.voteAverage,
-      media_type: cleanMovie.mediaType || 'movie' // Persist media type
+      media_type: cleanMovie.mediaType || 'movie'
+    };
+    if (Array.isArray(cleanMovie.genres) && cleanMovie.genres.length > 0) {
+      (mappedData as any).genres = cleanMovie.genres;
+    }
+
+    const tryInsert = async (payload: MovieInsert) => {
+      return await this.client.from('movies').insert(payload).select().single();
     };
 
-    const { data, error } = await this.client
-      .from('movies')
-      .insert(mappedData)
-      .select()
-      .single();
+    let { data, error } = await tryInsert(mappedData);
+
+    // Tolerate missing optional column "genres" if migration is pending.
+    if (error && /genres|column .* does not exist/i.test(error.message || '')) {
+      const fallback = { ...mappedData } as any;
+      delete fallback.genres;
+      ({ data, error } = await tryInsert(fallback));
+      if (!error) console.warn('genres column missing, saved without it:', error);
+    }
 
     if (error) {
       throw new Error(`Supabase add error: ${error.message}`);
     }
 
-    return this.mapRowToMovie(data);
+    return this.mapRowToMovie(data!);
   }
 
   async delete(id: string): Promise<void> {
@@ -368,24 +384,45 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   async update(id: string, updates: Partial<Movie>): Promise<void> {
     if (!this.isUUID(id)) return;
 
-    const dbUpdate: MovieUpdate = {};
-    // Map CamelCase to SnakeCase
+    const dbUpdate: Record<string, unknown> = {};
     if (updates.watched !== undefined) dbUpdate.watched = updates.watched;
     if (updates.favorite !== undefined) dbUpdate.favorite = updates.favorite;
     if (updates.title !== undefined) dbUpdate.title = updates.title;
     if (updates.overview !== undefined) dbUpdate.overview = updates.overview;
     if (updates.voteAverage !== undefined) dbUpdate.vote_average = updates.voteAverage;
     if (updates.posterPath !== undefined) dbUpdate.poster_path = updates.posterPath;
-    
+    if (updates.userRating !== undefined) dbUpdate.user_rating = updates.userRating;
+    if (updates.notes !== undefined) dbUpdate.notes = updates.notes;
+    if (updates.tags !== undefined) dbUpdate.tags = updates.tags;
+
     if (Object.keys(dbUpdate).length === 0) return;
 
     const { error } = await this.client
       .from('movies')
-      .update(dbUpdate)
+      .update(dbUpdate as MovieUpdate)
       .eq('id', id);
 
     if (error) {
-      throw new Error(`Supabase update error: ${error.message}`);
+      const msg = error.message || '';
+      // Tolerate missing optional columns (no migration applied yet).
+      if (/column .* does not exist|user_rating|notes|tags/i.test(msg)) {
+        const safeUpdate: Record<string, unknown> = { ...dbUpdate };
+        delete safeUpdate.user_rating;
+        delete safeUpdate.notes;
+        delete safeUpdate.tags;
+        if (Object.keys(safeUpdate).length === 0) {
+          console.warn('Skipping update — only optional columns were requested but column is missing:', msg);
+          return;
+        }
+        const retry = await this.client
+          .from('movies')
+          .update(safeUpdate as MovieUpdate)
+          .eq('id', id);
+        if (retry.error) throw new Error(`Supabase update error: ${retry.error.message}`);
+        console.warn('Optional columns missing, persisted core fields only:', msg);
+        return;
+      }
+      throw new Error(`Supabase update error: ${msg}`);
     }
   }
 
@@ -489,7 +526,11 @@ export class SupabaseMovieService implements MovieServiceAdapter {
             watched: m.watched,
             favorite: m.favorite,
             source: 'database',
-            addedAt: m.created_at
+            addedAt: m.created_at,
+            userRating: m.user_rating ?? null,
+            notes: m.notes ?? null,
+            tags: Array.isArray(m.tags) ? m.tags : [],
+            genres: Array.isArray(m.genres) ? m.genres : undefined,
          } as Movie;
      }).filter((m: any) => m !== null) as Movie[];
   }

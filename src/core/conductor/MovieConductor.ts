@@ -26,6 +26,7 @@ export class MovieConductor {
     error: null,
     filter: 'all',
     activeListId: null,
+    tagFilter: null,
   };
 
   constructor(adapter: MovieServiceAdapter) {
@@ -62,6 +63,39 @@ export class MovieConductor {
       case 'DELETE_LIST': await this.handleDeleteList(intent.payload); break;
       case 'ADD_TO_LIST': await this.handleAddMovieToList(intent.payload.listId, intent.payload.movie); break;
       case 'SELECT_LIST': await this.handleSelectList(intent.payload); break;
+      case 'UPDATE_USER_RATING': await this.handleUpdateField(intent.payload.id, { userRating: intent.payload.userRating }); break;
+      case 'UPDATE_NOTES': await this.handleUpdateField(intent.payload.id, { notes: intent.payload.notes }); break;
+      case 'UPDATE_TAGS': await this.handleUpdateField(intent.payload.id, { tags: intent.payload.tags }); break;
+      case 'SET_TAG_FILTER': this.updateState({ tagFilter: intent.payload }); break;
+    }
+  }
+
+  private async handleUpdateField(id: string, patch: Partial<Movie>): Promise<void> {
+    const movie = this.state.items.find(m => m.id === id);
+    const previous = movie ? { ...movie } : null;
+    if (movie) {
+      const updatedItems = this.state.items.map(m => m.id === id ? { ...m, ...patch } : m);
+      const updatedSelected = this.state.selectedMovie && this.state.selectedMovie.id === id
+        ? { ...this.state.selectedMovie, ...patch }
+        : this.state.selectedMovie;
+      this.updateState({
+        items: updatedItems,
+        selectedMovie: updatedSelected,
+        statistics: this.calculateStatistics(updatedItems),
+      });
+    }
+    try {
+      await this.adapter.update(id, patch);
+    } catch (error) {
+      // Revert on failure
+      if (previous) {
+        const reverted = this.state.items.map(m => m.id === id ? previous : m);
+        this.updateState({
+          items: reverted,
+          statistics: this.calculateStatistics(reverted),
+          error: error instanceof Error ? error.message : 'Update failed',
+        });
+      }
     }
   }
 
@@ -165,7 +199,8 @@ export class MovieConductor {
   private async handleRemoveMovie(id: string): Promise<void> {
     try {
       await this.adapter.delete(id);
-      this.updateState({ items: this.state.items.filter(m => m.id !== id) });
+      const items = this.state.items.filter(m => m.id !== id);
+      this.updateState({ items, statistics: this.calculateStatistics(items) });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Remove failed' });
     }
@@ -177,7 +212,7 @@ export class MovieConductor {
     try {
       await this.adapter.update(id, { watched: !movie.watched });
       const updated = this.state.items.map(m => m.id === id ? { ...m, watched: !m.watched } : m);
-      this.updateState({ items: updated });
+      this.updateState({ items: updated, statistics: this.calculateStatistics(updated) });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Toggle watched failed' });
     }
@@ -189,7 +224,7 @@ export class MovieConductor {
     try {
       await this.adapter.update(id, { favorite: !movie.favorite });
       const updated = this.state.items.map(m => m.id === id ? { ...m, favorite: !m.favorite } : m);
-      this.updateState({ items: updated });
+      this.updateState({ items: updated, statistics: this.calculateStatistics(updated) });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Toggle favorite failed' });
     }
@@ -217,8 +252,6 @@ export class MovieConductor {
       }
 
       if (details && localMovie) {
-        // Preserve local identity (DB id, watched/favorite flags) so the UI keeps
-        // referring to the saved record rather than the raw TMDB result.
         details = {
           ...details,
           id: localMovie.id,
@@ -227,6 +260,10 @@ export class MovieConductor {
           watched: localMovie.watched ?? details.watched,
           favorite: localMovie.favorite ?? details.favorite,
           addedAt: localMovie.addedAt ?? details.addedAt,
+          userRating: localMovie.userRating ?? null,
+          notes: localMovie.notes ?? null,
+          tags: localMovie.tags ?? [],
+          genres: details.genres && details.genres.length > 0 ? details.genres : (localMovie.genres ?? []),
         };
       }
 
@@ -237,13 +274,70 @@ export class MovieConductor {
   }
 
   private calculateStatistics(items: Movie[]): MovieStatistics {
+    const genreCount = new Map<string, number>();
+    const decadeCount = new Map<string, number>();
+    const yearCount = new Map<string, number>();
+    const tagCount = new Map<string, number>();
+
+    let ratingSum = 0;
+    let ratedCount = 0;
+    const currentYear = new Date().getFullYear();
+    let thisYearCount = 0;
+
+    for (const m of items) {
+      (m.genres || []).forEach(g => {
+        if (!g) return;
+        genreCount.set(g, (genreCount.get(g) || 0) + 1);
+      });
+
+      const release = m.releaseDate?.slice(0, 4);
+      if (release && /^\d{4}$/.test(release)) {
+        const decade = `${release.slice(0, 3)}0s`;
+        decadeCount.set(decade, (decadeCount.get(decade) || 0) + 1);
+      }
+
+      const added = m.addedAt?.slice(0, 4);
+      if (added && /^\d{4}$/.test(added)) {
+        yearCount.set(added, (yearCount.get(added) || 0) + 1);
+        if (Number(added) === currentYear) thisYearCount++;
+      }
+
+      (m.tags || []).forEach(t => {
+        if (!t) return;
+        tagCount.set(t, (tagCount.get(t) || 0) + 1);
+      });
+
+      if (typeof m.userRating === 'number' && !Number.isNaN(m.userRating)) {
+        ratingSum += m.userRating;
+        ratedCount++;
+      }
+    }
+
+    const sortDesc = <T extends { value?: number; count?: number }>(arr: T[]) =>
+      arr.sort((a, b) => ((b.value ?? b.count ?? 0) - (a.value ?? a.count ?? 0)));
+
+    const byGenre = sortDesc(Array.from(genreCount.entries()).map(([name, value]) => ({ name, value })));
+    const byDecade = Array.from(decadeCount.entries())
+      .map(([decade, count]) => ({ decade, count }))
+      .sort((a, b) => a.decade.localeCompare(b.decade));
+    const byYear = Array.from(yearCount.entries())
+      .map(([year, count]) => ({ year, count }))
+      .sort((a, b) => a.year.localeCompare(b.year));
+    const topTags = sortDesc(Array.from(tagCount.entries()).map(([name, value]) => ({ name, value })));
+
     return {
       totalMovies: items.length,
       watchedCount: items.filter(m => m.watched).length,
       totalRuntimeMinutes: items.reduce((sum, m) => sum + (m.runtime || 0), 0),
       favoriteCount: items.filter(m => m.favorite).length,
-      byGenre: [],
-      byDecade: []
+      byGenre: byGenre.slice(0, 8),
+      byDecade,
+      averageUserRating: ratedCount > 0 ? Number((ratingSum / ratedCount).toFixed(1)) : 0,
+      ratedCount,
+      byYear,
+      thisYearCount,
+      allTimeCount: items.length,
+      topTags: topTags.slice(0, 8),
     };
   }
 

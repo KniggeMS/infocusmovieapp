@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Home, Heart, User, Eye, Zap, BarChart2 } from 'lucide-react';
+import { Home, Heart, User, Eye, Zap, BarChart2, Sparkles } from 'lucide-react';
 
 interface BottomNavProps {
   currentFilter: string;
@@ -10,6 +10,7 @@ interface BottomNavProps {
   onShowWatched: () => void;
   onShowAchievements: () => void;
   onShowStatistics: () => void;
+  onShowRecommendations?: () => void;
 }
 
 export function BottomNav({
@@ -20,7 +21,8 @@ export function BottomNav({
   onShowProfile,
   onShowWatched,
   onShowAchievements,
-  onShowStatistics
+  onShowStatistics,
+  onShowRecommendations
 }: BottomNavProps) {
   const { t } = useTranslation();
 
@@ -85,6 +87,18 @@ export function BottomNav({
       >
         <BarChart2 className="w-6 h-6" />
       </button>
+
+      {onShowRecommendations && (
+        <button
+          className={`transition-colors ${
+            currentFilter === 'recommendations' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
+          }`}
+          onClick={onShowRecommendations}
+          aria-label="Empfehlungen"
+        >
+          <Sparkles className="w-6 h-6" />
+        </button>
+      )}
     </nav>
   );
 }
