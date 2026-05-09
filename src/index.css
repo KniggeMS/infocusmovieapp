@@ -29,3 +29,26 @@ body {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
+
+/* Auth inputs: ensure readable text/placeholder/autofill on light backgrounds */
+.auth-input {
+  color: var(--text-main);
+  caret-color: var(--text-main);
+  -webkit-text-fill-color: var(--text-main);
+}
+
+.auth-input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text-main);
+  caret-color: var(--text-main);
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-card) inset;
+  box-shadow: 0 0 0 1000px var(--bg-card) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
