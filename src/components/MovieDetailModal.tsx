@@ -157,14 +157,13 @@ function ActionButtons({
         </button>
 
         {/* Add to List */}
-        <ListMenu 
-          customLists={customLists} 
+        <ListMenu
+          customLists={customLists}
           onAddToList={(listId: string) => {
             conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movie } });
             onShowToast('Zum Liste hinzugefügt', 'success');
-          }} 
+          }}
           onCreateNewList={() => setShowListCreation(true)}
-          conductor={conductor}
         />
 
         {showListCreation && <ListCreationModal conductor={conductor} onClose={() => setShowListCreation(false)} />}
@@ -231,7 +230,7 @@ function RecommendationsSection({ recommendations, onSelectMovie }: { recommenda
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
         {recommendations?.slice(0, 5).map(rec => (
           <div key={rec.id} onClick={() => onSelectMovie(rec.id)} className="cursor-pointer">
-            <img src={rec.posterPath} alt={rec.title} className="rounded-lg" />
+            <img src={rec.posterPath ?? ''} alt={rec.title} className="rounded-lg" />
           </div>
         ))}
       </div>
