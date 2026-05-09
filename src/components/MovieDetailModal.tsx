@@ -42,12 +42,19 @@ export function MovieDetailModal({
       <div className="relative w-full max-w-7xl bg-app-bg sm:rounded-3xl border-t sm:border border-app-border shadow-2xl h-[95vh] sm:h-[90vh] overflow-y-auto overflow-x-hidden animate-slide-up scrollbar-hide">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-[120] bg-black/50 p-2 rounded-full text-app-text/80 hover:text-app-text hover:bg-app-secondary backdrop-blur-md transition-all pointer-events-auto"
+          aria-label="Schließen"
+          className="fixed sm:absolute top-3 right-3 sm:top-4 sm:right-4 z-[140] bg-black/60 p-2 rounded-full text-app-text/90 hover:text-app-text hover:bg-app-secondary backdrop-blur-md transition-all pointer-events-auto"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
 
         <HeroSection movie={movie} />
+
+        <div className="px-5 sm:px-10 pt-4 sm:pt-6 pb-2 bg-app-bg relative z-30">
+          <h2 className="text-2xl sm:text-4xl font-bold text-app-text leading-tight break-words pr-12 sm:pr-16">
+            {movie.title}
+          </h2>
+        </div>
 
         <ActionButtons
           movie={movie}
@@ -59,12 +66,18 @@ export function MovieDetailModal({
           onShowToast={onShowToast}
         />
 
-        <div className="p-5 sm:p-10 space-y-6 sm:space-y-8 bg-app-bg relative z-30">
+        <div className="px-5 sm:px-10 pt-4 pb-6 sm:pt-6 sm:pb-10 space-y-5 sm:space-y-6 bg-app-bg relative z-30">
           <MetadataRow movie={movie} />
-          <PlotSection movie={movie} />
-          <MetadataGrid movie={movie} />
-          <CastSection cast={movie.cast} />
-          <WatchProvidersSection watchProviders={movie.watchProviders} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="lg:col-span-2 space-y-5 sm:space-y-6">
+              <PlotSection movie={movie} />
+              <CastSection cast={movie.cast} />
+            </div>
+            <div className="space-y-5 sm:space-y-6">
+              <MetadataGrid movie={movie} />
+              <WatchProvidersSection watchProviders={movie.watchProviders} />
+            </div>
+          </div>
           <RecommendationsSection
             recommendations={movie.recommendations}
             onSelectMovie={(id: string) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
@@ -79,11 +92,11 @@ export function MovieDetailModal({
 
 function HeroSection({ movie }: { movie: Movie }) {
   return (
-    <div className="relative w-full aspect-video overflow-hidden group">
+    <div className="relative w-full aspect-video max-h-[40vh] sm:max-h-[45vh] overflow-hidden bg-black">
       {movie.trailerKey ? (
         <div className="absolute inset-0 w-full h-full pointer-events-none">
           <iframe
-            className="w-full h-full object-cover opacity-80 sm:opacity-100"
+            className="w-full h-full object-cover"
             src={`https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${movie.trailerKey}&playsinline=1&rel=0&disablekb=1&iv_load_policy=3`}
             title="Trailer"
             allow="autoplay; encrypted-media"
@@ -93,15 +106,10 @@ function HeroSection({ movie }: { movie: Movie }) {
         <img
           src={movie.backdropPath || movie.posterPath || ''}
           alt={movie.title}
-          className="w-full h-full object-cover opacity-80"
+          className="w-full h-full object-cover"
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-app-bg via-app-bg/40 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-10 flex flex-col justify-end h-full z-20 pointer-events-none">
-        <h2 className="text-2xl sm:text-5xl font-bold text-app-text mb-2 sm:mb-3 leading-tight drop-shadow-2xl line-clamp-2">
-          {movie.title}
-        </h2>
-      </div>
+      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-app-bg to-transparent pointer-events-none" />
     </div>
   );
 }
@@ -127,8 +135,8 @@ function ActionButtons({
   const [showListCreation, setShowListCreation] = useState(false);
 
   return (
-    <div className="px-5 sm:px-10 -mt-16 sm:-mt-20 relative z-[110]">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="px-5 sm:px-10 pt-1 pb-2 relative z-30">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         {/* Play Trailer */}
         {movie.trailerKey ? (
           <button onClick={() => window.open(`https://youtube.com/watch?v=${movie.trailerKey}`, '_blank')} className="flex items-center gap-2 bg-app-text text-app-bg hover:bg-app-text/90 px-3 py-2 rounded-lg font-medium text-sm shadow-lg active:scale-95">
