@@ -28,13 +28,14 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     setSuccessMsg(null);
 
     try {
-      if (mode === 'login') {
+            if (mode === 'login') {
         const user = await authService.signIn(identifier, password);
         onLoginSuccess(user);
       } else if (mode === 'signup') {
-        const user = await authService.signUp({ email, password, username });
+        const user = await authService.signUp(email, password, username);
         onLoginSuccess(user);
       } else if (mode === 'forgot') {
+
         await authService.resetPasswordForEmail(identifier);
         setSuccessMsg(t('auth.resetSuccess'));
       }

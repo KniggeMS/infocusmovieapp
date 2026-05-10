@@ -196,7 +196,8 @@ function App({ conductor }: AppProps) {
         {state.filter === 'achievements' ? (
           <AchievementsGrid achievements={state.achievements} />
         ) : state.filter === 'statistics' ? (
-          <StatisticsDashboard statistics={state.statistics} />
+                    <StatisticsDashboard movies={state.items} />
+
         ) : state.filter === 'recommendations' ? (
           <Recommendations
             library={state.items}

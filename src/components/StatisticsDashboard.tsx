@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Movie } from '../types/domain';
 
 interface StatisticsDashboardProps {
@@ -8,14 +8,14 @@ interface StatisticsDashboardProps {
 const roundHours = (minutes: number) => Math.round((minutes / 60) * 10) / 10;
 
 const getRuntimeMinutes = (movie: Movie): number => {
-  const raw = movie.runtime ?? movie.duration ?? 0;
-  const value = typeof raw === 'string' ? Number(raw) : raw;
-  return Number.isFinite(value) && value > 0 ? value : 0;
+  const runtime = movie.runtime;
+  const value = typeof runtime === 'string' ? Number(runtime) : runtime;
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0;
 };
 
-export function StatisticsDashboard({ movies }: StatisticsDashboardProps) {
+export const StatisticsDashboard = React.memo(({ movies }: StatisticsDashboardProps) => {
   const stats = useMemo(() => {
-    const watchedMovies = movies.filter(movie => movie.watched || movie.status === 'watched');
+    const watchedMovies = movies.filter(movie => movie.watched);
     const runtimeMinutes = watchedMovies.reduce((sum, movie) => sum + getRuntimeMinutes(movie), 0);
     const totalHours = roundHours(runtimeMinutes);
 
@@ -28,23 +28,29 @@ export function StatisticsDashboard({ movies }: StatisticsDashboardProps) {
   }, [movies]);
 
   return (
-    <section className="statistics-dashboard">
-      <h2>Statistiken</h2>
-      <div className="statistics-grid">
-        <article className="stat-card">
-          <span>Gesehene Filme</span>
-          <strong>{stats.watchedCount}</strong>
-        </article>
-        <article className="stat-card">
-          <span>Gesamtlaufzeit</span>
-          <strong>{stats.totalHours} Std.</strong>
-          <small>{stats.totalMinutes} Min.</small>
-        </article>
-        <article className="stat-card">
-          <span>Ø Laufzeit</span>
-          <strong>{stats.averageRuntimeMinutes} Min.</strong>
-        </article>
+    <div className="space-y-6 animate-fade-in">
+      <h2 className="text-2xl font-bold text-app-text">Statistiken</h2>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-app-card-bg border border-app-border p-5 rounded-2xl shadow-lg">
+          <span className="text-xs font-bold text-app-text-muted uppercase tracking-wider">Gesehene Filme</span>
+          <div className="text-3xl font-bold text-app-text mt-1">{stats.watchedCount}</div>
+        </div>
+        
+        <div className="bg-app-card-bg border border-app-border p-5 rounded-2xl shadow-lg">
+          <span className="text-xs font-bold text-app-text-muted uppercase tracking-wider">Gesamtlaufzeit</span>
+          <div className="text-3xl font-bold text-app-text mt-1">{stats.totalHours} <span className="text-sm font-normal text-app-text-muted">Std.</span></div>
+          <div className="text-xs text-app-text-muted mt-1">{stats.totalMinutes} Min. gesamt</div>
+        </div>
+        
+        <div className="bg-app-card-bg border border-app-border p-5 rounded-2xl shadow-lg">
+          <span className="text-xs font-bold text-app-text-muted uppercase tracking-wider">Ø Laufzeit</span>
+          <div className="text-3xl font-bold text-app-text mt-1">{stats.averageRuntimeMinutes} <span className="text-sm font-normal text-app-text-muted">Min.</span></div>
+        </div>
       </div>
-    </section>
+    </div>
   );
-}
+});
+
+StatisticsDashboard.displayName = 'StatisticsDashboard';
+

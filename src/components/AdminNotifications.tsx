@@ -36,10 +36,10 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  const fetchNotifications = async () => {
+    const fetchNotifications = async () => {
     try {
       const { data, error } = await supabase
-        .from('admin_notifications')
+        .from('admin_notifications' as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
@@ -54,7 +54,7 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
         return;
       }
 
-      setNotifications((data as AdminNotification[]) || []);
+      setNotifications((data as any[]) || []);
     } catch (e) {
       console.warn('AdminNotifications unexpected error:', e);
     }
@@ -82,8 +82,8 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
   const markAsRead = async (id: string) => {
     try {
       await supabase
-        .from('admin_notifications')
-        .update({ is_read: true })
+        .from('admin_notifications' as any)
+        .update({ is_read: true } as any)
         .eq('id', id);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
@@ -98,14 +98,15 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
       const unread = notifications.filter((n) => !n.is_read).map((n) => n.id);
       if (unread.length === 0) return;
       await supabase
-        .from('admin_notifications')
-        .update({ is_read: true })
+        .from('admin_notifications' as any)
+        .update({ is_read: true } as any)
         .in('id', unread);
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch (e) {
       console.warn('markAllAsRead error:', e);
     }
   };
+
 
   if (!available) return null;
 
