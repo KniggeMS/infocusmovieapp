@@ -2,7 +2,7 @@
   "id": "plan-mp09z60r-f5d9hs",
   "projectId": "222fca6c-ec70-4101-8c74-a3fcbb47176d",
   "title": "Analyse Projektordner — InFocus",
-  "status": "executing",
+  "status": "completed",
   "tldr": "Kurzanalyse des Repositorys, um Struktur, Tech-Stack, Start-Skripte, Umgebungsabhängigkeiten und kritische Pfade (src/core vs src/components, Supabase-Integration) zu identifizieren. Ergebnis: checkbare Liste von Befehlen im CodeBuddy Terminal, Dateien zum Öffnen im Editor und ein kleines Analyse-Report-File im Repo.",
   "steps": [
     {
@@ -15,55 +15,55 @@
       "id": "plan-mp09z60r-f5d9hs-s2",
       "order": 2,
       "text": "Paketinfos prüfen: Editor öffnen `package.json` und `README.md` lesen; in Terminal: cat package.json | jq .scripts (oder npm run) um Start/Scripts zu sehen.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s3",
       "order": 3,
       "text": "Framework & Build: Editor öffnen `tsconfig.json`, `vite.config.*`, `public/index.html` und `src/main.*` um Vite + React/TS zu bestätigen.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s4",
       "order": 4,
       "text": "Code-Architektur: Im Editor `src/` öffnen; prüfen ob `src/core/` (Conductor-Logik) und `src/components/` (UI) vorhanden sind; notiere Abweichungen.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s5",
       "order": 5,
       "text": "Auth & Daten: Suche in Editor/Terminal nach \"supabase\", \"SUPABASE_URL\", \".env\" und `src/services` oder `src/lib` für AuthService; notiere fehlende env-keys.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s6",
       "order": 6,
       "text": "Starten: In Terminal: npm install (oder pnpm/yarn), dann npm run dev; öffne Preview tab und verifiziere localhost-Seite lädt.",
-      "status": "pending"
+      "status": "skipped"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s7",
       "order": 7,
       "text": "Tests & Linter: In Terminal prüfen: npm test, npm run lint; notiere Fehler/fehlende Tests.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s8",
       "order": 8,
       "text": "Dokumentation: Erstelle Datei `analysis/structure-report.md` im Repo mit Befunden (Tech, start commands, envs, risiken).",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s9",
       "order": 9,
       "text": "Priorisierung: Markiere in report drei dringende Tasks: (a) fehlende .env.example, (b) fehlende Conductor-Tests, (c) fehlende RLS/Profiles-Dokumentation.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "plan-mp09z60r-f5d9hs-s10",
       "order": 10,
       "text": "Commit & Issue: Commit report, öffne Issues-Liste in Repo-Board (CodeBuddy Git UI) und erstelle Issues für die drei dringenden Tasks.",
-      "status": "pending"
+      "status": "done"
     }
   ],
   "relevantFiles": [
@@ -121,7 +121,7 @@
   ],
   "rawMarkdown": "## Plan: Analyse Projektordner — InFocus\n\n### TL;DR\nKurzanalyse des Repositorys, um Struktur, Tech-Stack, Start-Skripte, Umgebungsabhängigkeiten und kritische Pfade (src/core vs src/components, Supabase-Integration) zu identifizieren. Ergebnis: checkbare Liste von Befehlen im CodeBuddy Terminal, Dateien zum Öffnen im Editor und ein kleines Analyse-Report-File im Repo.\n\n### Steps\n1. Öffnen: In CodeBuddy Editor -> Projekt-Explorer, Terminal tab öffnen. In Terminal: git status; confirm branch and uncommitted changes.\n2. Paketinfos prüfen: Editor öffnen `package.json` und `README.md` lesen; in Terminal: cat package.json | jq .scripts (oder npm run) um Start/Scripts zu sehen.\n3. Framework & Build: Editor öffnen `tsconfig.json`, `vite.config.*`, `public/index.html` und `src/main.*` um Vite + React/TS zu bestätigen.\n4. Code-Architektur: Im Editor `src/` öffnen; prüfen ob `src/core/` (Conductor-Logik) und `src/components/` (UI) vorhanden sind; notiere Abweichungen.\n5. Auth & Daten: Suche in Editor/Terminal nach \"supabase\", \"SUPABASE_URL\", \".env\" und `src/services` oder `src/lib` für AuthService; notiere fehlende env-keys.\n6. Starten: In Terminal: npm install (oder pnpm/yarn), dann npm run dev; öffne Preview tab und verifiziere localhost-Seite lädt.\n7. Tests & Linter: In Terminal prüfen: npm test, npm run lint; notiere Fehler/fehlende Tests.\n8. Dokumentation: Erstelle Datei `analysis/structure-report.md` im Repo mit Befunden (Tech, start commands, envs, risiken).\n9. Priorisierung: Markiere in report drei dringende Tasks: (a) fehlende .env.example, (b) fehlende Conductor-Tests, (c) fehlende RLS/Profiles-Dokumentation.\n10. Commit & Issue: Commit report, öffne Issues-Liste in Repo-Board (CodeBuddy Git UI) und erstelle Issues für die drei dringenden Tasks.\n\n### Relevant files\n- `package.json` — Start-/Build-Skripte, Abhängigkeiten erkennen  \n- `README.md` — Projektüberblick, Setup-Anweisungen prüfen  \n- `tsconfig.json` / `vite.config.*` — bestätigt Vite + TS Setup  \n- `public/index.html` — Einstiegspunkt für Preview tab  \n- `src/main.*` / `src/App.*` — App bootstrap / routing prüfen  \n- `src/core/` — erwartete Conductor-Logik (State & Business)  \n- `src/components/` — UI-Komponenten (dumm vs smart)  \n- `.env` or `.env.example` — Secrets / Supabase Keys (wenn vorhanden)  \n- `tests/` oder `jest.config.*` — vorhandene Tests\n\n### Verification\n- Terminal: `npm run dev` startet ohne fatalen Errors; Preview tab zeigt die App.  \n- `analysis/structure-report.md` existiert, enthält die oben geforderten Abschnitte.  \n- `package.json`-scripts und benötigte env-keys dokumentiert.  \n- Mindestens ein Issue erstellt für `.env.example`, Conductor-Tests und RLS-Dokumentation.\n\n### Decisions\n- Fokus auf verifizierbaren, minimalen Analyse-Deliverables (report + issues) statt sofortiger Codeänderungen — rationale: Sicherheit (keine secrets committen) und klare Handlungsbasis.  \n- Priorisiere Conductor-Tests und env.example weil sie die Entwicklungsgeschwindigkeit und Sicherheit am stärksten verbessern.\n\n### Further Considerations\n- Fehlende Dateien oder Abweichungen (z.B. kein `src/core`) werden im Report dokumentiert; nächste Phase: Migration zur Conductor-Pattern-Ordnung falls nötig.  \n- Wenn Supabase-Keys fehlen, erzeuge nur `.env.example` ohne Secrets.  \n- Offene Frage: Welches Paketmanager-Tool bevorzugt das Projekt (npm/pnpm/yarn)? Falls unklar, dokumentieren und Standard npm verwenden.",
   "createdAt": "2026-05-10T21:18:45.820Z",
-  "updatedAt": "2026-05-10T21:21:29.385Z",
+  "updatedAt": "2026-05-10T21:28:54.715Z",
   "source": {
     "kind": "pm-chat",
     "chatId": "pm-222fca6c-ec70-4101-8c74-a3fcbb47176d",
