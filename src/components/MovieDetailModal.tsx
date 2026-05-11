@@ -2,8 +2,10 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Movie, CastMember, WatchProvider } from '../types/domain';
 import { MovieConductor } from '../core/conductor/MovieConductor';
-import { X, Play, Check, Plus, Share2, ListPlus, Star, Tag, NotebookPen } from 'lucide-react';
+import { X, Play, Check, Plus, Share2, ListPlus, Star, Tag, NotebookPen, Sparkles, Loader2 } from 'lucide-react';
 import { ListCreationModal } from './ListCreationModal';
+import { GeminiService } from '../services/GeminiService';
+
 
 interface MovieDetailModalProps {
   movie: Movie;
@@ -510,11 +512,46 @@ const PersonalSection = React.memo(({
     conductor.dispatch({ type: 'UPDATE_TAGS', payload: { id: movie.id, tags: next } });
   }, [conductor, movie.id, tags]);
 
+    const [aiLoading, setAiLoading] = useState(false);
+
+  const handleGenerateAiTags = useCallback(async () => {
+    if (!movie.overview) return;
+    setAiLoading(true);
+    try {
+      const newTags = await GeminiService.generateTags(movie.title, movie.overview);
+      if (newTags.length > 0) {
+        const existingTags = movie.tags || [];
+        const mergedTags = Array.from(new Set([...existingTags, ...newTags])).slice(0, 12);
+        conductor.dispatch({ type: 'UPDATE_TAGS', payload: { id: movie.id, tags: mergedTags } });
+        onShowToast(t('common.aiTagsSuccess', 'AI-Tags wurden hinzugefügt!'), 'success');
+      } else {
+        onShowToast(t('common.aiTagsError', 'Keine neuen Tags gefunden.'), 'info');
+      }
+    } catch (err) {
+      onShowToast('AI Error', 'error');
+    } finally {
+      setAiLoading(false);
+    }
+  }, [movie, conductor, onShowToast, t]);
+
   return (
     <section className="bg-app-secondary/30 border border-app-border rounded-2xl p-4 sm:p-5 space-y-5">
-      <h3 className="text-base font-semibold text-app-text uppercase tracking-wider flex items-center gap-2">
-        <NotebookPen className="w-4 h-4 text-blue-400" /> {t('common.myEntry', 'Mein Eintrag')}
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold text-app-text uppercase tracking-wider flex items-center gap-2">
+          <NotebookPen className="w-4 h-4 text-blue-400" /> {t('common.myEntry', 'Mein Eintrag')}
+        </h3>
+        
+        {/* AI Magic Button */}
+        <button
+          onClick={handleGenerateAiTags}
+          disabled={aiLoading || !movie.overview}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale transition-all"
+        >
+          {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+          {aiLoading ? 'Analysiere...' : 'AI Magic Tags'}
+        </button>
+      </div>
+
 
       {/* Rating */}
       <div>
