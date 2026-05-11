@@ -1,0 +1,1 @@
+powershell -Command "Get-Content -Path 'e:\cto.new\https-github.com-KniggeMS-InFocus\tsconfig.json' -TotalCount 921"

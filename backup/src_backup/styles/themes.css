@@ -1,0 +1,54 @@
+/* src/styles/themes.css */
+
+:root {
+  /* Default to Dark Theme variables if JS fails */
+  --bg-primary: #111827; /* gray-900 */
+  --bg-secondary: #1f2937; /* gray-800 */
+  --bg-card: #1f2937;
+  --text-main: #f9fafb; /* gray-50 */
+  --text-muted: #9ca3af; /* gray-400 */
+  --border-color: #374151; /* gray-700 */
+  
+  /* Glass specifics */
+  --glass-bg: rgba(31, 41, 55, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="light"] {
+  --bg-primary: #f3f4f6; /* gray-100 */
+  --bg-secondary: #ffffff; /* white */
+  --bg-card: #ffffff;
+  --text-main: #111827; /* gray-900 */
+  --text-muted: #6b7280; /* gray-500 */
+  --border-color: #e5e7eb; /* gray-200 */
+  
+  /* Glass specifics (Light) */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="dark"] {
+  /* Same as default */
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-card: #1f2937;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --border-color: #374151;
+  
+  --glass-bg: rgba(31, 41, 55, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="glass"] {
+  /* Transparent backgrounds for backdrop-filter to shine through */
+  --bg-primary: #0f172a; /* slate-900 fallback or base */
+  --bg-secondary: rgba(30, 41, 59, 0.4); /* slate-800 with alpha */
+  --bg-card: rgba(30, 41, 59, 0.4);
+  --text-main: #f8fafc; /* slate-50 */
+  --text-muted: #94a3b8; /* slate-400 */
+  --border-color: rgba(148, 163, 184, 0.1);
+  
+  --glass-bg: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}

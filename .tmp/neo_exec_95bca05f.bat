@@ -1,0 +1,1 @@
+cd "e:\cto.new\https-github.com-KniggeMS-InFocus" && git add analysis/structure-report.md .env.example && git status

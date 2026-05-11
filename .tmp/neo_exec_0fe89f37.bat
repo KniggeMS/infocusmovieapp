@@ -1,0 +1,1 @@
+cd "e:\cto.new\https-github.com-KniggeMS-InFocus" && ls -la | grep -E "\.env|\.gitignore"

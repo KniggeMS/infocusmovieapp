@@ -1,0 +1,1 @@
+cd "e:\cto.new\https-github.com-KniggeMS-InFocus" && dir /s /b .env*

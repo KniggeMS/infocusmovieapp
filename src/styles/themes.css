@@ -1,54 +1,67 @@
 /* src/styles/themes.css */
 
 :root {
-  /* Default to Dark Theme variables if JS fails */
-  --bg-primary: #111827; /* gray-900 */
-  --bg-secondary: #1f2937; /* gray-800 */
-  --bg-card: #1f2937;
-  --text-main: #f9fafb; /* gray-50 */
-  --text-muted: #9ca3af; /* gray-400 */
-  --border-color: #374151; /* gray-700 */
+  /* Default: Cinematic Noir */
+  --bg-primary: #050505;
+  --bg-secondary: #121212;
+  --bg-card: #1a1a1a;
+  --text-main: #ffffff;
+  --text-muted: #a0a0a0;
+  --border-color: #262626;
+  --accent-color: #e50914; /* Netflix Red as fallback */
   
-  /* Glass specifics */
-  --glass-bg: rgba(31, 41, 55, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(20, 20, 20, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 :root[data-theme="light"] {
-  --bg-primary: #f3f4f6; /* gray-100 */
-  --bg-secondary: #ffffff; /* white */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
   --bg-card: #ffffff;
-  --text-main: #111827; /* gray-900 */
-  --text-muted: #6b7280; /* gray-500 */
-  --border-color: #e5e7eb; /* gray-200 */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --accent-color: #3b82f6;
   
-  /* Glass specifics (Light) */
   --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border: rgba(0, 0, 0, 0.05);
 }
 
-:root[data-theme="dark"] {
-  /* Same as default */
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
-  --bg-card: #1f2937;
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --border-color: #374151;
+:root[data-theme="noir"] {
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-card: #111111;
+  --text-main: #f5f5f5;
+  --text-muted: #737373;
+  --border-color: #262626;
+  --accent-color: #dc2626;
   
-  --glass-bg: rgba(31, 41, 55, 0.7);
+  --glass-bg: rgba(0, 0, 0, 0.8);
   --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 :root[data-theme="glass"] {
-  /* Transparent backgrounds for backdrop-filter to shine through */
-  --bg-primary: #0f172a; /* slate-900 fallback or base */
-  --bg-secondary: rgba(30, 41, 59, 0.4); /* slate-800 with alpha */
-  --bg-card: rgba(30, 41, 59, 0.4);
-  --text-main: #f8fafc; /* slate-50 */
-  --text-muted: #94a3b8; /* slate-400 */
-  --border-color: rgba(148, 163, 184, 0.1);
+  --bg-primary: #020617;
+  --bg-secondary: rgba(30, 41, 59, 0.5);
+  --bg-card: rgba(30, 41, 59, 0.3);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --accent-color: #8b5cf6;
   
   --glass-bg: rgba(15, 23, 42, 0.6);
   --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="neon"] {
+  --bg-primary: #0d0221;
+  --bg-secondary: #190e38;
+  --bg-card: #241744;
+  --text-main: #ffffff;
+  --text-muted: #b1a1d1;
+  --border-color: #3d2b6b;
+  --accent-color: #00f2ff;
+  
+  --glass-bg: rgba(13, 2, 33, 0.7);
+  --glass-border: rgba(0, 242, 255, 0.2);
 }

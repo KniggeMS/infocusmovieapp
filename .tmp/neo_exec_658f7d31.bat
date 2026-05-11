@@ -1,0 +1,1 @@
+cd "e:\cto.new\https-github.com-KniggeMS-InFocus" && gh issue list --limit 20
