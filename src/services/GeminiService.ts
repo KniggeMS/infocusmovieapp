@@ -33,7 +33,7 @@ export const GeminiService = {
       
       // Clean up tags: find all #words and strip the # for internal storage
       const tags = text.match(/#[\w-]+/g) || [];
-      return tags.map(tag => tag.replace('#', '').trim()).slice(0, 6);
+      return tags.map((tag: string) => tag.replace('#', '').trim()).slice(0, 6);
     } catch (error) {
       console.error("Gemini AI Tag Generation Error:", error);
       return [];
