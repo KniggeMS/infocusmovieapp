@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Bell, Calendar, Mail, Shield, User, LogOut } from 'lucide-react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { Bell, Calendar, Mail, Shield, User, LogOut, X, Check } from 'lucide-react';
+
 import { AuthService } from '../services/AuthService';
 import { UserProfile } from '../types/auth';
 import { MovieConductor } from '../core/conductor/MovieConductor';
