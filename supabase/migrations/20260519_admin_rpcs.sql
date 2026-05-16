@@ -75,7 +75,12 @@ BEGIN
     IF caller_role = 'manager' AND EXISTS (SELECT 1 FROM profiles WHERE id = target_user_id AND role = 'admin') THEN
         RAISE EXCEPTION 'Managers cannot delete admin users';
     END IF;
-    DELETE FROM auth.users WHERE id = target_user_id;
+
+    -- Delete user's data first to avoid FK violations
+    DELETE FROM public.movies WHERE user_id = target_user_id;
+    DELETE FROM public.list_items WHERE list_id IN (SELECT id FROM public.custom_lists WHERE user_id = target_user_id);
+    DELETE FROM public.custom_lists WHERE user_id = target_user_id;
+    DELETE FROM auth.users WHERE id = target_user_id;  -- cascades to profiles
 END;
 $$;
 
