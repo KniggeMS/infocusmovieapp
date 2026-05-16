@@ -36,7 +36,7 @@ const resources = {
         statistics: "Statistics"
       },
       auth: {
-        welcome: "Welcome to InFocus",
+        welcome: "Welcome to InFocus Family CineLog",
         subtitle: "Your personal cinema logbook",
         login: "Sign In",
         signup: "Sign Up",
@@ -125,7 +125,7 @@ const resources = {
         statistics: "Statistiken"
       },
       auth: {
-        welcome: "Willkommen bei InFocus",
+        welcome: "Willkommen bei InFocus Family CineLog",
         subtitle: "Dein persönliches Kino-Logbuch",
         login: "Anmelden",
         signup: "Registrieren",

@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.infocus.app',
-  appName: 'InFocus CineLog',
+  appName: 'InFocus Family CineLog',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

@@ -2,7 +2,7 @@
   "name": "cinelog-infocus",
   "version": "2.4.1",
   "type": "module",
-  "description": "CineLog - Die ultimative AI-Watchlist PWA",
+  "description": "InFocus Family CineLog - Die ultimative AI-Watchlist PWA",
   "main": "index.tsx",
   "scripts": {
     "dev": "vite",
@@ -27,6 +27,7 @@
     "@capacitor/splash-screen": "^8.0.0",
     "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.89.0",
+    "framer-motion": "^12.38.0",
     "i18next": "^25.7.3",
     "i18next-browser-languagedetector": "^8.2.0",
     "lucide-react": "^0.555.0",

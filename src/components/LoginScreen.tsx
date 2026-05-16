@@ -77,8 +77,13 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         transition={{ duration: 0.6 }}
         className="fixed top-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10"
       >
-        <Film className="w-6 h-6 text-blue-400" />
-        <span className="text-lg font-bold text-app-text tracking-wider">InFocus</span>
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <Film className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <span className="text-xl font-bold text-app-text tracking-tight">InFocus</span>
+          <span className="block text-[10px] text-app-text-muted tracking-widest uppercase -mt-0.5">Family CineLog</span>
+        </div>
       </motion.div>
 
       {/* Language Toggle */}

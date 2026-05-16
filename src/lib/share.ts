@@ -10,7 +10,7 @@ export async function shareMovie(movie: Movie): Promise<ShareResult> {
   const title = movie.title;
   const rating = movie.voteAverage ? `⭐️ ${movie.voteAverage.toFixed(1)}/10` : '';
   // Use a nice emoji based on genre or media type if possible, keeping it simple for now
-  const text = `Hey, check out '${title}' on InFocus! ${rating}\n\n${movie.overview ? movie.overview.substring(0, 120) + '...' : ''}`;
+  const text = `Hey, check out '${title}' on InFocus Family CineLog! ${rating}\n\n${movie.overview ? movie.overview.substring(0, 120) + '...' : ''}`;
   
   // Fallback URL: TMDB. Ideally this would be a deep link to our app like infocus://movie/123
   // But since we don't have deep linking hosted yet, TMDB is a safe fallback for the recipient to see what it is.
@@ -21,7 +21,7 @@ export async function shareMovie(movie: Movie): Promise<ShareResult> {
   if (navigator.share) {
     try {
       await navigator.share({
-        title: `InFocus: ${title}`,
+        title: `InFocus Family CineLog: ${title}`,
         text: text,
         url: url
       });

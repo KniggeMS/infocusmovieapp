@@ -24,6 +24,8 @@ export function AdminPanel() {
   const [error, setError] = useState<string | null>(null);
   const [passwordModal, setPasswordModal] = useState<{ id: string; email: string } | null>(null);
   const [newPassword, setNewPassword] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<UserRow | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -49,13 +51,17 @@ export function AdminPanel() {
     }
   };
 
-  const handleDelete = async (userId: string) => {
-    if (!confirm('Benutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) return;
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return;
     try {
-      await authService.adminDeleteUser(userId);
-      setUsers(prev => prev.filter(u => u.id !== userId));
+      await authService.adminDeleteUser(deleteConfirm.id);
+      setUsers(prev => prev.filter(u => u.id !== deleteConfirm.id));
+      setDeleteConfirm(null);
+      setSuccessMsg('Benutzer gelöscht');
+      setTimeout(() => setSuccessMsg(null), 3000);
     } catch (e: any) {
       setError(e?.message || 'Fehler beim Löschen');
+      setDeleteConfirm(null);
     }
   };
 
@@ -65,9 +71,10 @@ export function AdminPanel() {
       await authService.adminChangePassword(passwordModal.id, newPassword);
       setPasswordModal(null);
       setNewPassword('');
-      alert('Passwort erfolgreich geändert!');
+      setSuccessMsg('Passwort geändert!');
+      setTimeout(() => setSuccessMsg(null), 3000);
     } catch (e: any) {
-      alert('Fehler: ' + (e?.message || 'Unbekannter Fehler'));
+      setError('Fehler: ' + (e?.message || 'Unbekannter Fehler'));
     }
   };
 
@@ -98,6 +105,11 @@ export function AdminPanel() {
           <button onClick={() => setError(null)} className="ml-2 underline">Schließen</button>
         </div>
       )}
+      {successMsg && (
+        <div className="bg-emerald-950/60 border border-emerald-800/50 text-emerald-200 p-3 rounded-xl text-sm">
+          {successMsg}
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-8 text-app-text-muted">Lade Benutzer...</div>
@@ -115,7 +127,7 @@ export function AdminPanel() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-app-text truncate">{u.username || u.email.split('@')[0]}</span>
+                  <span className="font-semibold text-app-text truncate">{u.username || (u.email ? u.email.split('@')[0] : 'User ' + u.id.slice(0, 8))}</span>
                   <RoleBadge role={u.role} />
                 </div>
                 <div className="text-xs text-app-text-muted truncate">{u.email}</div>
@@ -147,7 +159,7 @@ export function AdminPanel() {
                 </button>
 
                 <button
-                  onClick={() => handleDelete(u.id)}
+                  onClick={() => setDeleteConfirm(u)}
                   className="p-2 rounded-lg bg-app-secondary/50 border border-app-border text-app-text-muted hover:text-red-400 transition-colors"
                   title="Benutzer löschen"
                 >
@@ -185,6 +197,39 @@ export function AdminPanel() {
               </button>
               <button onClick={handlePasswordChange} disabled={newPassword.length < 6} className="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-bold transition-colors disabled:opacity-50">
                 Speichern
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative bg-app-bg border border-app-border rounded-3xl p-6 w-full max-w-sm shadow-2xl z-10"
+          >
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/15 flex items-center justify-center">
+                <Trash2 className="w-7 h-7 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-app-text">Benutzer löschen?</h3>
+              <p className="text-sm text-app-text-muted mt-2">
+                <strong className="text-app-text">{deleteConfirm.username || 'User ' + deleteConfirm.id.slice(0, 8)}</strong>
+                <br />
+                ({deleteConfirm.email || 'Keine E-Mail'})
+              </p>
+              <p className="text-xs text-red-400 mt-3">Alle Daten des Benutzers werden unwiderruflich gelöscht.</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 rounded-xl bg-app-secondary border border-app-border text-app-text font-medium transition-colors hover:bg-app-secondary/80">
+                Abbrechen
+              </button>
+              <button onClick={handleDeleteConfirm} className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold transition-colors">
+                Löschen
               </button>
             </div>
           </motion.div>

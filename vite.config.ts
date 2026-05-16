@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
         manifest: {
-          name: 'InFocus CineLog',
-          short_name: 'InFocus',
+          name: 'InFocus Family CineLog',
+          short_name: 'InFocus Family',
           description: 'Deine moderne Watchlist für Filme und Serien.',
           theme_color: '#0B0E14',
           background_color: '#0B0E14',

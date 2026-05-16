@@ -13,7 +13,7 @@ import { AchievementsGrid } from './components/AchievementsGrid';
 import { BottomNav } from './components/BottomNav';
 import { Recommendations } from './components/Recommendations';
 import { useToast } from './components/Toast';
-import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles } from 'lucide-react';
+import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles, Film } from 'lucide-react';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { shareMovie } from './lib/share';
 
@@ -140,11 +140,15 @@ function App({ conductor }: AppProps) {
       <header className="fixed top-0 left-0 right-0 z-50 bg-app-bg/80 backdrop-blur-xl border-b border-app-border px-4 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-                <img 
-                    src="/pwa-icon-192.png" 
-                    alt="InFocus Logo" 
-                    className="h-14 w-14 rounded-full object-cover border-2 border-app-border shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                />
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
+                    <Film className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="hidden sm:block">
+                    <div className="text-sm font-bold text-app-text leading-tight">InFocus</div>
+                    <div className="text-[9px] text-app-text-muted tracking-widest uppercase leading-tight">Family CineLog</div>
+                  </div>
+                </div>
                 
                 {/* Role Badge */}
                 {user.role === 'admin' && (
