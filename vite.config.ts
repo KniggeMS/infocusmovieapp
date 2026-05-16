@@ -45,13 +45,8 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       rollupOptions: {
         output: {
-          // KORREKTUR: Der Chunk-Name muss zum Paket in der package.json passen
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            'vendor-ui': ['lucide-react', 'recharts'],
-            'vendor-ai': ['@google/generative-ai'],
-            'vendor-db': ['@supabase/supabase-js']
-          }
+          // Manual chunks disabled - caused React 19 circular dependency issues
+          // React 19 + Vite bundling works better with default chunking
         }
       },
       chunkSizeWarningLimit: 1000 
