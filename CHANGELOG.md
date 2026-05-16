@@ -1,5 +1,104 @@
 # Changelog
 
+## [3.0.0] - 2026-05-16
+
+### 🎨 Visueller Overhaul — Cinema-Erlebnis
+
+**Foundation & Animations:**
+- **CSS-Animation-System:** Einheitliche Transitions, Micro-Interactions für alle Klick-Elemente
+- **Theme-Transitions:** Sanfte Übergänge (`transition-colors`) beim Umschalten zwischen Noir/Light/Glass/Neon
+- **Typography-Scale:** Definierte Schriftgrößen-Hierarchie (2xs bis 3xl)
+- **Semantische Farb-Tokens:** Konsistente CSS-Variablen statt hartcodierter Farben
+
+**Login Screen:**
+- **Cinematic Background:** Animierte Gradient-Blobs mit framer-motion
+- **Brand-Logo:** "InFocus"-Schriftzug + Film-Icon oben zentriert
+- **Mode-Transitions:** Geschmeidiger Wechsel zwischen Login/Signup/Forgot via `AnimatePresence`
+- **Google OAuth:** "Weiter mit Google" Button (Login + Signup)
+- **Lesbare Inputs:** Neue `.auth-input-field` Klasse mit festem Dark-Background und Autofill-Override
+
+**Movie Grid:**
+- **Staggered Entry:** Karten erscheinen nacheinander (40ms Verzögerung)
+- **Hover-Lift:** `hover:-translate-y-1 hover:shadow-2xl` für jeden Card
+- **Quick-Actions Overlay:** Heart/Eye/Plus/Trash erscheinen auf Hover
+- **Watched-Badge:** "✓ Gesehen" Badge oben-links auf der Karte
+- **Rating-Badge:** ★ Bewertung oben-rechts
+
+**Detail Modal (Cinema Immersion):**
+- **Full-Width Trailer:** YouTube-Trailer füllt 55vh des oberen Modalbereichs
+- **CSS-Overlay:** Unsichtbare Schicht über dem iframe unterdrückt alle YouTube-Steuerelemente
+- **Titel auf Hero:** Film-Titel + Metadaten (Jahr, Laufzeit, Typ, ★) überlappend auf dem Trailer
+- **Parallax-Effekt:** Sanfter Zoom bei fehlendem Trailer (motion.div scale-Animation)
+
+**Bottom Navigation:**
+- **Icons + Labels:** Jeder Tab hat jetzt einen Textlabel unter dem Icon
+- **Active Indicator:** Animierter Leuchtpunkt (spring physics) unter dem aktiven Tab
+- **AnimatePresence:** Geschmeidige Seiten-Übergänge beim Filter-Wechsel
+
+### 📊 Dashboard & Charts
+
+- **Recharts Integration:** Volle Nutzung der bereits installierten Recharts-Bibliothek
+- **Genre-Verteilung:** Interaktiver `PieChart` mit den Top-8 Genres inkl. Legende
+- **Bewertungs-Verteilung:** `BarChart` mit farbcodierten Balken (grün/gelb/rot)
+- **Jahrzehnte-Übersicht:** `BarChart` mit Filmen pro Dekade
+- **Stat-Karten:** 4 Karten (Filme, Laufzeit, Ø-Bewertung, Ø-Laufzeit) mit Lucide-Icons
+- **Theme-Adaptiv:** Chart-Farben lesen automatisch die aktuellen CSS-Variablen
+
+### 🏆 Achievements & Gamification
+
+- **XP/Level-System:** Level-Berechnung (10 XP pro Film, 100 XP pro Level)
+- **Fortschrittsbalken:** Animierte XP-Leiste mit Level-Anzeige
+- **7 Achievements:** First Blood, Collector Novice, Genre Guru, Film Fanatic, Cinema Legend, First Watch, Rating Pro
+- **Unlock-Animationen:** Spring-Animation, Wobble-Effekt beim Icon, Gleit-Progress-Bar
+
+### 👤 Profil & Benutzerverwaltung
+
+- **Benutzername editieren:** Direkt im Profil klickbar → Bearbeiten-Modus → Speichern
+- **Quick-Stats Übersicht:** Filme, Gesehen, Favoriten, Bewertet auf einen Blick
+- **Theme Live-Preview:** 4 Theme-Kacheln mit Vorschau-Farben und Auswahl-Haken
+- **System-Design folgen:** Toggle für OS-Theme-Präferenz (`prefers-color-scheme`)
+
+### 🔐 Rollen-System
+
+- **3 Rollen:** `admin` (voll), `manager` (löschen + Passwort), `user` (Filme verwalten)
+- **Role-Badges:** Im Profil und in der Admin-Liste mit Farbcodierung (rot/blau/grün)
+- **AdminPanel:** Komplette Benutzerverwaltung im Profil
+  - User-Liste mit Email, Rolle, Registrierungs-/Login-Datum
+  - Rollen-Dropdown zur direkten Änderung
+  - Passwort-Ändern Modal (styled)
+  - Löschen Modal (styled, mit Bestätigung)
+  - Cascade-Löschung (Filme + Listen + User)
+
+### 🔌 Integrationen
+
+- **Google OAuth:** "Weiter mit Google" Button + AuthService-Methoden
+- **OAuth-Provider vorbereitet:** Google, GitHub, Discord, Apple (via Supabase Dashboard aktivierbar)
+- **Chrome DevTools MCP:** Für Debugging direkt aus opencode
+
+### 🛠️ Skills
+
+- **vercel-deploy:** Deployment-Management für Vercel (Build, Preview, Production, Env-Vars)
+- **supabase-manager:** Supabase DB-Admin (Migrations, RLS, Auth, Schema)
+- **agent-memory-mcp:** Persistentes Memory-System (als MCP konfiguriert)
+
+### 🐛 Bug Fixes
+
+- **React Bundle Crash:** `manualChunks` in vite.config.ts entfernt → keine zirkulären Abhängigkeiten
+- **importmap entfernt:** CDN-Import-Remapping (esm.sh) mit Vite-Bundle kollidiert
+- **Supabase RLS Rekursion:** Radikale RLS-Policy-Bereinigung auf `profiles`
+- **custom_lists 400 Error:** Separate Queries statt PostgREST-Join (Schema-Cache umgangen)
+- **Login-Text unsichtbar:** Neue `.auth-input-field` Klasse mit fester Hintergrundfarbe
+- **Username speichern 500:** RLS-Policies auf `profiles` komplett neu aufgesetzt
+- **AdminPanel "id is ambiguous":** RPC-Funktion auf JSON-Rückgabe umgestellt
+- **`image.png` Error:** Chrome-AI-Konsolenfehler unterdrückt
+
+### 🔧 Technische Änderungen
+
+- **framer-motion installiert** für Animationen (React Native & Web kompatibel)
+- **Supabase RPCs erstellt:** `admin_get_all_users`, `admin_update_user_role`, `admin_delete_user`, `admin_change_password`
+- **Migrations aufgeräumt:** Doppelte Versionsnummern gefixt, Sync-Probleme behoben
+- **Backup-Branch erstellt:** `backup-vor-overhaul` als Sicherung
+
 ## [2.9.0] - 2026-01-03
 
 ### Added
