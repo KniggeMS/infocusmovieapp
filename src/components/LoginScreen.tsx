@@ -235,8 +235,8 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
               </motion.button>
             </form>
 
-            {/* OAuth / Social Login */}
-            {mode !== 'signup' && mode !== 'forgot' && (
+            {/* OAuth / Social Login — shown for login AND signup */}
+            {mode !== 'forgot' && (
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-3 text-xs text-app-text-muted uppercase tracking-wider">
                   <span className="flex-1 h-px bg-app-border" />

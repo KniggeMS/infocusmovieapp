@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Calendar, Mail, Shield, User, LogOut, X, Check, Monitor, Film, Eye, Heart, Star } from 'lucide-react';
+import { Bell, Calendar, Mail, Shield, User, LogOut, X, Check, Monitor, Film, Eye, Heart, Star, Users, Key, Trash2 } from 'lucide-react';
 
 import { AuthService } from '../services/AuthService';
 import { UserProfile } from '../types/auth';
 import { MovieConductor } from '../core/conductor/MovieConductor';
 import { CustomList } from '../types/domain';
+import { AdminPanel } from './AdminPanel';
 
 interface AdminNotification {
   id: string;
@@ -54,6 +55,7 @@ export const ProfileModal = React.memo(({
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState(user.username || '');
   const [savingUsername, setSavingUsername] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const state = conductor.getState();
 
   const handleSaveUsername = useCallback(async () => {
@@ -181,7 +183,7 @@ export const ProfileModal = React.memo(({
             </button>
           </section>
 
-          {/* User Info Section */}
+          {/* User Info Section + Role Permissions */}
           <section className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg shrink-0">
@@ -190,9 +192,17 @@ export const ProfileModal = React.memo(({
               <div className="min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-app-text truncate">{user.username || 'Benutzer'}</h3>
                 <p className="text-sm text-app-text-muted truncate">{user.email}</p>
-                <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase tracking-wider">
-                  <Shield className="w-3 h-3" />
-                  {user.role}
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  <RoleBadge role={user.role} />
+                  {user.role === 'user' && (
+                    <span className="text-[10px] text-app-text-muted">Kann Filme verwalten</span>
+                  )}
+                  {user.role === 'manager' && (
+                    <span className="text-[10px] text-app-text-muted">Kann Benutzer löschen & Passwörter ändern</span>
+                  )}
+                  {user.role === 'admin' && (
+                    <span className="text-[10px] text-app-text-muted">Voller Zugriff auf alle Funktionen</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -252,8 +262,33 @@ export const ProfileModal = React.memo(({
             </div>
           </section>
 
+          {/* Admin Panel (nur für Admin/Manager) */}
+          {(user.role === 'admin' || user.role === 'manager') && (
+            <section className="space-y-3 pt-2 border-t border-app-border">
+              <h4 className="text-xs font-bold text-app-text-muted uppercase tracking-wider flex items-center gap-2 pt-4">
+                <Shield className="w-3.5 h-3.5" /> Administration
+              </h4>
+              <button
+                onClick={() => setShowAdminPanel(!showAdminPanel)}
+                className="w-full flex items-center justify-between p-3 bg-app-secondary/30 border border-app-border rounded-xl text-sm text-app-text hover:bg-app-secondary/50 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-app-text-muted" />
+                  Benutzerverwaltung
+                </span>
+                <span className="text-app-text-muted">{showAdminPanel ? '▲' : '▼'}</span>
+              </button>
+            </section>
+          )}
+
+          {showAdminPanel && (
+            <div className="pt-2">
+              <AdminPanel />
+            </div>
+          )}
+
           {/* Actions */}
-          <section className="space-y-3">
+          <section className="space-y-3 pt-2">
             <button
               onClick={onLogout}
               className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 py-3 rounded-xl font-bold transition-all active:scale-95"
@@ -267,6 +302,23 @@ export const ProfileModal = React.memo(({
     </motion.div>
   );
 });
+
+function RoleBadge({ role }: { role: string }) {
+  const styles: Record<string, string> = {
+    admin: 'bg-red-500/10 text-red-400 border-red-500/20',
+    manager: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    user: 'bg-green-500/10 text-green-400 border-green-500/20',
+  };
+  const icons: Record<string, React.ReactNode> = {
+    admin: <Shield className="w-3 h-3" />,
+    manager: <Shield className="w-3 h-3" />,
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${styles[role] || 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+      {icons[role]} {role}
+    </span>
+  );
+}
 
 function ProfileRow({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
   return (

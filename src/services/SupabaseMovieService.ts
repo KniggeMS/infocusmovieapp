@@ -479,23 +479,43 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     const { data: { user } } = await this.client.auth.getUser();
     if (!user) return [];
 
-    // Fetch lists with IDs to count
+    // Fetch lists (no join — PostgREST schema cache issues with list_items FK)
     const { data, error } = await this.client
       .from('custom_lists')
-      .select('*, list_items(id)')
+      .select('*')
       .eq('user_id', user.id);
 
     if (error) {
         console.error('Error fetching lists:', error);
         return [];
     }
+
+    // Fetch item counts separately to avoid schema cache dependency
+    const { data: itemData, error: itemError } = await this.client
+      .from('list_items')
+      .select('list_id, id');
+
+    if (itemError) {
+      console.warn('Could not fetch list item counts:', itemError);
+    }
+
+    const itemCountMap = new Map<string, number>();
+    const itemIdsMap = new Map<string, string[]>();
+    if (itemData) {
+      for (const item of itemData) {
+        const lid = item.list_id;
+        itemCountMap.set(lid, (itemCountMap.get(lid) || 0) + 1);
+        if (!itemIdsMap.has(lid)) itemIdsMap.set(lid, []);
+        itemIdsMap.get(lid)!.push(item.id);
+      }
+    }
     
     return data.map((row: any) => ({
       id: row.id,
       name: row.name,
       description: row.description,
-      movieCount: row.list_items ? row.list_items.length : 0,
-      items: row.list_items ? row.list_items.map((i: any) => i.id) : [] 
+      movieCount: itemCountMap.get(row.id) || 0,
+      items: itemIdsMap.get(row.id) || [], 
     }));
   }
 

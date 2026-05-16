@@ -7,9 +7,13 @@ import { MovieConductor } from './core/conductor/MovieConductor';
 import { SupabaseMovieService } from './services/SupabaseMovieService';
 import { ToastProvider } from './components/Toast';
 
-window.addEventListener('error', (event) => {
-  console.error('Global runtime error:', event.error || event.message);
-});
+// Suppress known non-critical browser extension / built-in AI errors
+const origError = console.error;
+console.error = (...args) => {
+  const msg = args.join(' ');
+  if (msg.includes('model does not support image') || msg.includes('Cannot read "image.png"')) return;
+  origError.apply(console, args);
+};
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 

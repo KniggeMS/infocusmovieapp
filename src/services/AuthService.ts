@@ -238,4 +238,35 @@ export class AuthService {
     const { error } = await this.client.auth.signOut();
     if (error) throw error;
   }
+
+  // ===== Admin / Manager Methods =====
+
+  public async adminGetAllUsers(): Promise<any[]> {
+    const { data, error } = await this.client.rpc('admin_get_all_users');
+    if (error) throw error;
+    return data || [];
+  }
+
+  public async adminUpdateUserRole(targetUserId: string, newRole: string): Promise<void> {
+    const { error } = await this.client.rpc('admin_update_user_role', {
+      target_user_id: targetUserId,
+      new_role: newRole,
+    });
+    if (error) throw error;
+  }
+
+  public async adminDeleteUser(targetUserId: string): Promise<void> {
+    const { error } = await this.client.rpc('admin_delete_user', {
+      target_user_id: targetUserId,
+    });
+    if (error) throw error;
+  }
+
+  public async adminChangePassword(targetUserId: string, newPassword: string): Promise<void> {
+    const { error } = await this.client.rpc('admin_change_password', {
+      target_user_id: targetUserId,
+      new_password: newPassword,
+    });
+    if (error) throw error;
+  }
 }
