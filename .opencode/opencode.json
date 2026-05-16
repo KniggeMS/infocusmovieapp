@@ -23,8 +23,8 @@
       "description": "Save current session to ChromaDB memory"
     },
     "load": {
-      "template": "Load a previous session from ChromaDB.\n\nList: python C:\\Users\\Admin\\.shokunin\\scripts\\chroma-helper.py session list 5\n\nContinue: python C:\\Users\\Admin\\.shokunin\\scripts\\chroma-helper.py session continue <session_id>",
-      "description": "Load a previous session from ChromaDB"
+      "template": "Load full memory context from ChromaDB and .memory-context.md.\n\n1. First read E:\\.opencode\\..memory-context.md for the project summary\n2. Then run: python C:\\Users\\Admin\\.shokunin\\scripts\\chroma-helper.py recent 3\n3. Then run: python C:\\Users\\Admin\\.shokunin\\scripts\\chroma-helper.py recall \"Infocus architecture decisions features\"\n4. Summarize everything so the user knows context is restored",
+      "description": "Load full memory context from ChromaDB + .memory-context.md"
     }
   },
   "permission": {

@@ -29,6 +29,7 @@ Thumbs.db
 
 # Session memory (temporary notes)
 .session-memory.md
+.memory-context.md
 
 # Supabase CLI temp files
 supabase/.temp/
