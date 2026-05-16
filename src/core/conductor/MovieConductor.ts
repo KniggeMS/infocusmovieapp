@@ -5,7 +5,11 @@ type Listener = (state: WatchlistState) => void;
 const INITIAL_ACHIEVEMENTS: Achievement[] = [
   { id: 'first-blood', title: 'First Blood', description: 'Add your first movie to the collection.', iconName: 'Popcorn', unlocked: false, threshold: 1 },
   { id: 'collector-novice', title: 'Collector Novice', description: 'Collect 5 movies.', iconName: 'Library', unlocked: false, threshold: 5 },
-  { id: 'genre-guru', title: 'Genre Guru', description: 'Collect 10 movies to become a guru.', iconName: 'Library', unlocked: false, threshold: 10 }
+  { id: 'genre-guru', title: 'Genre Guru', description: 'Collect 10 movies to become a guru.', iconName: 'Library', unlocked: false, threshold: 10 },
+  { id: 'film-fanatic', title: 'Film Fanatic', description: 'Collect 25 movies in your library.', iconName: 'Popcorn', unlocked: false, threshold: 25 },
+  { id: 'cinema-legend', title: 'Cinema Legend', description: 'Collect 50 movies in your library.', iconName: 'Library', unlocked: false, threshold: 50 },
+  { id: 'first-watched', title: 'First Watch', description: 'Mark your first movie as watched.', iconName: 'Popcorn', unlocked: false, threshold: 1 },
+  { id: 'rating-pro', title: 'Rating Pro', description: 'Rate 10 movies with a personal score.', iconName: 'Library', unlocked: false, threshold: 10 },
 ];
 
 const INITIAL_STATISTICS: MovieStatistics = {
@@ -404,7 +408,23 @@ export class MovieConductor {
 
   private checkAchievements(items: Movie[]): Achievement[] {
     const count = items.length;
-    return INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: count >= a.threshold }));
+    const watchedCount = items.filter(m => m.watched).length;
+    const ratedCount = items.filter(m => typeof m.userRating === 'number' && m.userRating > 0).length;
+
+    return INITIAL_ACHIEVEMENTS.map(a => {
+      let unlocked = false;
+      switch (a.id) {
+        case 'first-watched':
+          unlocked = watchedCount >= a.threshold;
+          break;
+        case 'rating-pro':
+          unlocked = ratedCount >= a.threshold;
+          break;
+        default:
+          unlocked = count >= a.threshold;
+      }
+      return { ...a, unlocked };
+    });
   }
 
   private updateState(updates: Partial<WatchlistState>): void {

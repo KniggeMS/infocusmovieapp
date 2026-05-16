@@ -2,14 +2,21 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-// Lazy initialization of AI model
 let model: any = null;
 
 const getModel = () => {
-  if (!API_KEY) return null;
+  if (!API_KEY) {
+    console.warn('Gemini: VITE_GEMINI_API_KEY is not set');
+    return null;
+  }
   if (!model) {
-    const genAI = new GoogleGenerativeAI(API_KEY);
-    model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    try {
+      const genAI = new GoogleGenerativeAI(API_KEY);
+      model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    } catch (e) {
+      console.error('Gemini: Failed to initialize model', e);
+      return null;
+    }
   }
   return model;
 };

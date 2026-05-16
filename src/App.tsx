@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MovieConductor } from './core/conductor/MovieConductor';
 import { WatchlistState, Movie } from './types/domain';
 import { UserProfile } from './types/auth';
@@ -193,6 +194,14 @@ function App({ conductor }: AppProps) {
           </div>
         )}
         
+        <AnimatePresence mode="wait">
+        <motion.div
+          key={state.filter + (state.activeListId || '')}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.25 }}
+        >
         {state.filter === 'achievements' ? (
           <AchievementsGrid achievements={state.achievements} />
         ) : state.filter === 'statistics' ? (
@@ -246,91 +255,103 @@ function App({ conductor }: AppProps) {
                     </div>
                 )}
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {filteredItems.map((movie) => (
-                        <div 
-                            key={movie.id} 
+                    {filteredItems.map((movie, index) => (
+                        <motion.div
+                            key={movie.id}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.04, duration: 0.35 }}
                             onClick={() => conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id })}
-                            style={{ contentVisibility: 'auto', containIntrinsicSize: '0 300px' } as React.CSSProperties}
-                            className="relative aspect-[2/3] rounded-2xl overflow-hidden group shadow-lg bg-app-card-bg cursor-pointer"
+                            className="relative aspect-[2/3] rounded-2xl overflow-hidden group shadow-lg bg-app-card-bg cursor-pointer hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
                         >
-
                             {/* Image */}
                             {movie.posterPath ? (
-                                <img 
-                                    src={movie.posterPath} 
-                                    alt={movie.title} 
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                                <img
+                                    src={movie.posterPath}
+                                    alt={movie.title}
+                                    loading="lazy"
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-app-text-muted bg-app-card-bg">
+                                <div className="w-full h-full flex items-center justify-center text-app-text-muted bg-app-card-bg text-sm">
                                     No Image
                                 </div>
                             )}
 
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90" />
+                            {/* Gradient Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
 
-                            {/* Action Button (Top Right) */}
-                            <div className="absolute top-3 right-3 z-10">
-                                {movie.source === 'tmdb' ? (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }}
-                                        className="bg-black/40 backdrop-blur-md p-2 rounded-full transition-all shadow-lg text-app-text hover:bg-accent-blue"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
-                                        className="bg-black/40 backdrop-blur-md p-2 rounded-full text-app-text hover:bg-red-500 transition-all shadow-lg"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                            {/* Watched Badge */}
+                            {movie.watched && (
+                                <div className="absolute top-3 left-3 z-10 bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
+                                    <span>✓ Gesehen</span>
+                                </div>
+                            )}
+
+                            {/* Rating Badge (Top Right) */}
+                            {movie.voteAverage && (
+                                <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-accent-glow text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
+                                    ★ {movie.voteAverage.toFixed(1)}
+                                </div>
+                            )}
+
+                            {/* Quick Actions (visible on hover) */}
+                            <div className="absolute inset-0 z-10 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                {movie.source !== 'tmdb' && (
+                                    <>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
+                                            className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
+                                        >
+                                            <Heart className={`w-5 h-5 ${movie.favorite ? 'fill-red-500 text-red-500' : 'text-white/80 hover:text-red-400'}`} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }}
+                                            className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
+                                        >
+                                            <Eye className={`w-5 h-5 ${movie.watched ? 'text-emerald-400' : 'text-white/80 hover:text-emerald-400'}`} />
+                                        </button>
+                                    </>
                                 )}
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); movie.source === 'tmdb' ? handleAddMovie(movie) : conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
+                                    className={`bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg ${
+                                        movie.source === 'tmdb' ? 'hover:bg-blue-500/40' : 'hover:bg-red-500/40'
+                                    }`}
+                                >
+                                    {movie.source === 'tmdb' ? (
+                                        <Plus className="w-5 h-5 text-white/80" />
+                                    ) : (
+                                        <Trash2 className="w-5 h-5 text-white/80" />
+                                    )}
+                                </button>
                             </div>
 
                             {/* Text Content */}
-                            <div className="absolute bottom-0 left-0 right-0 p-3">
-                                <h3 className="font-bold text-sm truncate text-app-text">{movie.title}</h3>
+                            <div className="absolute bottom-0 left-0 right-0 p-3 z-20">
+                                <h3 className="font-bold text-sm truncate text-app-text drop-shadow-lg">{movie.title}</h3>
                                 <div className="text-xs text-app-text-muted flex items-center gap-2 mt-1">
-                                    <span className="bg-app-secondary px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
+                                    <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider backdrop-blur-sm">
                                         {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
                                     </span>
                                     <span>{movie.releaseDate?.split('-')[0] || 'N/A'}</span>
-                                    {movie.voteAverage && (
-                                        <span className="flex items-center gap-1 text-accent-glow">
-                                            ★ {movie.voteAverage.toFixed(1)}
-                                        </span>
-                                    )}
                                 </div>
-                                {movie.source !== 'tmdb' && (
-                                    <>
-                                        {!!movie.tags?.length && (
-                                            <div className="flex flex-wrap gap-1 mt-1">
-                                                {movie.tags!.slice(0, 2).map(tag => (
-                                                    <span key={tag} className="text-[10px] bg-blue-500/15 text-blue-300 border border-blue-500/30 rounded px-1.5 py-0.5">
-                                                        #{tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                        <div className="flex items-center gap-3 mt-2">
-                                            <Heart
-                                                className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.favorite ? "fill-red-500 text-red-500" : "text-app-text-muted"}`}
-                                                onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
-                                            />
-                                            <Eye
-                                                className={`w-5 h-5 cursor-pointer transition hover:scale-110 ${movie.watched ? "text-blue-400" : "text-gray-600"}`}
-                                                onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }}
-                                            />
-                                            {typeof movie.userRating === 'number' && movie.userRating > 0 && (
-                                                <span className="text-xs text-yellow-400 font-bold">★ {movie.userRating}</span>
-                                            )}
-                                        </div>
-                                    </>
+                                {movie.source !== 'tmdb' && movie.tags && movie.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {movie.tags.slice(0, 2).map(tag => (
+                                            <span key={tag} className="text-[10px] bg-blue-500/15 text-blue-300 border border-blue-500/30 rounded px-1.5 py-0.5 backdrop-blur-sm">
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                                {movie.source !== 'tmdb' && typeof movie.userRating === 'number' && movie.userRating > 0 && (
+                                    <div className="mt-1">
+                                        <span className="text-xs text-yellow-400 font-bold drop-shadow-lg">★ {movie.userRating}/10</span>
+                                    </div>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
 
@@ -344,6 +365,8 @@ function App({ conductor }: AppProps) {
                 )}
             </>
         )}
+        </motion.div>
+        </AnimatePresence>
 
       </div>
 

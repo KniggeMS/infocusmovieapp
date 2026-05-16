@@ -5,7 +5,77 @@
 @tailwind utilities;
 
 body {
-  @apply bg-app-bg text-app-text transition-colors duration-300;
+  @apply bg-app-bg text-app-text;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== Animation Keyframes ===== */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes stagger-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Animation Utility Classes ===== */
+.animate-fade-in {
+  animation: fade-in 0.4s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease forwards;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.4s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Staggered children: override animation-delay via style prop */
+.stagger-child {
+  animation: stagger-fade-in 0.5s ease forwards;
+  opacity: 0;
 }
 
 /* Hide scrollbars globally */
@@ -30,25 +100,32 @@ body {
   scrollbar-color: transparent transparent;
 }
 
-/* Auth inputs: ensure readable text/placeholder/autofill on light backgrounds */
-.auth-input {
-  color: #111827;
-  caret-color: #111827;
-  -webkit-text-fill-color: #111827;
+/* Auth input field - visible across all themes */
+.auth-input-field {
+  @apply w-full rounded-xl py-3 pl-12 pr-4 text-sm border transition-all outline-none;
+  background-color: rgba(0, 0, 0, 0.35);
+  border-color: var(--border-color);
+  color: #ffffff;
+  caret-color: #ffffff;
 }
-
-.auth-input::placeholder {
-  color: #6b7280;
+.auth-input-field::placeholder {
+  color: #9ca3af;
   opacity: 1;
 }
+.auth-input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
 
-.auth-input:-webkit-autofill,
-.auth-input:-webkit-autofill:hover,
-.auth-input:-webkit-autofill:focus,
-.auth-input:-webkit-autofill:active {
-  -webkit-text-fill-color: #111827;
-  caret-color: #111827;
-  -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
-  box-shadow: 0 0 0 1000px #ffffff inset;
+/* Input autofill override for all themes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0 1000px #1a1a2e inset !important;
+  box-shadow: 0 0 0 1000px #1a1a2e inset !important;
   transition: background-color 9999s ease-in-out 0s;
+  border-radius: 12px;
 }

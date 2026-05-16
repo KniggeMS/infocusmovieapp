@@ -8,10 +8,14 @@
   --text-main: #ffffff;
   --text-muted: #a0a0a0;
   --border-color: #262626;
-  --accent-color: #e50914; /* Netflix Red as fallback */
+  --accent-color: #e50914;
+  --accent-glow: #60a5fa;
   
   --glass-bg: rgba(20, 20, 20, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Smooth theme transitions */
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
 }
 
 :root[data-theme="light"] {

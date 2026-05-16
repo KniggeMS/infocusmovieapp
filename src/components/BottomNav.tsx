@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { Home, Heart, User, Eye, Zap, BarChart2, Sparkles } from 'lucide-react';
 
 interface BottomNavProps {
@@ -13,6 +13,16 @@ interface BottomNavProps {
   onShowRecommendations?: () => void;
 }
 
+const tabs = [
+  { key: 'all', icon: Home, label: 'Home' },
+  { key: 'favorites', icon: Heart, label: 'Favoriten' },
+  { key: 'profile', icon: User, label: 'Profil' },
+  { key: 'watched', icon: Eye, label: 'Gesehen' },
+  { key: 'achievements', icon: Zap, label: 'Erfolge' },
+  { key: 'statistics', icon: BarChart2, label: 'Statistiken' },
+  { key: 'recommendations', icon: Sparkles, label: 'Empfehlungen' },
+] as const;
+
 export function BottomNav({
   currentFilter,
   showProfile,
@@ -24,81 +34,56 @@ export function BottomNav({
   onShowStatistics,
   onShowRecommendations
 }: BottomNavProps) {
-  const { t } = useTranslation();
+  const isActive = (key: string) => {
+    if (key === 'profile') return showProfile;
+    return currentFilter === key;
+  };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-app-bg/90 backdrop-blur-2xl border-t border-app-border px-6 py-4 flex justify-between items-center z-50 max-w-4xl mx-auto w-full md:rounded-t-3xl">
-      <button
-        className={`transition-colors ${
-          currentFilter === 'all' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
-        }`}
-        onClick={onNavigateHome}
-        aria-label={t('nav.home')}
-      >
-        <Home className="w-6 h-6" />
-      </button>
+    <nav className="fixed bottom-0 left-0 right-0 bg-app-bg/90 backdrop-blur-2xl border-t border-app-border px-2 sm:px-4 py-2 z-50">
+      <div className="max-w-4xl mx-auto flex justify-around items-center">
+        {tabs.map(({ key, icon: Icon, label }) => {
+          const active = isActive(key);
+          const handler = {
+            all: onNavigateHome,
+            favorites: onShowFavorites,
+            profile: onShowProfile,
+            watched: onShowWatched,
+            achievements: onShowAchievements,
+            statistics: onShowStatistics,
+            recommendations: onShowRecommendations,
+          }[key];
+          if (key === 'recommendations' && !onShowRecommendations) return null;
 
-      <button
-        className={`transition-colors ${
-          currentFilter === 'favorites' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
-        }`}
-        onClick={onShowFavorites}
-        aria-label={t('nav.favorites')}
-      >
-        <Heart className="w-6 h-6" />
-      </button>
-
-      <button
-        className={`transition-colors ${
-          showProfile ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
-        }`}
-        onClick={onShowProfile}
-        aria-label="Profile"
-      >
-        <User className="w-6 h-6" />
-      </button>
-
-      <button
-        className={`transition-colors ${
-          currentFilter === 'watched' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
-        }`}
-        onClick={onShowWatched}
-        aria-label={t('nav.watched')}
-      >
-        <Eye className="w-6 h-6" />
-      </button>
-
-      <button
-        className={`transition-colors ${
-          currentFilter === 'achievements' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
-        }`}
-        onClick={onShowAchievements}
-        aria-label={t('nav.achievements')}
-      >
-        <Zap className="w-6 h-6" />
-      </button>
-
-      <button
-        className={`transition-colors ${
-          currentFilter === 'statistics' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
-        }`}
-        onClick={onShowStatistics}
-        aria-label={t('nav.statistics')}
-      >
-        <BarChart2 className="w-6 h-6" />
-      </button>
-
-      {onShowRecommendations && (
-        <button
-          className={`transition-colors ${
-            currentFilter === 'recommendations' ? 'text-blue-500' : 'text-app-text-muted hover:text-app-text'
-          }`}
-          onClick={onShowRecommendations}
-          aria-label="Empfehlungen"
-        >
-          <Sparkles className="w-6 h-6" />
-        </button>
-      )}
+          return (
+            <button
+              key={key}
+              onClick={handler}
+              className="relative flex flex-col items-center gap-0.5 py-1 px-2 sm:px-3 min-w-0"
+            >
+              <Icon
+                className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
+                  active ? 'text-accent-glow' : 'text-app-text-muted hover:text-app-text'
+                }`}
+              />
+              <span
+                className={`text-[10px] leading-tight transition-colors whitespace-nowrap ${
+                  active ? 'text-accent-glow font-semibold' : 'text-app-text-muted'
+                }`}
+              >
+                {label}
+              </span>
+              {active && (
+                <motion.div
+                  layoutId="nav-indicator"
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-glow"
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 }

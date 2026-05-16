@@ -205,21 +205,33 @@ export class AuthService {
     if (error) throw error;
     if (!data.user) throw new Error('No user data returned');
 
-    // Also write username directly to profiles (belt-and-suspenders,
-    // in case the trigger hasn't run yet or migration is pending).
-    if (username) {
-      try {
-        await this.client
-          .from('profiles')
-          .upsert({ id: data.user.id, role: 'user', username })
-          .select()
-          .single();
-      } catch (e) {
-        console.warn('Could not upsert username to profiles (migration pending?):', e);
-      }
-    }
-
     return this.mapUser(data.user);
+  }
+
+  /**
+   * Sign in with Google (OAuth).
+   */
+  public async signInWithGoogle(): Promise<void> {
+    const { error } = await this.client.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: AppConfig.getRedirectUrl(),
+      },
+    });
+    if (error) throw error;
+  }
+
+  /**
+   * Sign in with a supported OAuth provider.
+   */
+  public async signInWithOAuth(provider: 'google' | 'github' | 'discord' | 'apple'): Promise<void> {
+    const { error } = await this.client.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: AppConfig.getRedirectUrl(),
+      },
+    });
+    if (error) throw error;
   }
 
   public async signOut(): Promise<void> {

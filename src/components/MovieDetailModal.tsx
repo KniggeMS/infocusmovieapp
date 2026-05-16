@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Movie, CastMember, WatchProvider } from '../types/domain';
 import { MovieConductor } from '../core/conductor/MovieConductor';
+import { motion } from 'framer-motion';
 import { X, Play, Check, Plus, Share2, ListPlus, Star, Tag, NotebookPen, Sparkles, Loader2 } from 'lucide-react';
 import { ListCreationModal } from './ListCreationModal';
 import { GeminiService } from '../services/GeminiService';
@@ -57,25 +58,36 @@ export const MovieDetailModal = React.memo(({
 
         <HeroSection movie={movie} />
 
-        <div className="px-5 sm:px-10 pt-4 sm:pt-6 pb-2 bg-app-bg relative z-30">
-          <h2 className="text-2xl sm:text-4xl font-bold text-app-text leading-tight break-words pr-12 sm:pr-16">
-            {movie.title}
-          </h2>
+        {/* Overlapping Title + Metadata on Hero */}
+        <div className="relative z-30 -mt-20 sm:-mt-28 px-4 sm:px-8">
+          <div className="bg-gradient-to-t from-app-bg via-app-bg/95 to-transparent pt-16 sm:pt-24 pb-4 sm:pb-6 px-4 sm:px-8 -mx-4 sm:-mx-8">
+            <h2 className="text-2xl sm:text-4xl font-bold text-app-text leading-tight break-words">
+              {movie.title}
+            </h2>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-sm text-app-text-muted">
+              {movie.releaseDate?.slice(0, 4) && (
+                <span className="px-2.5 py-1 bg-app-secondary/50 rounded-full border border-app-border backdrop-blur-sm">
+                  {movie.releaseDate.slice(0, 4)}
+                </span>
+              )}
+              {movie.runtime != null && (
+                <span className="px-2.5 py-1 bg-app-secondary/50 rounded-full border border-app-border backdrop-blur-sm">
+                  {movie.runtime} min
+                </span>
+              )}
+              <span className="px-2.5 py-1 bg-app-secondary/50 rounded-full border border-app-border backdrop-blur-sm uppercase text-[11px] tracking-wider">
+                {movie.mediaType === 'tv' ? 'Serie' : 'Film'}
+              </span>
+              {movie.voteAverage != null && (
+                <span className="flex items-center gap-1 text-yellow-400 font-medium">
+                  ★ {movie.voteAverage.toFixed(1)}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
-        <ActionButtons
-          movie={movie}
-          isInLibrary={isInLibrary}
-          customLists={customLists}
-          onAddToLibrary={onAddToLibrary}
-          onShare={onShare}
-          conductor={conductor}
-          onShowToast={onShowToast}
-        />
-
-        <div className="px-5 sm:px-10 pt-4 pb-6 sm:pt-6 sm:pb-10 space-y-5 sm:space-y-6 bg-app-bg relative z-30">
-          <MetadataRow movie={movie} />
-          
+        <div className="px-4 sm:px-8 pb-6 space-y-5 sm:space-y-6 bg-app-bg relative z-30 -mt-0">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             <div className="lg:col-span-2 space-y-5 sm:space-y-6">
               <PlotSection movie={movie} />
@@ -111,26 +123,45 @@ MovieDetailModal.displayName = 'MovieDetailModal';
 
 const HeroSection = React.memo(({ movie }: { movie: Movie }) => {
   return (
-    <div className="relative w-full aspect-video max-h-[40vh] sm:max-h-[45vh] overflow-hidden bg-black">
+    <div className="relative w-full h-[45vh] sm:h-[55vh] overflow-hidden bg-black">
       {movie.trailerKey ? (
-        <div className="absolute inset-0 w-full h-full pointer-events-none">
+        <div className="absolute inset-0 w-full h-full">
           <iframe
-            className="w-full h-full object-cover"
-            src={`https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${movie.trailerKey}&playsinline=1&rel=0&disablekb=1&iv_load_policy=3`}
+            className="w-full h-full pointer-events-none"
+            style={{ 
+              width: '100vw',
+              height: 'calc(100vw * 9/16)',
+              minHeight: '100%',
+              minWidth: '177.78vh',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              scale: '1.15'
+            }}
+            src={`https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${movie.trailerKey}&playsinline=1&rel=0&disablekb=1&iv_load_policy=3&modestbranding=1`}
             title="Trailer"
             allow="autoplay; encrypted-media"
-            loading="lazy"
+            loading="eager"
           />
+          {/* CSS Overlay to suppress all YouTube controls/clicks */}
+          <div className="absolute inset-0 z-10 cursor-default" />
         </div>
       ) : (
-        <img
-          src={movie.backdropPath || movie.posterPath || ''}
-          alt={movie.title}
-          className="w-full h-full object-cover"
-          loading="eager"
-        />
+        <motion.div
+          className="absolute inset-0"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <img
+            src={movie.backdropPath || movie.posterPath || ''}
+            alt={movie.title}
+            className="w-full h-full object-cover"
+            loading="eager"
+          />
+        </motion.div>
       )}
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-app-bg to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-app-bg via-app-bg/80 to-transparent pointer-events-none z-20" />
     </div>
   );
 });
@@ -272,42 +303,6 @@ const ListMenu = React.memo(({
 });
 
 ListMenu.displayName = 'ListMenu';
-
-const MetadataRow = React.memo(({ movie }: { movie: Movie }) => {
-  const year = useMemo(() => movie.releaseDate?.slice(0, 4), [movie.releaseDate]);
-  
-  const parts = useMemo(() => {
-    const p: string[] = [];
-    if (year) p.push(year);
-    if (movie.runtime) p.push(`${movie.runtime} min`);
-    if (movie.mediaType) p.push(movie.mediaType === 'tv' ? 'Serie' : 'Film');
-    return p;
-  }, [year, movie.runtime, movie.mediaType]);
-
-  return (
-    <div className="flex flex-wrap items-center gap-3 text-sm text-app-text-muted">
-      {parts.map((p, i) => (
-        <span key={i} className="px-2.5 py-1 bg-app-secondary/40 rounded-full border border-app-border">{p}</span>
-      ))}
-      {movie.voteAverage != null && (
-        <span className="flex items-center gap-1 text-yellow-400 font-medium">
-          ★ {movie.voteAverage.toFixed(1)}
-        </span>
-      )}
-      {!!movie.tags?.length && (
-        <div className="flex flex-wrap gap-1.5">
-          {movie.tags.slice(0, 4).map(tag => (
-            <span key={tag} className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/30 rounded-full px-2 py-0.5">
-              #{tag}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-});
-
-MetadataRow.displayName = 'MetadataRow';
 
 const PlotSection = React.memo(({ movie }: { movie: Movie }) => {
   const { t } = useTranslation();
