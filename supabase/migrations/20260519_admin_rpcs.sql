@@ -1,41 +1,40 @@
 -- RPC: Get all users (admin only)
-CREATE OR REPLACE FUNCTION public.admin_get_all_users()
-RETURNS TABLE (
-    id UUID,
-    email TEXT,
-    role TEXT,
-    username TEXT,
-    display_name TEXT,
-    created_at TIMESTAMPTZ,
-    last_login_at TIMESTAMPTZ,
-    avatar_url TEXT,
-    theme TEXT
-)
+DROP FUNCTION IF EXISTS public.admin_get_all_users();
+CREATE FUNCTION public.admin_get_all_users()
+RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+    result JSON;
 BEGIN
-    -- Check if caller is admin
     IF NOT EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin') THEN
         RAISE EXCEPTION 'Permission denied: admin role required';
     END IF;
 
-    RETURN QUERY
-    SELECT 
-        p.id,
-        p.email,
-        p.role,
-        p.username,
-        p.display_name,
-        p.created_at,
-        p.last_login_at,
-        p.avatar_url,
-        p.theme
-    FROM profiles p
-    ORDER BY p.created_at DESC;
+    SELECT json_agg(row_to_json(t))
+    INTO result
+    FROM (
+        SELECT 
+            p.id,
+            p.email,
+            p.role,
+            p.username,
+            p.display_name,
+            p.created_at,
+            p.last_login_at,
+            p.avatar_url,
+            p.theme
+        FROM profiles p
+        ORDER BY p.created_at DESC
+    ) t;
+
+    RETURN COALESCE(result, '[]'::JSON);
 END;
 $$;
+
+GRANT EXECUTE ON FUNCTION public.admin_get_all_users TO authenticated;
 
 -- RPC: Update user role (admin only)
 CREATE OR REPLACE FUNCTION public.admin_update_user_role(target_user_id UUID, new_role TEXT)
