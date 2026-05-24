@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Loader2, AlertCircle, Globe, Check, User, Film } from 'lucide-react';
+import { GlassCard, GlassButton, GlassInput } from './glass';
 import { AuthService } from '../services/AuthService';
 import { UserProfile } from '../types/auth';
 
@@ -87,24 +88,17 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
       </motion.div>
 
       {/* Language Toggle */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
+      <GlassButton
         onClick={() => i18n.changeLanguage(i18n.language.startsWith('de') ? 'en' : 'de')}
-        className="fixed bottom-6 right-6 z-20 flex items-center gap-2 bg-app-secondary/80 hover:bg-app-secondary border border-app-border rounded-full px-4 py-2 text-sm text-app-text-muted hover:text-app-text transition-all backdrop-blur-md shadow-lg"
+        pill
+        className="fixed bottom-24 right-6 z-20 flex items-center gap-2 px-4 py-2 text-sm"
       >
         <Globe className="w-4 h-4" />
         <span className="font-bold tracking-wide">{i18n.language.split('-')[0].toUpperCase()}</span>
-      </motion.button>
+      </GlassButton>
 
       {/* Auth Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="w-full max-w-md bg-app-card-bg/60 backdrop-blur-xl border border-app-border rounded-3xl p-8 shadow-2xl relative z-10"
-      >
+      <GlassCard className="w-full max-w-md p-8 relative z-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={mode}
@@ -127,17 +121,14 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
               {mode === 'signup' && (
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-app-text-muted uppercase tracking-wider ml-1">{t('auth.username')}</label>
-                  <div className="relative group">
-                    <User className="absolute left-4 top-3.5 w-5 h-5 text-app-text-muted group-focus-within:text-blue-400 transition-colors" />
-                    <input
-                      value={username}
-                      onChange={e => setUsername(e.target.value)}
-                      autoComplete="username"
-                      required
-                      className="auth-input-field"
-                      placeholder={t('auth.username')}
-                    />
-                  </div>
+                  <GlassInput
+                    icon={<User className="w-5 h-5" />}
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    autoComplete="username"
+                    required
+                    placeholder={t('auth.username')}
+                  />
                 </div>
               )}
 
@@ -146,53 +137,44 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   <label className="text-xs font-semibold text-app-text-muted uppercase tracking-wider ml-1">
                     {mode === 'forgot' ? 'E-Mail' : 'E-Mail oder Benutzername'}
                   </label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-app-text-muted group-focus-within:text-blue-400 transition-colors" />
-                    <input
-                      value={identifier}
-                      onChange={e => setIdentifier(e.target.value)}
-                      autoComplete="username"
-                      required
-                      className="auth-input-field"
-                      placeholder={mode === 'forgot' ? 'name@example.com' : 'name@example.com oder benutzername'}
-                    />
-                  </div>
+                  <GlassInput
+                    icon={<Mail className="w-5 h-5" />}
+                    value={identifier}
+                    onChange={e => setIdentifier(e.target.value)}
+                    autoComplete="username"
+                    required
+                    placeholder={mode === 'forgot' ? 'name@example.com' : 'name@example.com oder benutzername'}
+                  />
                 </div>
               )}
 
               {mode === 'signup' && (
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-app-text-muted uppercase tracking-wider ml-1">{t('auth.email')}</label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-app-text-muted group-focus-within:text-blue-400 transition-colors" />
-                    <input
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      autoComplete="email"
-                      required
-                      className="auth-input-field"
-                      placeholder="name@example.com"
-                    />
-                  </div>
+                  <GlassInput
+                    icon={<Mail className="w-5 h-5" />}
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    autoComplete="email"
+                    required
+                    placeholder="name@example.com"
+                  />
                 </div>
               )}
 
               {mode !== 'forgot' && (
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-app-text-muted uppercase tracking-wider ml-1">{t('auth.password')}</label>
-                  <div className="relative group">
-                    <Lock className="absolute left-4 top-3.5 w-5 h-5 text-app-text-muted group-focus-within:text-purple-400 transition-colors" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                      required
-                      minLength={6}
-                      className="auth-input-field"
-                      placeholder="••••••••"
-                    />
-                  </div>
+                  <GlassInput
+                    icon={<Lock className="w-5 h-5" />}
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                    required
+                    minLength={6}
+                    placeholder="••••••••"
+                  />
                 </div>
               )}
 
@@ -221,12 +203,11 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 )}
               </AnimatePresence>
 
-              <motion.button
+              <GlassButton
                 type="submit"
                 disabled={loading}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2"
+                accent
+                className="w-full py-3.5 mt-2 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -237,16 +218,16 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                 ) : (
                   t('auth.login')
                 )}
-              </motion.button>
+              </GlassButton>
             </form>
 
             {/* OAuth / Social Login — shown for login AND signup */}
             {mode !== 'forgot' && (
               <div className="mt-4 space-y-2">
-                <div className="flex items-center gap-3 text-xs text-app-text-muted uppercase tracking-wider">
-                  <span className="flex-1 h-px bg-app-border" />
+                <div className="glass-divider flex items-center gap-3 text-xs text-app-text-muted uppercase tracking-wider">
+                  <span className="flex-1" />
                   <span>oder</span>
-                  <span className="flex-1 h-px bg-app-border" />
+                  <span className="flex-1" />
                 </div>
                 <motion.button
                   type="button"
@@ -291,7 +272,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             </div>
           </motion.div>
         </AnimatePresence>
-      </motion.div>
+      </GlassCard>
     </div>
   );
 }

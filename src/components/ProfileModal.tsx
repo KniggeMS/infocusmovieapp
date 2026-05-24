@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Calendar, Mail, Shield, User, LogOut, X, Check, Monitor, Film, Eye, Heart, Star, Users, Key, Trash2 } from 'lucide-react';
 
@@ -7,6 +7,7 @@ import { UserProfile } from '../types/auth';
 import { MovieConductor } from '../core/conductor/MovieConductor';
 import { CustomList } from '../types/domain';
 import { AdminPanel } from './AdminPanel';
+import { GlassCard, GlassButton, GlassSection, GlassDivider } from './glass';
 
 interface AdminNotification {
   id: string;
@@ -116,30 +117,38 @@ export const ProfileModal = React.memo(({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-[150] flex items-center justify-center p-4"
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center"
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="relative w-full max-w-lg bg-app-bg border border-app-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        initial={{ y: '100%', opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: '100%', opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.8 }}
+        className="relative w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl glass-sheet max-h-[85vh] flex flex-col overflow-hidden"
       >
-        <header className="p-6 border-b border-app-border flex items-center justify-between">
-          <h2 className="text-xl font-bold text-app-text">Profil & Einstellungen</h2>
+        <div className="flex items-center justify-between px-6 pt-5 pb-3">
+          <div className="w-6" />
+          <h2 className="text-lg font-bold text-app-text">Profil & Einstellungen</h2>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-app-secondary rounded-full transition-colors text-app-text-muted hover:text-app-text"
+            className="p-1.5 rounded-full glass-button hover:brightness-125 transition-all"
           >
-            <X className="w-6 h-6" />
+            <X className="w-4 h-4 text-app-text-muted" />
           </button>
-        </header>
+        </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6 scrollbar-hide">
           {/* Theme Selector */}
-          <section>
-            <h4 className="text-xs font-bold text-app-text-muted uppercase tracking-wider mb-4">Erscheinungsbild</h4>
+          <GlassSection title="Erscheinungsbild" icon={<Monitor className="w-3.5 h-3.5" />}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {themes.map((t) => (
                 <motion.button
@@ -149,7 +158,7 @@ export const ProfileModal = React.memo(({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`relative h-20 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 overflow-hidden ${t.class} ${
-                    (user.theme || 'noir') === t.id ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-app-bg' : 'opacity-75 hover:opacity-100'
+                    (user.theme || 'noir') === t.id ? 'ring-2 ring-accent-color ring-offset-2 ring-offset-app-bg' : 'opacity-75 hover:opacity-100'
                   }`}
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${t.preview} opacity-50`} />
@@ -158,7 +167,7 @@ export const ProfileModal = React.memo(({
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5 z-10"
+                      className="absolute -top-1 -right-1 bg-accent-color rounded-full p-0.5 z-10"
                     >
                       <Check size={8} className="text-white" />
                     </motion.div>
@@ -166,26 +175,24 @@ export const ProfileModal = React.memo(({
                 </motion.button>
               ))}
             </div>
-            {/* System Theme Toggle */}
-            <button
-              onClick={handleSystemTheme}
-              className="mt-3 w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-app-secondary/30 border border-app-border text-sm text-app-text-muted hover:text-app-text hover:bg-app-secondary/50 transition-all"
-            >
+            <GlassButton onClick={handleSystemTheme} className="mt-3 w-full flex items-center justify-center gap-2">
               <Monitor className="w-4 h-4" />
               <span>System-Design folgen</span>
-              <div className={`ml-auto w-9 h-5 rounded-full transition-colors ${followSystem ? 'bg-blue-500' : 'bg-app-secondary'}`}>
+              <div className={`ml-auto w-9 h-5 rounded-full transition-colors ${followSystem ? 'bg-accent-color' : 'bg-app-secondary'}`}>
                 <motion.div
                   className="w-4 h-4 bg-white rounded-full shadow"
                   animate={{ x: followSystem ? 18 : 2 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               </div>
-            </button>
-          </section>
+            </GlassButton>
+          </GlassSection>
 
-          {/* User Info Section + Role Permissions */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-4">
+          <GlassDivider />
+
+          {/* User Info */}
+          <GlassSection title="Benutzer">
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg shrink-0">
                 {user.username?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
               </div>
@@ -194,21 +201,15 @@ export const ProfileModal = React.memo(({
                 <p className="text-sm text-app-text-muted truncate">{user.email}</p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                   <RoleBadge role={user.role} />
-                  {user.role === 'user' && (
-                    <span className="text-[10px] text-app-text-muted">Kann Filme verwalten</span>
-                  )}
-                  {user.role === 'manager' && (
-                    <span className="text-[10px] text-app-text-muted">Kann Benutzer löschen & Passwörter ändern</span>
-                  )}
-                  {user.role === 'admin' && (
-                    <span className="text-[10px] text-app-text-muted">Voller Zugriff auf alle Funktionen</span>
-                  )}
+                  <span className="text-[10px] text-app-text-muted">
+                    {user.role === 'admin' ? 'Voller Zugriff' : user.role === 'manager' ? 'Benutzerverwaltung' : 'Filme verwalten'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between p-3 bg-app-secondary/30 border border-app-border rounded-xl">
+            <GlassCard className="p-0 divide-y divide-glass-border">
+              <div className="flex items-center justify-between p-3">
                 <div className="flex items-center gap-3 text-app-text-muted">
                   <User size={14} />
                   <span className="text-sm font-medium">Benutzername</span>
@@ -219,7 +220,7 @@ export const ProfileModal = React.memo(({
                       value={newUsername}
                       onChange={e => setNewUsername(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') handleSaveUsername(); if (e.key === 'Escape') { setEditingUsername(false); setNewUsername(user.username || ''); } }}
-                      className="text-sm bg-app-bg border border-app-border rounded-lg px-2 py-1 text-app-text w-28 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="text-sm glass-input rounded-lg px-2 py-1 w-28"
                       autoFocus
                       placeholder="username"
                     />
@@ -240,63 +241,58 @@ export const ProfileModal = React.memo(({
               <ProfileRow icon={<Mail size={14} />} label="E-Mail" value={user.email} />
               <ProfileRow icon={<Calendar size={14} />} label="Registriert" value={formatDate(user.createdAt)} />
               <ProfileRow icon={<Calendar size={14} />} label="Letzte Anmeldung" value={formatDate(user.lastLoginAt)} />
-            </div>
-          </section>
+            </GlassCard>
+          </GlassSection>
+
+          <GlassDivider />
 
           {/* Quick Stats */}
-          <section className="bg-app-secondary/20 border border-app-border rounded-2xl p-4">
-            <h4 className="text-xs font-bold text-app-text-muted uppercase tracking-wider mb-3">Meine Mediathek</h4>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              {[
-                { icon: Film, label: 'Filme', value: stats.total },
-                { icon: Eye, label: 'Gesehen', value: stats.watched },
-                { icon: Heart, label: 'Favoriten', value: stats.favorites },
-                { icon: Star, label: 'Bewertet', value: stats.rated },
-              ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="p-2">
-                  <Icon className="w-4 h-4 mx-auto text-app-text-muted mb-1" />
-                  <div className="text-lg font-bold text-app-text">{value}</div>
-                  <div className="text-[9px] text-app-text-muted uppercase tracking-wider truncate">{label}</div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <GlassSection title="Meine Mediathek" icon={<Film className="w-3.5 h-3.5" />}>
+            <GlassCard className="p-4">
+              <div className="grid grid-cols-4 gap-2 text-center">
+                {[
+                  { icon: Film, label: 'Filme', value: stats.total },
+                  { icon: Eye, label: 'Gesehen', value: stats.watched },
+                  { icon: Heart, label: 'Favoriten', value: stats.favorites },
+                  { icon: Star, label: 'Bewertet', value: stats.rated },
+                ].map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="p-2">
+                    <Icon className="w-4 h-4 mx-auto text-app-text-muted mb-1" />
+                    <div className="text-lg font-bold text-app-text">{value}</div>
+                    <div className="text-[9px] text-app-text-muted uppercase tracking-wider truncate">{label}</div>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          </GlassSection>
 
-          {/* Admin Panel (nur für Admin/Manager) */}
+          {/* Admin Panel */}
           {(user.role === 'admin' || user.role === 'manager') && (
-            <section className="space-y-3 pt-2 border-t border-app-border">
-              <h4 className="text-xs font-bold text-app-text-muted uppercase tracking-wider flex items-center gap-2 pt-4">
-                <Shield className="w-3.5 h-3.5" /> Administration
-              </h4>
-              <button
-                onClick={() => setShowAdminPanel(!showAdminPanel)}
-                className="w-full flex items-center justify-between p-3 bg-app-secondary/30 border border-app-border rounded-xl text-sm text-app-text hover:bg-app-secondary/50 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-app-text-muted" />
-                  Benutzerverwaltung
-                </span>
-                <span className="text-app-text-muted">{showAdminPanel ? '▲' : '▼'}</span>
-              </button>
-            </section>
+            <>
+              <GlassDivider />
+              <GlassSection title="Administration" icon={<Shield className="w-3.5 h-3.5" />}>
+                <GlassButton onClick={() => setShowAdminPanel(!showAdminPanel)} className="w-full flex items-center justify-between p-3">
+                  <span className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-app-text-muted" />
+                    Benutzerverwaltung
+                  </span>
+                  <span className="text-app-text-muted text-xs">{showAdminPanel ? '▲' : '▼'}</span>
+                </GlassButton>
+              </GlassSection>
+              {showAdminPanel && <AdminPanel />}
+            </>
           )}
 
-          {showAdminPanel && (
-            <div className="pt-2">
-              <AdminPanel />
-            </div>
-          )}
+          <GlassDivider />
 
-          {/* Actions */}
-          <section className="space-y-3 pt-2">
-            <button
-              onClick={onLogout}
-              className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 py-3 rounded-xl font-bold transition-all active:scale-95"
-            >
-              <LogOut size={18} />
-              Abmelden
-            </button>
-          </section>
+          {/* Logout */}
+          <GlassButton
+            onClick={onLogout}
+            className="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20"
+          >
+            <LogOut size={18} />
+            Abmelden
+          </GlassButton>
         </div>
       </motion.div>
     </motion.div>
@@ -322,7 +318,7 @@ function RoleBadge({ role }: { role: string }) {
 
 function ProfileRow({ icon, label, value }: { icon: React.ReactNode, label: string, value: string }) {
   return (
-    <div className="flex items-center justify-between p-3 bg-app-secondary/30 border border-app-border rounded-xl">
+    <div className="flex items-center justify-between p-3">
       <div className="flex items-center gap-3 text-app-text-muted">
         {icon}
         <span className="text-sm font-medium">{label}</span>

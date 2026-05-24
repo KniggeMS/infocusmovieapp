@@ -15,17 +15,29 @@ export default {
         'app-text-muted': 'var(--text-muted)',
         'app-border': 'var(--border-color)',
         'accent-glow': 'var(--accent-glow)',
+        'accent-color': 'var(--accent-color)',
+        
+        // Frosted Glass Tokens
+        'glass-bg': 'var(--glass-bg)',
+        'glass-border': 'var(--glass-border)',
+        'glass-tint': 'var(--glass-tint)',
+        'tabbar-bg': 'var(--tabbar-bg)',
+        'sheet-bg': 'var(--sheet-bg)',
         
         // Legacy / Specifics
         'app-dark': '#0f172a',
         'app-card': '#1e293b',
-        'glass-border': 'rgba(255, 255, 255, 0.1)',
         'accent-blue': '#3b82f6',
         gray: {
           900: '#111827',
           800: '#1f2937', 
           700: '#374151'
         }
+      },
+      backdropBlur: {
+        'glass': 'var(--glass-blur)',
+        'tabbar': 'var(--tabbar-blur)',
+        'sheet': 'var(--sheet-blur)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],

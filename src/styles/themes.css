@@ -11,8 +11,22 @@
   --accent-color: #e50914;
   --accent-glow: #60a5fa;
   
+  /* Frosted Glass Tokens */
   --glass-bg: rgba(20, 20, 20, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 24px;
+  --glass-saturation: 180%;
+  --glass-tint: rgba(255, 255, 255, 0.03);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* iOS-style Tab Bar */
+  --tabbar-bg: rgba(5, 5, 5, 0.75);
+  --tabbar-blur: 32px;
+  --tabbar-border: rgba(255, 255, 255, 0.08);
+
+  /* Sheet Modal */
+  --sheet-bg: rgba(18, 18, 18, 0.95);
+  --sheet-blur: 40px;
 
   /* Smooth theme transitions */
   transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
@@ -29,6 +43,15 @@
   
   --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-blur: 20px;
+  --glass-saturation: 180%;
+  --glass-tint: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --tabbar-bg: rgba(248, 250, 252, 0.8);
+  --tabbar-blur: 30px;
+  --tabbar-border: rgba(0, 0, 0, 0.05);
+  --sheet-bg: rgba(255, 255, 255, 0.95);
+  --sheet-blur: 40px;
 }
 
 :root[data-theme="noir"] {
@@ -42,6 +65,15 @@
   
   --glass-bg: rgba(0, 0, 0, 0.8);
   --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: 24px;
+  --glass-saturation: 150%;
+  --glass-tint: rgba(255, 255, 255, 0.02);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --tabbar-bg: rgba(0, 0, 0, 0.8);
+  --tabbar-blur: 32px;
+  --tabbar-border: rgba(255, 255, 255, 0.08);
+  --sheet-bg: rgba(0, 0, 0, 0.92);
+  --sheet-blur: 40px;
 }
 
 :root[data-theme="glass"] {
@@ -54,7 +86,16 @@
   --accent-color: #8b5cf6;
   
   --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: 28px;
+  --glass-saturation: 200%;
+  --glass-tint: rgba(139, 92, 246, 0.05);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --tabbar-bg: rgba(2, 6, 23, 0.7);
+  --tabbar-blur: 36px;
+  --tabbar-border: rgba(255, 255, 255, 0.1);
+  --sheet-bg: rgba(15, 23, 42, 0.92);
+  --sheet-blur: 40px;
 }
 
 :root[data-theme="neon"] {
@@ -68,4 +109,13 @@
   
   --glass-bg: rgba(13, 2, 33, 0.7);
   --glass-border: rgba(0, 242, 255, 0.2);
+  --glass-blur: 24px;
+  --glass-saturation: 180%;
+  --glass-tint: rgba(0, 242, 255, 0.03);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --tabbar-bg: rgba(13, 2, 33, 0.75);
+  --tabbar-blur: 32px;
+  --tabbar-border: rgba(0, 242, 255, 0.15);
+  --sheet-bg: rgba(13, 2, 33, 0.95);
+  --sheet-blur: 40px;
 }

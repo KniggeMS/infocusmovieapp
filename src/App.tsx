@@ -13,7 +13,12 @@ import { AchievementsGrid } from './components/AchievementsGrid';
 import { BottomNav } from './components/BottomNav';
 import { Recommendations } from './components/Recommendations';
 import { useToast } from './components/Toast';
-import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles, Film } from 'lucide-react';
+import {     Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles, Film, ChevronDown, ChevronUp } from 'lucide-react';
+import { GlassCard, GlassInput } from './components/glass';
+import { DiaryView } from './components/diary/DiaryView';
+import { ActivityFeed } from './components/diary/ActivityFeed';
+import { EpisodeTracker } from './components/tv/EpisodeTracker';
+import { ListsOverview } from './components/ListsOverview';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { shareMovie } from './lib/share';
 
@@ -34,8 +39,9 @@ function App({ conductor }: AppProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfile, setShowProfile] = useState(false);
   
-  // UI State for Actions
-  const [showListMenu, setShowListMenu] = useState(false);
+    // UI State for Actions
+    const [showListMenu, setShowListMenu] = useState(false);
+    const [tagsExpanded, setTagsExpanded] = useState(false);
 
   useEffect(() => {
     // Check for existing session
@@ -133,17 +139,27 @@ function App({ conductor }: AppProps) {
     new Set(state.items.flatMap((m) => m.tags || []).filter(Boolean))
   ).sort();
 
+  // Hilfsfunktion: Prüft ob ein TMDB-Film bereits in der Bibliothek ist
+  const isMovieInLibrary = (movie: Movie) => {
+    if (movie.source !== 'tmdb') return true; // DB-Filme sind per Definition in der Bibliothek
+    return state.items.some(m => 
+      m.tmdbId === Number(movie.id) || m.id === movie.id
+    );
+  };
+
   return (
     <div className="min-h-screen bg-app-bg text-app-text font-sans pb-24">
       
-      {/* Header (Sticky Glass) */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-app-bg/80 backdrop-blur-xl border-b border-app-border px-4 py-4">
+      {/* Header (Frosted Glass) */}
+      <header className="fixed top-0 left-0 right-0 z-50 glass-card rounded-none border-x-0 border-t-0 px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20 flex-shrink-0">
-                    <Film className="w-6 h-6 text-white" />
-                  </div>
+                  <img
+                    src="/pwa-icon-192.png"
+                    alt="InFocus Logo"
+                    className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl object-cover border-2 border-white/10 shadow-[0_0_15px_rgba(59,130,246,0.2)] flex-shrink-0"
+                  />
                   <div className="hidden sm:block">
                     <div className="text-sm font-bold text-app-text leading-tight">InFocus</div>
                     <div className="text-[9px] text-app-text-muted tracking-widest uppercase leading-tight">Family CineLog</div>
@@ -165,18 +181,14 @@ function App({ conductor }: AppProps) {
             </div>
             
             <div className="flex-1 flex justify-end gap-3">
-                 <div className="flex bg-app-secondary border border-app-border rounded-2xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus-within:ring-2 focus-within:ring-blue-500 w-full items-center gap-2 max-w-[150px] sm:max-w-md transition-all">
-                    <Search className="w-4 h-4 text-app-text-muted shrink-0" />
-                    <input 
-                        id="search-movies"
-                        name="search"
-                        type="text" 
-                        placeholder={t('common.search')} 
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="bg-transparent border-none focus:outline-none w-full text-app-text placeholder-app-text-muted text-xs sm:text-sm"
-                    />
-                </div>
+                <GlassInput
+                    icon={<Search className="w-4 h-4" />}
+                    type="text"
+                    placeholder={t('common.search')}
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="max-w-[150px] sm:max-w-md w-full"
+                />
             </div>
         </div>
       </header>
@@ -206,7 +218,28 @@ function App({ conductor }: AppProps) {
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.25 }}
         >
-        {state.filter === 'achievements' ? (
+        {state.filter === 'diary' ? (
+          <>
+            <ActivityFeed items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
+            <div className="mt-8">
+              <DiaryView items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
+            </div>
+          </>
+        ) : state.filter === 'series' ? (
+          <EpisodeTracker
+            items={state.items}
+            episodes={state.episodes}
+            onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+            onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
+          />
+        ) : state.filter === 'lists' ? (
+          <ListsOverview
+            lists={state.customLists}
+            items={state.items}
+            conductor={conductor}
+            onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
+          />
+        ) : state.filter === 'achievements' ? (
           <AchievementsGrid achievements={state.achievements} />
         ) : state.filter === 'statistics' ? (
                     <StatisticsDashboard movies={state.items} />
@@ -228,78 +261,102 @@ function App({ conductor }: AppProps) {
                     </div>
                 )}
 
-                {/* Tag filter chips: nur sichtbar, wenn Tags existieren */}
+                {/* Tag filter: kollapsibel für mobile Usability */}
                 {allTags.length > 0 && (
-                    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
-                        <span className="text-app-text-muted uppercase tracking-wider">Tags:</span>
-                        {state.tagFilter && (
-                            <button
-                                onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: null })}
-                                className="bg-app-secondary text-app-text-muted hover:text-app-text px-2 py-1 rounded-full border border-app-border"
-                            >
-                                Alle
-                            </button>
-                        )}
-                        {allTags.slice(0, 12).map(tag => {
-                            const active = state.tagFilter === tag;
-                            return (
-                                <button
-                                    key={tag}
-                                    onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: active ? null : tag })}
-                                    className={`px-2.5 py-1 rounded-full border transition ${
-                                        active
-                                            ? 'bg-blue-500 text-white border-blue-500'
-                                            : 'bg-blue-500/10 text-blue-300 border-blue-500/30 hover:bg-blue-500/20'
-                                    }`}
+                    <div className="mb-4">
+                        <button
+                            onClick={() => setTagsExpanded(!tagsExpanded)}
+                            className="flex items-center gap-2 text-xs text-app-text-muted uppercase tracking-wider hover:text-app-text transition-colors"
+                        >
+                            <span className="flex items-center gap-1">
+                                Tags
+                                {state.tagFilter && (
+                                    <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                                        1
+                                    </span>
+                                )}
+                            </span>
+                            {tagsExpanded ? (
+                                <ChevronUp className="w-3.5 h-3.5" />
+                            ) : (
+                                <ChevronDown className="w-3.5 h-3.5" />
+                            )}
+                        </button>
+                        <AnimatePresence>
+                            {tagsExpanded && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="overflow-hidden"
                                 >
-                                    #{tag}
-                                </button>
-                            );
-                        })}
+                                    <div className="flex flex-wrap items-center gap-2 text-xs pt-2">
+                                        {state.tagFilter && (
+                                            <button
+                                                onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: null })}
+                                                className="bg-app-secondary text-app-text-muted hover:text-app-text px-2 py-1 rounded-full border border-app-border"
+                                            >
+                                                Alle
+                                            </button>
+                                        )}
+                                        {allTags.map(tag => {
+                                            const active = state.tagFilter === tag;
+                                            return (
+                                                <button
+                                                    key={tag}
+                                                    onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: active ? null : tag })}
+                                                    className={`px-2.5 py-1 rounded-full border transition ${
+                                                        active
+                                                            ? 'bg-blue-500 text-white border-blue-500'
+                                                            : 'bg-blue-500/10 text-blue-300 border-blue-500/30 hover:bg-blue-500/20'
+                                                    }`}
+                                                >
+                                                    #{tag}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 )}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {filteredItems.map((movie, index) => (
-                        <motion.div
+                        <GlassCard
                             key={movie.id}
-                            initial={{ opacity: 0, y: 16 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.04, duration: 0.35 }}
+                            hover
                             onClick={() => conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id })}
-                            className="relative aspect-[2/3] rounded-2xl overflow-hidden group shadow-lg bg-app-card-bg cursor-pointer hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
+                            className="relative aspect-[2/3] overflow-hidden p-0"
                         >
-                            {/* Image */}
                             {movie.posterPath ? (
                                 <img
                                     src={movie.posterPath}
                                     alt={movie.title}
                                     loading="lazy"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-app-text-muted bg-app-card-bg text-sm">
+                                <div className="absolute inset-0 flex items-center justify-center text-app-text-muted text-sm">
                                     No Image
                                 </div>
                             )}
 
-                            {/* Gradient Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
 
-                            {/* Watched Badge */}
                             {movie.watched && (
                                 <div className="absolute top-3 left-3 z-10 bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
                                     <span>✓ Gesehen</span>
                                 </div>
                             )}
 
-                            {/* Rating Badge (Top Right) */}
                             {movie.voteAverage && (
                                 <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-accent-glow text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
                                     ★ {movie.voteAverage.toFixed(1)}
                                 </div>
                             )}
 
-                            {/* Quick Actions (visible on hover) */}
                             <div className="absolute inset-0 z-10 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 {movie.source !== 'tmdb' && (
                                     <>
@@ -317,21 +374,32 @@ function App({ conductor }: AppProps) {
                                         </button>
                                     </>
                                 )}
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); movie.source === 'tmdb' ? handleAddMovie(movie) : conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
-                                    className={`bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg ${
-                                        movie.source === 'tmdb' ? 'hover:bg-blue-500/40' : 'hover:bg-red-500/40'
-                                    }`}
-                                >
-                                    {movie.source === 'tmdb' ? (
+                                {movie.source === 'tmdb' && !isMovieInLibrary(movie) ? (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }}
+                                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
+                                        title={t('common.addToWatchlist', 'Zur Watchlist hinzufügen')}
+                                    >
                                         <Plus className="w-5 h-5 text-white/80" />
-                                    ) : (
+                                    </button>
+                                ) : movie.source === 'tmdb' && isMovieInLibrary(movie) ? (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id }); }}
+                                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
+                                        title={t('common.inLibrary', 'In Bibliothek – zum Detailansicht')}
+                                    >
+                                        <ListPlus className="w-5 h-5 text-white/80" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
+                                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-red-500/40"
+                                    >
                                         <Trash2 className="w-5 h-5 text-white/80" />
-                                    )}
-                                </button>
+                                    </button>
+                                )}
                             </div>
 
-                            {/* Text Content */}
                             <div className="absolute bottom-0 left-0 right-0 p-3 z-20">
                                 <h3 className="font-bold text-sm truncate text-app-text drop-shadow-lg">{movie.title}</h3>
                                 <div className="text-xs text-app-text-muted flex items-center gap-2 mt-1">
@@ -355,7 +423,7 @@ function App({ conductor }: AppProps) {
                                     </div>
                                 )}
                             </div>
-                        </motion.div>
+                        </GlassCard>
                     ))}
                 </div>
 
@@ -383,12 +451,10 @@ function App({ conductor }: AppProps) {
           conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
           conductor.dispatch({ type: 'LOAD_MOVIES' });
         }}
-        onShowFavorites={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'favorites' })}
+        onShowDiary={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'diary' })}
         onShowProfile={() => setShowProfile(true)}
-        onShowWatched={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'watched' })}
-        onShowAchievements={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'achievements' })}
-        onShowStatistics={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'statistics' })}
-        onShowRecommendations={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'recommendations' })}
+        onShowSeries={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'series' })}
+        onShowLists={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'lists' })}
       />
       
       {/* Profile Modal */}

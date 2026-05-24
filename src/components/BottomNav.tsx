@@ -1,82 +1,76 @@
 import { motion } from 'framer-motion';
-import { Home, Heart, User, Eye, Zap, BarChart2, Sparkles } from 'lucide-react';
+import { Home, User, Sparkles, BookOpen, Film, List } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface BottomNavProps {
   currentFilter: string;
   showProfile: boolean;
   onNavigateHome: () => void;
-  onShowFavorites: () => void;
+  onShowDiary: () => void;
   onShowProfile: () => void;
-  onShowWatched: () => void;
-  onShowAchievements: () => void;
-  onShowStatistics: () => void;
-  onShowRecommendations?: () => void;
+  onShowSeries: () => void;
+  onShowLists: () => void;
 }
 
-const tabs = [
-  { key: 'all', icon: Home, label: 'Home' },
-  { key: 'favorites', icon: Heart, label: 'Favoriten' },
+const tabConfig: Array<{ key: string; icon: typeof BookOpen; label: string; i18n?: boolean }> = [
+  { key: 'diary', icon: BookOpen, label: 'nav.diary', i18n: true },
+  { key: 'all', icon: Home, label: 'nav.home', i18n: true },
+  { key: 'lists', icon: List, label: 'nav.lists', i18n: true },
+  { key: 'series', icon: Film, label: 'nav.series', i18n: true },
   { key: 'profile', icon: User, label: 'Profil' },
-  { key: 'watched', icon: Eye, label: 'Gesehen' },
-  { key: 'achievements', icon: Zap, label: 'Erfolge' },
-  { key: 'statistics', icon: BarChart2, label: 'Statistiken' },
-  { key: 'recommendations', icon: Sparkles, label: 'Empfehlungen' },
-] as const;
+];
 
 export function BottomNav({
   currentFilter,
   showProfile,
   onNavigateHome,
-  onShowFavorites,
+  onShowDiary,
   onShowProfile,
-  onShowWatched,
-  onShowAchievements,
-  onShowStatistics,
-  onShowRecommendations
+  onShowSeries,
+  onShowLists
 }: BottomNavProps) {
+  const { t } = useTranslation();
   const isActive = (key: string) => {
     if (key === 'profile') return showProfile;
     return currentFilter === key;
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-app-bg/90 backdrop-blur-2xl border-t border-app-border px-2 sm:px-4 py-2 z-50">
-      <div className="max-w-4xl mx-auto flex justify-around items-center">
-        {tabs.map(({ key, icon: Icon, label }) => {
+    <nav className="fixed bottom-4 left-4 right-4 z-50">
+      <div className="max-w-sm mx-auto glass-tabbar rounded-2xl px-2 sm:px-3 py-2 shadow-2xl flex justify-around items-center">
+        {tabConfig.map(({ key, icon: Icon, label, i18n }) => {
           const active = isActive(key);
           const handler = {
+            diary: onShowDiary,
             all: onNavigateHome,
-            favorites: onShowFavorites,
+            lists: onShowLists,
             profile: onShowProfile,
-            watched: onShowWatched,
-            achievements: onShowAchievements,
-            statistics: onShowStatistics,
-            recommendations: onShowRecommendations,
+            series: onShowSeries,
           }[key];
-          if (key === 'recommendations' && !onShowRecommendations) return null;
+          const displayLabel = i18n ? t(label) : label;
 
           return (
             <button
               key={key}
               onClick={handler}
-              className="relative flex flex-col items-center gap-0.5 py-1 px-2 sm:px-3 min-w-0"
+              className="relative flex flex-col items-center gap-0.5 py-1 px-1.5 sm:px-3 min-w-0"
             >
               <Icon
-                className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
-                  active ? 'text-accent-glow' : 'text-app-text-muted hover:text-app-text'
+                className={`w-5 h-5 sm:w-6 sm:h-6 transition-all ${
+                  active ? 'text-accent-glow drop-shadow-[0_0_8px_var(--accent-glow)]' : 'text-app-text-muted hover:text-app-text'
                 }`}
               />
               <span
-                className={`text-[10px] leading-tight transition-colors whitespace-nowrap ${
+                className={`text-[9px] leading-tight transition-colors whitespace-nowrap ${
                   active ? 'text-accent-glow font-semibold' : 'text-app-text-muted'
                 }`}
               >
-                {label}
+                {displayLabel}
               </span>
               {active && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-glow"
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-glow shadow-[0_0_6px_var(--accent-glow)]"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}

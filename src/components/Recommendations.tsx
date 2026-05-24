@@ -3,6 +3,7 @@ import { Sparkles, Plus } from 'lucide-react';
 import { Movie } from '../types/domain';
 import { getSmartRecommendations, RecommendationItem, UserPreferences } from '../services/Recommendations';
 import { MovieConductor } from '../core/conductor/MovieConductor';
+import { GlassCard } from './glass';
 
 interface RecommendationsProps {
   library: Movie[];
@@ -119,32 +120,43 @@ function RecommendationCard({
   onAdd: () => void;
 }) {
   return (
-    <div className="bg-app-card-bg border border-app-border rounded-2xl overflow-hidden flex flex-col">
-      <button onClick={onSelect} className="text-left">
+    <GlassCard hover className="flex flex-col overflow-hidden p-0" onClick={onSelect}>
+      <div className="relative">
         {item.movie.posterPath ? (
-          <img src={item.movie.posterPath} alt={item.movie.title} className="w-full aspect-[2/3] object-cover" />
+          <img src={item.movie.posterPath} alt={item.movie.title} className="w-full aspect-[2/3] object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : (
           <div className="w-full aspect-[2/3] bg-app-secondary text-app-text-muted text-xs flex items-center justify-center">No image</div>
         )}
-      </button>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+        {/* Hover Quick Action */}
+        <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={(e) => { e.stopPropagation(); onAdd(); }}
+            className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 hover:bg-blue-500/40 shadow-lg"
+          >
+            <Plus className="w-5 h-5 text-white/80" />
+          </button>
+        </div>
+      </div>
       <div className="p-3 flex-1 flex flex-col gap-2">
-        <button onClick={onSelect} className="text-left">
-          <h3 className="text-sm font-semibold text-app-text truncate">{item.movie.title}</h3>
-          <div className="text-xs text-app-text-muted mt-0.5">
-            {item.movie.releaseDate?.slice(0, 4)}
-            {item.movie.voteAverage != null && <span> · ★ {item.movie.voteAverage.toFixed(1)}</span>}
-          </div>
-        </button>
+        <h3 className="text-sm font-semibold text-app-text truncate">{item.movie.title}</h3>
+        <div className="text-xs text-app-text-muted">
+          {item.movie.releaseDate?.slice(0, 4)}
+          {item.movie.voteAverage != null && <span> · ★ {item.movie.voteAverage.toFixed(1)}</span>}
+        </div>
         <p className="text-[11px] text-app-text-muted leading-snug line-clamp-3">
           {item.reasons.join(' · ')}
         </p>
         <button
-          onClick={onAdd}
+          onClick={(e) => { e.stopPropagation(); onAdd(); }}
           className="mt-auto text-xs flex items-center gap-1 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 px-2 py-1.5 rounded-md transition"
         >
           <Plus className="w-3.5 h-3.5" /> Auf Watchlist
         </button>
       </div>
-    </div>
+    </GlassCard>
   );
 }

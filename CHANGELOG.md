@@ -1,5 +1,75 @@
 # Changelog
 
+## [3.1.1] - 2026-05-24
+
+### 🏷️ Tags UX-Verbesserung
+
+- **Tag-Filter kollapsibel:** Tag-Cloud in der Hauptansicht hinter Toggle-Button mit Chevron-Icon versteckt, mobile-optimiert
+- **Tag-Verwaltung kollapsibel:** Im MovieDetailModal sind bestehende Tags + Eingabefeld jetzt einklappbar, Platz sparender
+
+### 📋 Listen-Fixes & Robustheit
+
+- **Duplicate-Prevention:** `addMovieToList` prüft vor Insert auf bestehende Einträge, verhindert doppelte Hinzufügungen
+- **TMDB-ID Fallback:** Wenn `movie.tmdbId` fehlt, wird aus `movie.id` abgeleitet — verhindert Insert-Fehler bei Suchergebnissen
+- **Grid-Buttons intelligent:** TMDB-Filme bereits in Bibliothek zeigen `ListPlus`-Icon (DetailModal) statt `+` (Watchlist-Add)
+- **Fehler-Toast:** Im DetailModal wird bei Listen-Hinzufügen jetzt der konkrete Fehler angezeigt (statt immer "Erfolg")
+
+---
+
+## [3.1.0] - 2026-05-17
+
+### 🧊 Frosted Glass Redesign — iOS Glassmorphismus
+
+**Foundation:**
+- **Frosted Glass Token-System:** Neue CSS-Variablen `--glass-blur`, `--glass-saturation`, `--glass-tint`, `--glass-shadow` für alle 4 Themes (Noir/Light/Glass/Neon in individuellen Werten)
+- **Utility-Classes:** `.glass-card`, `.glass-card-tinted`, `.glass-tabbar`, `.glass-sheet`, `.glass-input`, `.glass-button`, `.glass-pill`, `.glass-divider`, `.glass-shimmer` in `index.css`
+- **Tailwind-Integration:** `backdropBlur`-Custom-Values via CSS-Vars, neue Farb-Token `accent-color`, `glass-bg`, `glass-border`, `tabbar-bg`, `sheet-bg`
+
+**Glass-Komponenten-Bibliothek (`src/components/glass/`):**
+- `GlassCard` — Basis-Karte mit backdrop-blur + Saturation, optional tinted/hover
+- `GlassButton` — Pill-Button mit Glas-Hintergrund, accent-Variante, active:scale-95
+- `GlassInput` — Input mit Icon-Prop, Glas-Look
+- `GlassSection` — iOS-Section-Header (uppercase, tracking-wider)
+- `GlassDivider` — Gradient-Trenner
+- `SheetModal` — iOS-Sheet von unten (spring-animiert, framer-motion)
+
+**Anwendung:**
+- **BottomNav** → schwebende Glas-Tab-Bar (`glass-tabbar`, `bottom-4`, `rounded-2xl`, `max-w-sm`)
+- **Header** → `glass-card`-Styling, Suche via `GlassInput`
+- **ProfileModal** → `SheetModal` von unten, innen `GlassCard` + `GlassSection`
+- **LoginScreen** → `GlassCard` + `GlassInput` + `GlassButton`
+- **MovieGrid** → `GlassCard` statt bg-app-card-bg
+
+### 📓 Diary/Feed (Letterboxd-Stil)
+
+- **Data:** `watched_at`-Timestamp bei TOGGLE_WATCHED, Backfill-Migration für bestehende Filme
+- **DiaryView:** Tagebuch gruppiert nach Heute/Gestern/Diese Woche/Früher, Mini-Poster + Rating + Uhrzeit
+- **ActivityFeed:** Aktivitäten (gesehen/bewertet) + "Aktuell am Schauen"-Karussell
+- **Migration:** `20260521_diary_and_episodes.sql` (`watched_at`, `total_seasons`, `total_episodes`)
+
+### 📺 Episode-Tracking (Serializd-Stil)
+
+- **tv_progress-Tabelle:** `user_id, tmdb_id, season_number, episode_number, watched, watched_at`
+- **EpisodeTracker:** Serien-Liste mit Progress-Bar, Season-Breakdown, 10er-Episode-Grid, "Fortsetzen"-Button
+- **Conductor:** `TOGGLE_EPISODE`-Action mit optimistischem Update
+
+### 📋 Listen-Verwaltung & Teilen
+
+- **ListsOverview:** Eigene Listen-Übersicht mit Poster-Previews, Filmzahlen, Teilen/Löschen-Buttons
+- **WhatsApp-Share:** `shareList()` mit `wa.me`-Link, formatierte Liste (Name, Beschreibung, alle Filme mit Jahr + Bewertung)
+- **BottomNav:** Neuer Listen-Tab zwischen Start und Serien
+
+### 🐛 Bugfixes
+
+- **Schema-Mismatch:** `list_items` auf Remote-DB hatte `tmdb_movie_id` statt `movie_id` — Service auf Remote-Schema umgestellt
+- **BottomNav-Labels:** Übersetzung via `t()` für i18n-Keys korrigiert
+- **Supabase-Typen:** Regeneriert via `--linked`, CLI-Output aus Datei entfernt
+
+### 🔧 Infrastruktur
+
+- **ctx7 MCP Server** installiert (Context7 für Library-Docs)
+- **Vercel Production:** Automatisierte Deployments auf `v0-infocusmovie.vercel.app`
+
 ## [3.0.0] - 2026-05-16
 
 ### 🎨 Visueller Overhaul — Cinema-Erlebnis

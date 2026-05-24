@@ -1,4 +1,4 @@
-import { MovieServiceAdapter, UserIntent, WatchlistState, Movie, Achievement, MovieStatistics } from '../../types/domain';
+import { MovieServiceAdapter, UserIntent, WatchlistState, Movie, Achievement, MovieStatistics, EpisodeEntry } from '../../types/domain';
 
 type Listener = (state: WatchlistState) => void;
 
@@ -51,6 +51,9 @@ export class MovieConductor {
     filter: 'all',
     activeListId: null,
     tagFilter: null,
+    diaryEntries: [],
+    tvShows: [],
+    episodes: [],
   };
 
   constructor(adapter: MovieServiceAdapter) {
@@ -129,6 +132,9 @@ export class MovieConductor {
       case 'UPDATE_NOTES': await this.handleUpdateField(intent.payload.id, { notes: intent.payload.notes }); break;
       case 'UPDATE_TAGS': await this.handleUpdateField(intent.payload.id, { tags: intent.payload.tags }); break;
       case 'SET_TAG_FILTER': this.updateState({ tagFilter: intent.payload }); break;
+      case 'LOAD_TV_PROGRESS': await this.handleLoadTvProgress(); break;
+      case 'TOGGLE_EPISODE': await this.handleToggleEpisode(intent.payload); break;
+      case 'DIARY_ENTRY': await this.handleDiaryEntry(intent.payload); break;
     }
   }
 
@@ -193,7 +199,7 @@ export class MovieConductor {
       const updatedLists = this.state.customLists.map(l =>
         l.id === listId ? { ...l, movieCount: (l.movieCount || 0) + 1 } : l
       );
-      this.updateState({ customLists: updatedLists });
+      this.updateState({ customLists: updatedLists, error: null });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Failed to add to list' });
     }
@@ -276,13 +282,64 @@ export class MovieConductor {
   private async handleToggleWatched(id: string): Promise<void> {
     const movie = this.state.items.find(m => m.id === id);
     if (!movie) return;
+    const nowWatched = !movie.watched;
+    const watchedAt = nowWatched ? new Date().toISOString() : null;
     try {
-      await this.adapter.update(id, { watched: !movie.watched });
-      const updated = this.state.items.map(m => m.id === id ? { ...m, watched: !m.watched } : m);
+      await this.adapter.update(id, { watched: nowWatched, watchedAt });
+      const updated = this.state.items.map(m =>
+        m.id === id ? { ...m, watched: nowWatched, watchedAt } : m
+      );
       this.updateState({ items: updated, statistics: this.calculateStatistics(updated) });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Toggle watched failed' });
     }
+  }
+
+  private async handleDiaryEntry(movie: Movie): Promise<void> {
+    const watchedAt = new Date().toISOString();
+    const patched = { ...movie, watched: true, watchedAt };
+    if (movie.source === 'database') {
+      try {
+        await this.adapter.update(movie.id, { watched: true, watchedAt });
+      } catch { /* ignore */ }
+    }
+    const entry = { ...patched, id: crypto.randomUUID(), addedAt: watchedAt, source: 'database' as const };
+    const items = [entry, ...this.state.items];
+    this.updateState({
+      items,
+      statistics: this.calculateStatistics(items),
+      achievements: this.checkAchievements(items),
+    });
+  }
+
+  private async handleLoadTvProgress(): Promise<void> {
+    const tvShows = this.state.items.filter(m => m.mediaType === 'tv');
+    this.updateState({ tvShows });
+  }
+
+  private async handleToggleEpisode(payload: { showId: number; season: number; episode: number }): Promise<void> {
+    const existing = this.state.episodes.find(
+      e => e.tmdbId === payload.showId && e.seasonNumber === payload.season && e.episodeNumber === payload.episode
+    );
+    let updated: EpisodeEntry[];
+    if (existing) {
+      updated = this.state.episodes.map(e =>
+        e.tmdbId === payload.showId && e.seasonNumber === payload.season && e.episodeNumber === payload.episode
+          ? { ...e, watched: !e.watched, watchedAt: !e.watched ? new Date().toISOString() : null }
+          : e
+      );
+    } else {
+      const show = this.state.items.find(m => m.tmdbId === payload.showId);
+      updated = [...this.state.episodes, {
+        tmdbId: payload.showId,
+        title: show?.title || '',
+        seasonNumber: payload.season,
+        episodeNumber: payload.episode,
+        watched: true,
+        watchedAt: new Date().toISOString(),
+      }];
+    }
+    this.updateState({ episodes: updated });
   }
 
   private async handleToggleFavorite(id: string): Promise<void> {

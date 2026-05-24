@@ -77,7 +77,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       releaseDate: row.release_date || null,
       overview: row.overview || null,
       voteAverage: row.vote_average ? Number(row.vote_average) : null,
-      addedAt: row.created_at,
+      addedAt: row.created_at ?? undefined,
       source: 'database',
       mediaType: (row.media_type as 'movie' | 'tv') || 'movie',
       watched: row.watched ?? false,
@@ -479,7 +479,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     const { data: { user } } = await this.client.auth.getUser();
     if (!user) return [];
 
-    // Fetch lists (no join — PostgREST schema cache issues with list_items FK)
     const { data, error } = await this.client
       .from('custom_lists')
       .select('*')
@@ -490,7 +489,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
         return [];
     }
 
-    // Fetch item counts separately to avoid schema cache dependency
     const { data: itemData, error: itemError } = await this.client
       .from('list_items')
       .select('list_id, id');
@@ -520,80 +518,119 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async getListMovies(listId: string): Promise<Movie[]> {
-     const { data, error } = await this.client
-        .from('list_items')
-        .select(`
-            movie_id,
-            movies:movie_id (*) 
-        `)
-        .eq('list_id', listId);
+    const { data, error } = await this.client
+      .from('list_items')
+      .select('*')
+      .eq('list_id', listId);
 
-     if (error) throw new Error(error.message);
-     
-     return data.map((item: any) => {
-         const m = item.movies;
-         if (!m) return null;
-         return {
-            id: m.id,
-            title: m.title,
-            overview: m.overview,
-            posterPath: m.poster_path,
-            releaseDate: m.release_date,
-            voteAverage: m.vote_average,
-            runtime: m.runtime,
-            mediaType: m.media_type,
-            tmdbId: m.tmdb_id,
-            watched: m.watched,
-            favorite: m.favorite,
+    if (error) throw new Error(error.message);
+
+    const movies: Movie[] = [];
+    for (const item of data) {
+      const tmdbId = item.tmdb_movie_id;
+      let movie: Movie | null = null;
+
+      if (tmdbId) {
+        const { data: existing } = await this.client
+          .from('movies')
+          .select('*')
+          .eq('tmdb_id', tmdbId)
+          .maybeSingle();
+
+        if (existing) {
+          const row = existing as any;
+          movie = {
+            id: row.id,
+            title: row.title,
+            overview: row.overview,
+            posterPath: row.poster_path,
+            releaseDate: row.release_date,
+            voteAverage: row.vote_average ? Number(row.vote_average) : null,
+            runtime: row.runtime,
+            mediaType: row.media_type || item.media_type || 'movie',
+            tmdbId: row.tmdb_id,
+            watched: row.watched ?? false,
+            favorite: row.favorite ?? false,
             source: 'database',
-            addedAt: m.created_at,
-            userRating: m.user_rating ?? null,
-            notes: m.notes ?? null,
-            tags: Array.isArray(m.tags) ? m.tags : [],
-            genres: Array.isArray(m.genres) ? m.genres : undefined,
-         } as Movie;
-     }).filter((m: any) => m !== null) as Movie[];
+      addedAt: row.created_at ?? undefined,
+            userRating: row.user_rating ?? null,
+            notes: row.notes ?? null,
+            tags: Array.isArray(row.tags) ? row.tags : [],
+            genres: Array.isArray(row.genres) ? row.genres : undefined,
+          };
+        }
+      }
+
+      if (!movie) {
+        movie = {
+          id: item.id,
+          title: item.movie_title,
+          posterPath: item.movie_poster_path || null,
+          releaseDate: item.movie_year ? `${item.movie_year}-01-01` : null,
+          mediaType: item.media_type as 'movie' | 'tv' || 'movie',
+          tmdbId: tmdbId || undefined,
+          source: 'database',
+          watched: false,
+          favorite: false,
+          overview: null,
+          voteAverage: null,
+          runtime: null,
+        };
+      }
+
+      movies.push(movie);
+    }
+
+    return movies;
   }
 
   async addMovieToList(listId: string, movie: Movie): Promise<void> {
-    // 1. Ensure movie exists in our DB (if it's from TMDB only)
-    let movieId = movie.id;
-    if (movie.source === 'tmdb') {
-        const { data: { user } } = await this.client.auth.getUser();
-        if(!user) throw new Error('User not authenticated');
+    // TMDB-ID ermitteln: tmdbId-Feld oder aus id ableiten (für Suchergebnisse)
+    const tmdbId = movie.tmdbId ?? (movie.source === 'tmdb' ? Number(movie.id) || 0 : 0);
 
-        // Check if we already have it by TMDB ID
-        const { data: existing } = await this.client
-            .from('movies')
-            .select('id')
-            .eq('tmdb_id', movie.tmdbId!)
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-        if (existing) {
-            movieId = existing.id;
-        } else {
-            // Add to DB first
-             const saved = await this.add(movie);
-             movieId = saved.id;
-        }
+    if (!tmdbId) {
+      throw new Error('Movie has no valid TMDB ID and cannot be added to a list');
     }
 
-    // 2. Link to list
-    const { error } = await this.client
-        .from('list_items')
-        .insert({ list_id: listId, movie_id: movieId });
+    // Prüfen ob Film bereits in der Liste ist
+    const { data: existing } = await this.client
+      .from('list_items')
+      .select('id')
+      .eq('list_id', listId)
+      .eq('tmdb_movie_id', tmdbId)
+      .limit(1);
 
-    if (error && error.code !== '23505') { // Ignore unique violation
-        throw new Error(error.message);
+    if (existing && existing.length > 0) {
+      throw new Error(`Movie "${movie.title}" is already in this list`);
+    }
+
+    const { error } = await this.client
+      .from('list_items')
+      .insert({
+        list_id: listId,
+        tmdb_movie_id: tmdbId,
+        movie_title: movie.title,
+        media_type: movie.mediaType || 'movie',
+        movie_poster_path: movie.posterPath || null,
+        movie_year: movie.releaseDate?.split('-')[0] || null,
+      } as any);
+
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error(`Movie "${movie.title}" is already in this list`);
+      }
+      throw new Error(error.message);
     }
   }
 
   async removeMovieFromList(listId: string, movieId: string): Promise<void> {
+    const numId = parseInt(movieId, 10);
+    if (isNaN(numId)) return;
     const { error } = await this.client
-        .from('list_items')
-        .delete()
-        .match({ list_id: listId, movie_id: movieId });
+      .from('list_items')
+      .delete()
+      .eq('list_id', listId)
+      .eq('tmdb_movie_id', numId);
 
     if (error) throw new Error(error.message);
   }

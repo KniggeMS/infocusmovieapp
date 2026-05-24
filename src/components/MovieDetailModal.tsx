@@ -2,8 +2,8 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Movie, CastMember, WatchProvider } from '../types/domain';
 import { MovieConductor } from '../core/conductor/MovieConductor';
-import { motion } from 'framer-motion';
-import { X, Play, Check, Plus, Share2, ListPlus, Star, Tag, NotebookPen, Sparkles, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Play, Check, Plus, Share2, ListPlus, Star, Tag, NotebookPen, Sparkles, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { ListCreationModal } from './ListCreationModal';
 import { GeminiService } from '../services/GeminiService';
 
@@ -188,9 +188,15 @@ const ActionButtons = React.memo(({
   const { t } = useTranslation();
   const [showListCreation, setShowListCreation] = useState(false);
 
-  const handleAddToList = useCallback((listId: string) => {
-    conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movie } });
-    onShowToast(t('common.addedToList', 'Zur Liste hinzugefügt'), 'success');
+  const handleAddToList = useCallback(async (listId: string) => {
+    await conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movie } });
+    // Prüfen ob ein Fehler aufgetreten ist
+    const currentError = conductor.getState().error;
+    if (currentError) {
+      onShowToast(currentError, 'error');
+    } else {
+      onShowToast(t('common.addedToList', 'Zur Liste hinzugefügt'), 'success');
+    }
   }, [conductor, movie, onShowToast, t]);
 
   return (
@@ -472,6 +478,7 @@ const PersonalSection = React.memo(({
   const [notes, setNotes] = useState<string>(movie.notes ?? '');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>(movie.tags ?? []);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
 
   useEffect(() => {
@@ -598,35 +605,63 @@ const PersonalSection = React.memo(({
         </div>
       </div>
 
-      {/* Tags */}
+      {/* Tags - kollapsibel für mobile Usability */}
       <div>
-        <div className="text-xs text-app-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
-          <Tag className="w-3.5 h-3.5" /> {t('common.tags', 'Tags')}
-        </div>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {tags.map(tag => (
-            <button
-              key={tag}
-              onClick={() => removeTag(tag)}
-              className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/30 rounded-full px-2 py-1 hover:bg-red-500/20 hover:text-red-300 transition-all"
-              title={t('common.remove', 'Entfernen')}
+        <button
+          onClick={() => setTagsExpanded(!tagsExpanded)}
+          className="flex items-center gap-2 text-xs text-app-text-muted uppercase tracking-wider mb-2 hover:text-app-text transition-colors w-full"
+        >
+          <Tag className="w-3.5 h-3.5" />
+          <span className="flex items-center gap-1">
+            {t('common.tags', 'Tags')}
+            {tags.length > 0 && (
+              <span className="bg-blue-500/20 text-blue-300 text-[10px] px-1.5 py-0.5 rounded-full">
+                {tags.length}
+              </span>
+            )}
+          </span>
+          {tagsExpanded ? (
+            <ChevronUp className="w-3.5 h-3.5 ml-auto" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5 ml-auto" />
+          )}
+        </button>
+        <AnimatePresence>
+          {tagsExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
             >
-              #{tag} ✕
-            </button>
-          ))}
-        </div>
-        <input
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ',') {
-              e.preventDefault();
-              addTag(tagInput);
-            }
-          }}
-          placeholder={t('common.tagPlaceholder', 'Tag eingeben und Enter drücken')}
-          className="w-full bg-app-bg border border-app-border rounded-lg p-2 text-sm text-app-text placeholder-app-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-        />
+              <div className="flex flex-wrap gap-2 mb-2">
+                {tags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => removeTag(tag)}
+                    className="text-xs bg-blue-500/10 text-blue-300 border border-blue-500/30 rounded-full px-2 py-1 hover:bg-red-500/20 hover:text-red-300 transition-all"
+                    title={t('common.remove', 'Entfernen')}
+                  >
+                    #{tag} ✕
+                  </button>
+                ))}
+              </div>
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    addTag(tagInput);
+                  }
+                }}
+                placeholder={t('common.tagPlaceholder', 'Tag eingeben und Enter drücken')}
+                className="w-full bg-app-bg border border-app-border rounded-lg p-2 text-sm text-app-text placeholder-app-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

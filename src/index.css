@@ -45,6 +45,21 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes glass-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes slide-up-sheet {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fade-in-scale {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 /* ===== Animation Utility Classes ===== */
 .animate-fade-in {
   animation: fade-in 0.4s ease forwards;
@@ -115,6 +130,107 @@ body {
 .auth-input-field:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* ===== Frosted Glass Utilities ===== */
+@layer components {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-card-tinted {
+    background: color-mix(in srgb, var(--glass-bg), var(--glass-tint));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-tabbar {
+    background: var(--tabbar-bg);
+    backdrop-filter: blur(var(--tabbar-blur)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--tabbar-blur)) saturate(var(--glass-saturation));
+    border: 1px solid var(--tabbar-border);
+  }
+
+  .glass-sheet {
+    background: var(--sheet-bg);
+    backdrop-filter: blur(var(--sheet-blur)) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(var(--sheet-blur)) saturate(var(--glass-saturation));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-input {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(16px) saturate(var(--glass-saturation));
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-input:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 25%, transparent);
+  }
+
+  .glass-button {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px) saturate(var(--glass-saturation));
+    -webkit-backdrop-filter: blur(12px) saturate(var(--glass-saturation));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: all 0.2s ease;
+  }
+
+  .glass-button:hover {
+    background: color-mix(in srgb, var(--glass-bg) 80%, white);
+    border-color: color-mix(in srgb, var(--glass-border) 70%, white);
+  }
+
+  .glass-button:active {
+    transform: scale(0.97);
+  }
+
+  .glass-pill {
+    border-radius: 9999px;
+    padding: 0.5rem 1.25rem;
+  }
+
+  .glass-divider {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--glass-border),
+      transparent
+    );
+  }
+}
+
+/* iOS-style slide-up sheet animation */
+.sheet-enter {
+  animation: slide-up-sheet 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.sheet-overlay-enter {
+  animation: fade-in 0.3s ease forwards;
+}
+
+/* Glass shimmer loading */
+.glass-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.06) 37%,
+    transparent 63%
+  );
+  background-size: 200% 100%;
+  animation: glass-shimmer 1.5s infinite;
 }
 
 /* Input autofill override for all themes */

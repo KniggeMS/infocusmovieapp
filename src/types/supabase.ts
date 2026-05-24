@@ -12,25 +12,85 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      custom_lists: {
+      admin_notifications: {
         Row: {
           created_at: string
+          id: string
+          payload: Json
+          read_at: string | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          type?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_lists: {
+        Row: {
+          created_at: string | null
           description: string | null
           id: string
           name: string
           user_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           name: string
           user_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           name?: string
@@ -38,138 +98,453 @@ export type Database = {
         }
         Relationships: []
       }
-      list_items: {
+      diary_entries: {
         Row: {
-          added_at: string
+          created_at: string | null
+          episode_number: number | null
           id: string
-          list_id: string
-          movie_id: string
+          imdb_rating: number | null
+          media_type: string
+          movie_poster_path: string | null
+          movie_title: string
+          movie_year: string | null
+          rating: number | null
+          review: string | null
+          rotten_tomatoes_rating: number | null
+          season_number: number | null
+          tmdb_movie_id: number
+          user_id: string
+          watched_on: string | null
         }
         Insert: {
-          added_at?: string
+          created_at?: string | null
+          episode_number?: number | null
           id?: string
-          list_id: string
-          movie_id: string
+          imdb_rating?: number | null
+          media_type?: string
+          movie_poster_path?: string | null
+          movie_title: string
+          movie_year?: string | null
+          rating?: number | null
+          review?: string | null
+          rotten_tomatoes_rating?: number | null
+          season_number?: number | null
+          tmdb_movie_id: number
+          user_id: string
+          watched_on?: string | null
         }
         Update: {
-          added_at?: string
+          created_at?: string | null
+          episode_number?: number | null
+          id?: string
+          imdb_rating?: number | null
+          media_type?: string
+          movie_poster_path?: string | null
+          movie_title?: string
+          movie_year?: string | null
+          rating?: number | null
+          review?: string | null
+          rotten_tomatoes_rating?: number | null
+          season_number?: number | null
+          tmdb_movie_id?: number
+          user_id?: string
+          watched_on?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_ratings: {
+        Row: {
+          id: string
+          imdb_id: string | null
+          imdb_rating: number | null
+          imdb_vote_count: number | null
+          last_updated: string | null
+          media_type: string
+          metacritic_score: number | null
+          rotten_tomatoes_fresh: number | null
+          rotten_tomatoes_rating: number | null
+          rotten_tomatoes_rotten: number | null
+          tmdb_id: number
+        }
+        Insert: {
+          id?: string
+          imdb_id?: string | null
+          imdb_rating?: number | null
+          imdb_vote_count?: number | null
+          last_updated?: string | null
+          media_type: string
+          metacritic_score?: number | null
+          rotten_tomatoes_fresh?: number | null
+          rotten_tomatoes_rating?: number | null
+          rotten_tomatoes_rotten?: number | null
+          tmdb_id: number
+        }
+        Update: {
+          id?: string
+          imdb_id?: string | null
+          imdb_rating?: number | null
+          imdb_vote_count?: number | null
+          last_updated?: string | null
+          media_type?: string
+          metacritic_score?: number | null
+          rotten_tomatoes_fresh?: number | null
+          rotten_tomatoes_rating?: number | null
+          rotten_tomatoes_rotten?: number | null
+          tmdb_id?: number
+        }
+        Relationships: []
+      }
+      likes: {
+        Row: {
+          created_at: string | null
+          diary_entry_id: string
+          id: string
+          media_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          diary_entry_id: string
+          id?: string
+          media_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          diary_entry_id?: string
+          id?: string
+          media_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_diary_entry_id_fkey"
+            columns: ["diary_entry_id"]
+            isOneToOne: false
+            referencedRelation: "diary_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      list_items: {
+        Row: {
+          added_at: string | null
+          episode_number: number | null
+          id: string
+          list_id: string
+          media_type: string
+          movie_poster_path: string | null
+          movie_title: string
+          movie_year: string | null
+          position: number | null
+          season_number: number | null
+          tmdb_movie_id: number
+        }
+        Insert: {
+          added_at?: string | null
+          episode_number?: number | null
+          id?: string
+          list_id: string
+          media_type?: string
+          movie_poster_path?: string | null
+          movie_title: string
+          movie_year?: string | null
+          position?: number | null
+          season_number?: number | null
+          tmdb_movie_id: number
+        }
+        Update: {
+          added_at?: string | null
+          episode_number?: number | null
           id?: string
           list_id?: string
-          movie_id?: string
+          media_type?: string
+          movie_poster_path?: string | null
+          movie_title?: string
+          movie_year?: string | null
+          position?: number | null
+          season_number?: number | null
+          tmdb_movie_id?: number
         }
         Relationships: [
           {
             foreignKeyName: "list_items_list_id_fkey"
             columns: ["list_id"]
             isOneToOne: false
-            referencedRelation: "custom_lists"
+            referencedRelation: "lists"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      lists: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "list_items_movie_id_fkey"
-            columns: ["movie_id"]
+            foreignKeyName: "lists_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "movies"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
       movies: {
         Row: {
-          created_at: string
+          created_at: string | null
           favorite: boolean | null
+          genres: string[] | null
           id: string
           media_type: string | null
+          notes: string | null
           overview: string | null
           poster_path: string | null
           release_date: string | null
           runtime: number | null
+          tags: string[] | null
           title: string
           tmdb_id: number | null
+          total_episodes: number | null
+          total_seasons: number | null
           user_id: string | null
+          user_rating: number | null
           vote_average: number | null
           watched: boolean | null
-          user_rating: number | null
-          notes: string | null
-          tags: string[] | null
-          genres: string[] | null
+          watched_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           favorite?: boolean | null
+          genres?: string[] | null
           id?: string
           media_type?: string | null
+          notes?: string | null
           overview?: string | null
           poster_path?: string | null
           release_date?: string | null
           runtime?: number | null
+          tags?: string[] | null
           title: string
           tmdb_id?: number | null
+          total_episodes?: number | null
+          total_seasons?: number | null
           user_id?: string | null
+          user_rating?: number | null
           vote_average?: number | null
           watched?: boolean | null
-          user_rating?: number | null
-          notes?: string | null
-          tags?: string[] | null
-          genres?: string[] | null
+          watched_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           favorite?: boolean | null
+          genres?: string[] | null
           id?: string
           media_type?: string | null
+          notes?: string | null
           overview?: string | null
           poster_path?: string | null
           release_date?: string | null
           runtime?: number | null
+          tags?: string[] | null
           title?: string
           tmdb_id?: number | null
+          total_episodes?: number | null
+          total_seasons?: number | null
           user_id?: string | null
+          user_rating?: number | null
           vote_average?: number | null
           watched?: boolean | null
-          user_rating?: number | null
-          notes?: string | null
-          tags?: string[] | null
-          genres?: string[] | null
+          watched_at?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
           avatar_url: string | null
-          created_at: string
+          created_at: string | null
           display_name: string | null
           email: string | null
           id: string
-          role: string | null
+          last_login_at: string | null
+          role: string
           theme: string | null
+          updated_at: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
-          created_at?: string
+          created_at?: string | null
           display_name?: string | null
           email?: string | null
           id: string
-          role?: string | null
+          last_login_at?: string | null
+          role?: string
           theme?: string | null
+          updated_at?: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
-          created_at?: string
+          created_at?: string | null
           display_name?: string | null
           email?: string | null
           id?: string
-          role?: string | null
+          last_login_at?: string | null
+          role?: string
           theme?: string | null
+          updated_at?: string
+          username?: string | null
         }
         Relationships: []
+      }
+      tv_progress: {
+        Row: {
+          created_at: string | null
+          episode_number: number
+          id: string
+          season_number: number
+          title: string
+          tmdb_id: number
+          user_id: string | null
+          watched: boolean | null
+          watched_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          episode_number: number
+          id?: string
+          season_number: number
+          title: string
+          tmdb_id: number
+          user_id?: string | null
+          watched?: boolean | null
+          watched_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          episode_number?: number
+          id?: string
+          season_number?: number
+          title?: string
+          tmdb_id?: number
+          user_id?: string | null
+          watched?: boolean | null
+          watched_at?: string | null
+        }
+        Relationships: []
+      }
+      watchlist: {
+        Row: {
+          added_at: string | null
+          episode_number: number | null
+          id: string
+          media_type: string
+          movie_poster_path: string | null
+          movie_title: string
+          movie_year: string | null
+          season_number: number | null
+          tmdb_movie_id: number
+          user_id: string
+        }
+        Insert: {
+          added_at?: string | null
+          episode_number?: number | null
+          id?: string
+          media_type?: string
+          movie_poster_path?: string | null
+          movie_title: string
+          movie_year?: string | null
+          season_number?: number | null
+          tmdb_movie_id: number
+          user_id: string
+        }
+        Update: {
+          added_at?: string | null
+          episode_number?: number | null
+          id?: string
+          media_type?: string
+          movie_poster_path?: string | null
+          movie_title?: string
+          movie_year?: string | null
+          season_number?: number | null
+          tmdb_movie_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_change_password: {
+        Args: { new_password: string; target_user_id: string }
+        Returns: undefined
+      }
+      admin_delete_user: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
+      admin_get_all_users: { Args: never; Returns: Json }
+      admin_update_user_role: {
+        Args: { new_role: string; target_user_id: string }
+        Returns: undefined
+      }
+      get_email_by_username: { Args: { p_username: string }; Returns: string }
+      get_profile_by_identifier: {
+        Args: { p_identifier: string }
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          last_login_at: string
+          role: string
+          username: string
+        }[]
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
@@ -298,6 +673,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

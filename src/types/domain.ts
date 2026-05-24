@@ -19,8 +19,8 @@ export interface Movie {
   tmdbId?: number;
   title: string;
   posterPath: string | null;
-  backdropPath?: string | null; // High-res landscape image
-  trailerKey?: string | null; // YouTube Video Key
+  backdropPath?: string | null;
+  trailerKey?: string | null;
   runtime?: number | null;
   releaseDate: string | null;
   overview: string | null;
@@ -29,10 +29,11 @@ export interface Movie {
   source?: 'tmdb' | 'database';
   mediaType?: 'movie' | 'tv';
   watched?: boolean;
+  watchedAt?: string | null;
   favorite?: boolean;
-  userRating?: number | null; // 0..10, persisted
-  notes?: string | null; // private notes
-  tags?: string[]; // free-form tags
+  userRating?: number | null;
+  notes?: string | null;
+  tags?: string[];
   genres?: string[];
   cast?: CastMember[];
   director?: string;
@@ -42,6 +43,17 @@ export interface Movie {
     rent?: WatchProvider[];
     buy?: WatchProvider[];
   };
+  totalSeasons?: number;
+  totalEpisodes?: number;
+}
+
+export interface EpisodeEntry {
+  tmdbId: number;
+  title: string;
+  seasonNumber: number;
+  episodeNumber: number;
+  watched: boolean;
+  watchedAt?: string | null;
 }
 
 export interface Achievement {
@@ -83,17 +95,20 @@ export type UserIntent =
   | { type: 'REMOVE_MOVIE'; payload: string }
   | { type: 'TOGGLE_WATCHED'; payload: string }
   | { type: 'TOGGLE_FAVORITE'; payload: string }
-  | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' | 'recommendations' }
+  | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'diary' | 'series' | 'achievements' | 'statistics' | 'lists' | 'recommendations' }
   | { type: 'SELECT_MOVIE'; payload: string }
   | { type: 'CLOSE_DETAILS' }
   | { type: 'CREATE_LIST'; payload: { name: string, description?: string } }
   | { type: 'DELETE_LIST'; payload: string }
   | { type: 'ADD_TO_LIST'; payload: { listId: string, movie: Movie } }
-  | { type: 'SELECT_LIST'; payload: string } // listId
+  | { type: 'SELECT_LIST'; payload: string }
   | { type: 'UPDATE_USER_RATING'; payload: { id: string; userRating: number | null } }
   | { type: 'UPDATE_NOTES'; payload: { id: string; notes: string } }
   | { type: 'UPDATE_TAGS'; payload: { id: string; tags: string[] } }
-  | { type: 'SET_TAG_FILTER'; payload: string | null };
+  | { type: 'SET_TAG_FILTER'; payload: string | null }
+  | { type: 'LOAD_TV_PROGRESS' }
+  | { type: 'TOGGLE_EPISODE'; payload: { showId: number; season: number; episode: number } }
+  | { type: 'DIARY_ENTRY'; payload: Movie };
 
 export interface WatchlistState {
   items: Movie[];
@@ -103,9 +118,12 @@ export interface WatchlistState {
   selectedMovie: Movie | null;
   status: 'idle' | 'loading' | 'error';
   error: string | null;
-  filter: 'all' | 'favorites' | 'watched' | 'achievements' | 'statistics' | 'lists' | 'list' | 'recommendations';
-  activeListId: string | null; // Added activeListId
+  filter: 'all' | 'favorites' | 'watched' | 'diary' | 'series' | 'achievements' | 'statistics' | 'lists' | 'list' | 'recommendations';
+  activeListId: string | null;
   tagFilter?: string | null;
+  diaryEntries: Movie[];
+  tvShows: Movie[];
+  episodes: EpisodeEntry[];
 }
 
 export interface MovieServiceAdapter {
