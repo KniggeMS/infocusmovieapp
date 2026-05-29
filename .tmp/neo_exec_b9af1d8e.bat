@@ -1,1 +1,0 @@
-cd "e:\cto.new\https-github.com-KniggeMS-InFocus" && dir /s /b *.test.ts *.test.tsx 2>nul | findstr /v node_modules

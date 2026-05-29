@@ -1,1 +1,0 @@
-powershell -Command "Get-Content -Path 'e:\cto.new\https-github.com-KniggeMS-InFocus\src\services\AuthService.ts' -TotalCount 921"

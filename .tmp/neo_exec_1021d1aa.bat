@@ -1,1 +1,0 @@
-cd "e:\cto.new\https-github.com-KniggeMS-InFocus" && git status
