@@ -196,7 +196,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
     }
 
     // 2. Fallback to OMDb Search
-    console.log('TMDB search yielded no results, trying OMDb fallback...');
     return this.searchOMDb(query);
   }
 
@@ -262,8 +261,6 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       ) || data.videos?.results?.find(
         (v: any) => v.site === 'YouTube' && v.type === 'Teaser'
       );
-      
-      console.log('[TMDB] Videos found:', data.videos?.results?.length || 0, 'Trailer selected:', trailer?.key || 'none');
 
       const recommendations = (data.recommendations?.results || []).slice(0, 10).map((rec: any) => {
          const recIsTv = rec.media_type === 'tv' || (!rec.title && !!rec.name); 

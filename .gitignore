@@ -36,3 +36,18 @@ supabase/.temp/
 
 # Editor backups
 *.old
+
+# AI-Tool-Konfigurationen (lokal, nicht im Repo)
+.agents/
+.continue/
+.opencode/
+.vscode/
+
+# Interne Entwicklungsdokumente
+GEMINI.md
+AGENTS.md
+PLAN.md
+conductor/
+
+# Debug-Skripte
+check-supabase-v2.js

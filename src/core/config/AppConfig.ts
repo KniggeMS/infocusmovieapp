@@ -5,7 +5,7 @@ export class AppConfig {
    */
   public static getRedirectUrl(): string {
     const appUrl = import.meta.env.VITE_APP_URL;
-    
+
     if (appUrl && appUrl.trim() !== '') {
       return appUrl;
     }
@@ -14,6 +14,6 @@ export class AppConfig {
       return window.location.origin;
     }
 
-    return 'https://infocus-cinelog.vercel.app'; // Final fallback
+    return '';
   }
 }
