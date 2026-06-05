@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Play, Check, Plus, Share2, ListPlus, Star, Tag, NotebookPen, Sparkles, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { ListCreationModal } from './ListCreationModal';
 import { GeminiService } from '../services/GeminiService';
+import { useExternalRatings } from '../hooks/useExternalRatings';
 
 
 interface MovieDetailModalProps {
@@ -475,6 +476,12 @@ const PersonalSection = React.memo(({
 }) => {
   const { t } = useTranslation();
   const [rating, setRating] = useState<number | null>(movie.userRating ?? null);
+  const { ratings, loading: ratingsLoading } = useExternalRatings(
+    movie.tmdbId,
+    movie.title,
+    movie.mediaType ?? 'movie',
+    movie.voteAverage
+  );
   const [notes, setNotes] = useState<string>(movie.notes ?? '');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>(movie.tags ?? []);
@@ -557,6 +564,53 @@ const PersonalSection = React.memo(({
 
       {/* Rating */}
       <div>
+        {/* Externe Bewertungs-Badges */}
+        <div className="flex items-center gap-2 mb-3">
+          {ratings.tmdb !== null && (
+            <a
+              href={`https://www.themoviedb.org/${movie.mediaType ?? 'movie'}/${movie.tmdbId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0d253f] hover:bg-[#1a3a5c] transition-colors"
+              title="TMDB Bewertung"
+            >
+              <img
+                src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
+                alt="TMDB"
+                className="h-3"
+              />
+              <span className="text-xs font-bold text-white">
+                {ratings.tmdb.toFixed(1)}
+              </span>
+            </a>
+          )}
+          {ratingsLoading && !ratings.rottenTomatoes && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-app-secondary/60 animate-pulse">
+              <div className="w-12 h-3 bg-app-secondary rounded" />
+            </div>
+          )}
+          {ratings.rottenTomatoes && (() => {
+            const pct = parseInt(ratings.rottenTomatoes);
+            const isFresh = pct >= 60;
+            return (
+              <a
+                href={`https://www.rottentomatoes.com/search?search=${encodeURIComponent(movie.title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-colors ${
+                  isFresh
+                    ? 'bg-red-700/80 hover:bg-red-700'
+                    : 'bg-yellow-700/80 hover:bg-yellow-700'
+                }`}
+                title="Rotten Tomatoes"
+              >
+                <span className="text-sm">{isFresh ? '🍅' : '🤢'}</span>
+                <span className="text-xs font-bold text-white">{ratings.rottenTomatoes}</span>
+              </a>
+            );
+          })()}
+        </div>
+
         <div className="text-xs text-app-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
           <Star className="w-3.5 h-3.5" /> {t('common.myRating', 'Eigene Bewertung')}
         </div>
