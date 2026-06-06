@@ -250,59 +250,123 @@ input:-webkit-autofill:active {
    UI-STYLE VARIABLEN — gesteuert via data-ui-style auf <html>
 ══════════════════════════════════════════════════════════════════════════════ */
 
-[data-ui-style="minimal"] {
-  --ui-font-display: 'Instrument Serif', Georgia, serif;
-  --ui-font-body: 'DM Sans', system-ui, sans-serif;
-  --ui-radius-card: 6px;
-  --ui-radius-button: 6px;
-  --ui-nav-height: 56px;
-  --ui-nav-style: top;
-  --ui-card-aspect: 2 / 3;
+/* ── Fallback / Default (kein data-ui-style gesetzt) ── */
+:root {
+  --ui-font-display:    'DM Sans', system-ui, sans-serif;
+  --ui-font-body:       'DM Sans', system-ui, sans-serif;
+  --ui-radius-card:     6px;
+  --ui-radius-button:   6px;
+  --ui-nav-height:      56px;
+  --ui-nav-style:       top;
+  --ui-card-aspect:     2 / 3;
   --ui-spacing-section: 3rem;
-  --ui-hero-layout: split;
-  --ui-accent-weight: subtle;
+  --ui-hero-layout:     split;
+  --ui-accent-weight:   subtle;
+  --ui-bg:              #ffffff;
+  --ui-surface:         #f8f8f8;
+  --ui-surface-2:       #f0f0f0;
+  --ui-text:            #111111;
+  --ui-text-muted:      #666666;
+  --ui-accent:          #1a1a1a;
+  --ui-accent-fg:       #ffffff;
+  --ui-border:          rgba(0,0,0,0.1);
+}
+
+[data-ui-style="minimal"] {
+  --ui-font-display:    'Instrument Serif', Georgia, serif;
+  --ui-font-body:       'DM Sans', system-ui, sans-serif;
+  --ui-radius-card:     6px;
+  --ui-radius-button:   6px;
+  --ui-nav-height:      56px;
+  --ui-nav-style:       top;
+  --ui-card-aspect:     2 / 3;
+  --ui-spacing-section: 3rem;
+  --ui-hero-layout:     split;
+  --ui-accent-weight:   subtle;
+  --ui-bg:              #ffffff;
+  --ui-surface:         #f8f8f8;
+  --ui-surface-2:       #f0ede8;
+  --ui-text:            #111111;
+  --ui-text-muted:      #555555;
+  --ui-accent:          #1a1a1a;
+  --ui-accent-fg:       #ffffff;
+  --ui-border:          rgba(0,0,0,0.08);
 }
 
 [data-ui-style="cinematic"] {
-  --ui-font-display: 'Playfair Display', Georgia, serif;
-  --ui-font-body: 'DM Sans', system-ui, sans-serif;
-  --ui-radius-card: 3px;
-  --ui-radius-button: 4px;
-  --ui-nav-height: 64px;
-  --ui-nav-style: top;
-  --ui-card-aspect: 2 / 3;
+  --ui-font-display:    'Playfair Display', Georgia, serif;
+  --ui-font-body:       'DM Sans', system-ui, sans-serif;
+  --ui-radius-card:     3px;
+  --ui-radius-button:   4px;
+  --ui-nav-height:      64px;
+  --ui-nav-style:       top;
+  --ui-card-aspect:     2 / 3;
   --ui-spacing-section: 2.5rem;
-  --ui-hero-layout: fullbleed;
-  --ui-accent-weight: bold;
+  --ui-hero-layout:     fullbleed;
+  --ui-accent-weight:   bold;
+  --ui-bg:              #0a0a0a;
+  --ui-surface:         #141414;
+  --ui-surface-2:       #1e1e1e;
+  --ui-text:            #e8e8e8;
+  --ui-text-muted:      #999999;
+  --ui-accent:          #e50914;
+  --ui-accent-fg:       #ffffff;
+  --ui-border:          rgba(255,255,255,0.08);
 }
 
 [data-ui-style="modern"] {
-  --ui-font-display: 'Inter', system-ui, sans-serif;
-  --ui-font-body: 'Inter', system-ui, sans-serif;
-  --ui-radius-card: 10px;
-  --ui-radius-button: 6px;
-  --ui-nav-height: 56px;
-  --ui-nav-style: sidebar;
-  --ui-card-aspect: 2 / 3;
+  --ui-font-display:    'Inter', system-ui, sans-serif;
+  --ui-font-body:       'Inter', system-ui, sans-serif;
+  --ui-radius-card:     10px;
+  --ui-radius-button:   6px;
+  --ui-nav-height:      56px;
+  --ui-nav-style:       sidebar;
+  --ui-card-aspect:     2 / 3;
   --ui-spacing-section: 2rem;
-  --ui-hero-layout: dashboard;
-  --ui-accent-weight: subtle;
+  --ui-hero-layout:     dashboard;
+  --ui-accent-weight:   subtle;
+  --ui-bg:              #0f172a;
+  --ui-surface:         #1e293b;
+  --ui-surface-2:       #273549;
+  --ui-text:            #f1f5f9;
+  --ui-text-muted:      #94a3b8;
+  --ui-accent:          #6366f1;
+  --ui-accent-fg:       #ffffff;
+  --ui-border:          rgba(255,255,255,0.06);
 }
 
 [data-ui-style="editorial"] {
-  --ui-font-display: 'Playfair Display', Georgia, serif;
-  --ui-font-body: 'DM Sans', system-ui, sans-serif;
-  --ui-radius-card: 6px;
-  --ui-radius-button: 4px;
-  --ui-nav-height: 60px;
-  --ui-nav-style: top;
-  --ui-card-aspect: 2 / 3;
+  --ui-font-display:    'Playfair Display', Georgia, serif;
+  --ui-font-body:       'DM Sans', system-ui, sans-serif;
+  --ui-radius-card:     6px;
+  --ui-radius-button:   4px;
+  --ui-nav-height:      60px;
+  --ui-nav-style:       top;
+  --ui-card-aspect:     2 / 3;
   --ui-spacing-section: 4rem;
-  --ui-hero-layout: split;
-  --ui-accent-weight: bold;
+  --ui-hero-layout:     split;
+  --ui-accent-weight:   bold;
+  --ui-bg:              #fafaf8;
+  --ui-surface:         #f0ede8;
+  --ui-surface-2:       #e8e4dc;
+  --ui-text:            #1a1a1a;
+  --ui-text-muted:      #555555;
+  --ui-accent:          #c41e3a;
+  --ui-accent-fg:       #ffffff;
+  --ui-border:          rgba(0,0,0,0.1);
 }
 
-.ui-font-display { font-family: var(--ui-font-display, 'DM Sans', sans-serif); }
-.ui-font-body    { font-family: var(--ui-font-body, 'DM Sans', sans-serif); }
-.ui-card         { border-radius: var(--ui-radius-card, 6px); aspect-ratio: var(--ui-card-aspect, 2/3); }
-.ui-btn          { border-radius: var(--ui-radius-button, 6px); }
+/* ── Globale Anwendung der UI-Variablen ── */
+html, body {
+  background-color: var(--ui-bg) !important;
+  color:            var(--ui-text) !important;
+  font-family:      var(--ui-font-body);
+  transition:
+    background-color 0.35s ease,
+    color            0.35s ease;
+}
+
+.ui-font-display { font-family: var(--ui-font-display); }
+.ui-font-body    { font-family: var(--ui-font-body); }
+.ui-card         { border-radius: var(--ui-radius-card); aspect-ratio: var(--ui-card-aspect, 2/3); }
+.ui-btn          { border-radius: var(--ui-radius-button); }
