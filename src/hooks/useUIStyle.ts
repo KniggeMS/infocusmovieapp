@@ -1,35 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from './useAuth';
 
 export type UIStyle = 'minimal' | 'cinematic' | 'modern' | 'editorial';
 
 const UI_STYLE_KEY = 'infocus_ui_style';
 
-const UI_STYLE_LABELS: Record<UIStyle, { name: string; description: string; icon: string }> = {
-  minimal: {
-    name: 'Premium & Minimal',
-    description: 'Klare Ästhetik, viel Whitespace – inspiriert von Letterboxd',
-    icon: '◻',
-  },
-  cinematic: {
-    name: 'Cineastisch',
-    description: 'Dunkel, dramatisch, filmisch – inspiriert von Mubi',
-    icon: '🎬',
-  },
-  modern: {
-    name: 'Modern & Lebendig',
-    description: 'Dashboard-Stil mit Sidebar – inspiriert von Vercel',
-    icon: '⚡',
-  },
-  editorial: {
-    name: 'Bold & Editorial',
-    description: 'Starke Typografie, hell – inspiriert von Stripe Press',
-    icon: '📰',
-  },
+export const UI_STYLE_LABELS: Record<UIStyle, { name: string; description: string; icon: string }> = {
+  minimal:    { name: 'Premium & Minimal',   description: 'Klare Ästhetik, viel Whitespace',       icon: '◻' },
+  cinematic:  { name: 'Cineastisch',          description: 'Dunkel, dramatisch, filmisch',           icon: '🎬' },
+  modern:     { name: 'Modern & Lebendig',   description: 'Dashboard-Stil mit Sidebar',             icon: '⚡' },
+  editorial:  { name: 'Bold & Editorial',    description: 'Starke Typografie, hell',                icon: '📰' },
 };
-
-export { UI_STYLE_LABELS };
 
 function applyUIStyle(style: UIStyle) {
   document.documentElement.setAttribute('data-ui-style', style);
@@ -47,50 +28,54 @@ function getStoredUIStyle(): UIStyle {
 }
 
 export function useUIStyle() {
-  const { user } = useAuth();
   const [uiStyle, setUIStyleState] = useState<UIStyle>(getStoredUIStyle);
   const [loading, setLoading] = useState(false);
 
-  // Beim Login: Style aus Supabase laden
+  // Beim ersten Render: Style sofort anwenden
   useEffect(() => {
-    if (!user) return;
-    const loadStyle = async () => {
+    applyUIStyle(uiStyle);
+
+    // Style aus Supabase laden falls eingeloggt
+    const loadFromDB = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data } = await supabase
         .from('profiles')
         .select('ui_style')
         .eq('id', user.id)
         .single();
-      if (data?.ui_style) {
-        const style = data.ui_style as UIStyle;
-        setUIStyleState(style);
-        applyUIStyle(style);
+
+      // any-Cast nötig bis Supabase-Typen regeneriert werden
+      const dbStyle = (data as any)?.ui_style as UIStyle | undefined;
+      if (dbStyle && ['minimal', 'cinematic', 'modern', 'editorial'].includes(dbStyle)) {
+        setUIStyleState(dbStyle);
+        applyUIStyle(dbStyle);
       }
     };
-    loadStyle();
-  }, [user]);
 
-  // Beim ersten Render: gespeicherten Style anwenden
-  useEffect(() => {
-    applyUIStyle(uiStyle);
+    loadFromDB();
   }, []);
 
   const setUIStyle = useCallback(async (style: UIStyle) => {
     setUIStyleState(style);
     applyUIStyle(style);
 
-    if (!user) return;
     setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       await supabase
         .from('profiles')
-        .update({ ui_style: style })
+        .update({ ui_style: style } as any)  // any-Cast bis Typen regeneriert
         .eq('id', user.id);
     } catch (err) {
       console.error('Fehler beim Speichern des UI-Styles:', err);
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   return { uiStyle, setUIStyle, loading, labels: UI_STYLE_LABELS };
 }
