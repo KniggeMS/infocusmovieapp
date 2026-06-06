@@ -51,3 +51,6 @@ conductor/
 
 # Debug-Skripte
 check-supabase-v2.js
+
+# PowerShell Dev-Scripts
+*.ps1
