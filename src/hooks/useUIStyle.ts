@@ -58,6 +58,7 @@ export function useUIStyle() {
   }, []);
 
   const setUIStyle = useCallback(async (style: UIStyle) => {
+    console.log('🎨 setUIStyle called:', style);
     setUIStyleState(style);
     applyUIStyle(style);
 

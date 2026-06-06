@@ -1,141 +1,115 @@
 import React from 'react';
-import { useUIStyle, UIStyle, UI_STYLE_LABELS } from '../hooks/useUIStyle';
-import { useTranslation } from 'react-i18next';
+import { useUIStyle, UI_STYLE_LABELS, UIStyle } from '../hooks/useUIStyle';
 
-interface UIStyleSwitcherProps {
-  compact?: boolean;
-}
+const STYLE_PREVIEWS: Record<UIStyle, { lines: string[]; accent: string }> = {
+  minimal: {
+    lines: ['#e5e7eb', '#e5e7eb', '#e5e7eb'],
+    accent: '#22c55e',
+  },
+  cinematic: {
+    lines: ['#7f1d1d', '#78350f', '#713f12'],
+    accent: '#e50914',
+  },
+  modern: {
+    lines: ['#1e3a5f', '#1e3a5f', '#1e3a5f'],
+    accent: '#6366f1',
+  },
+  editorial: {
+    lines: ['#d1d5db', '#d1d5db', '#9ca3af'],
+    accent: '#d97706',
+  },
+};
 
-export function UIStyleSwitcher({ compact = false }: UIStyleSwitcherProps) {
-  const { uiStyle, setUIStyle, loading } = useUIStyle();
-  const { t } = useTranslation();
+const STYLE_BG: Record<UIStyle, string> = {
+  minimal:   '#ffffff',
+  cinematic: '#0a0a0a',
+  modern:    '#0f172a',
+  editorial: '#fafaf9',
+};
 
-  const styles = Object.entries(UI_STYLE_LABELS) as [UIStyle, typeof UI_STYLE_LABELS[UIStyle]][];
+const STYLE_TEXT: Record<UIStyle, string> = {
+  minimal:   '#111111',
+  cinematic: '#e5e5e5',
+  modern:    '#f1f5f9',
+  editorial: '#1c1917',
+};
 
-  if (compact) {
-    return (
-      <div className="flex items-center gap-1">
-        {styles.map(([style, meta]) => (
-          <button
-            key={style}
-            onClick={() => setUIStyle(style)}
-            disabled={loading}
-            title={meta.name}
-            aria-label={meta.name}
-            aria-pressed={uiStyle === style}
-            className={`
-              w-8 h-8 rounded-lg text-base transition-all duration-200
-              flex items-center justify-center
-              ${uiStyle === style
-                ? 'bg-app-accent text-white shadow-lg scale-105'
-                : 'bg-app-secondary/50 text-app-text-muted hover:bg-app-secondary hover:text-app-text'
-              }
-            `}
-          >
-            {meta.icon}
-          </button>
-        ))}
-      </div>
-    );
-  }
+export const UIStyleSwitcher: React.FC = () => {
+  const { uiStyle, setUIStyle } = useUIStyle();
+
+  const styles: UIStyle[] = ['minimal', 'cinematic', 'modern', 'editorial'];
+
+  const handleSelect = (style: UIStyle) => {
+    console.log('🎨 UIStyle selected:', style);
+    setUIStyle(style);
+  };
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs text-app-text-muted uppercase tracking-wider font-semibold mb-3">
-        {t('settings.uiStyle', 'UI Design')}
-      </p>
-      <div className="grid grid-cols-2 gap-2">
-        {styles.map(([style, meta]) => (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', padding: '4px 0' }}>
+      {styles.map((style) => {
+        const label = UI_STYLE_LABELS[style];
+        const preview = STYLE_PREVIEWS[style];
+        const isSelected = uiStyle === style;
+
+        return (
           <button
             key={style}
-            onClick={() => setUIStyle(style)}
-            disabled={loading}
-            aria-pressed={uiStyle === style}
-            className={`
-              relative p-3 rounded-xl text-left transition-all duration-200
-              border-2 group
-              ${uiStyle === style
-                ? 'border-app-accent bg-app-accent/10 shadow-md'
-                : 'border-app-border bg-app-secondary/30 hover:border-app-accent/40 hover:bg-app-secondary/60'
-              }
-            `}
+            type="button"
+            onClick={() => handleSelect(style)}
+            style={{
+              background: 'transparent',
+              border: isSelected ? `2px solid ${preview.accent}` : '2px solid rgba(255,255,255,0.1)',
+              borderRadius: '12px',
+              padding: '12px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              transition: 'border-color 0.2s, box-shadow 0.2s',
+              boxShadow: isSelected ? `0 0 0 1px ${preview.accent}40` : 'none',
+              outline: 'none',
+            }}
           >
-            {uiStyle === style && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-app-accent" />
-            )}
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg">{meta.icon}</span>
-              <span className={`text-xs font-bold leading-tight ${
-                uiStyle === style ? 'text-app-accent' : 'text-app-text'
-              }`}>
-                {meta.name}
+            {/* Mini Preview */}
+            <div
+              style={{
+                background: STYLE_BG[style],
+                borderRadius: '6px',
+                padding: '8px',
+                marginBottom: '8px',
+                height: '48px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                gap: '4px',
+              }}
+            >
+              {preview.lines.map((color, i) => (
+                <div
+                  key={i}
+                  style={{
+                    height: '4px',
+                    borderRadius: '2px',
+                    background: i === 0 ? preview.accent : color,
+                    width: i === 0 ? '60%' : i === 1 ? '90%' : '75%',
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Label */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+              <span style={{ fontSize: '14px' }}>{label.icon}</span>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary, #fff)' }}>
+                {label.name}
               </span>
             </div>
-            <p className="text-xs text-app-text-muted leading-snug">
-              {meta.description}
-            </p>
-            <div className="mt-2 h-10 rounded-lg overflow-hidden opacity-60 group-hover:opacity-80 transition-opacity">
-              <StylePreview style={style} />
+            <div style={{ fontSize: '11px', color: 'var(--text-muted, rgba(255,255,255,0.5))' }}>
+              {label.description}
             </div>
           </button>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
-}
+};
 
-function StylePreview({ style }: { style: UIStyle }) {
-  const previews: Record<UIStyle, React.ReactNode> = {
-    minimal: (
-      <div className="w-full h-full bg-neutral-900 flex items-center gap-1.5 px-2">
-        <div className="w-5 h-7 rounded-sm bg-neutral-700/80 flex-shrink-0" />
-        <div className="flex-1 space-y-1">
-          <div className="h-1.5 bg-neutral-600 rounded-full w-3/4" />
-          <div className="h-1 bg-neutral-700 rounded-full w-1/2" />
-          <div className="flex gap-0.5 mt-0.5">
-            {[1,2,3,4,5].map(i => <div key={i} className="w-1.5 h-1.5 rounded-sm bg-emerald-500/40" />)}
-          </div>
-        </div>
-      </div>
-    ),
-    cinematic: (
-      <div className="w-full h-full flex items-end" style={{background:'linear-gradient(135deg,#1a0808,#08080a)'}}>
-        <div className="w-full h-7 flex items-center px-2 gap-2"
-             style={{background:'linear-gradient(to top, rgba(229,57,53,0.15), transparent)'}}>
-          <div className="h-1.5 bg-red-600/60 rounded-full w-2/3" />
-          <div className="h-1.5 bg-amber-400/40 rounded-full w-1/4 ml-auto" />
-        </div>
-      </div>
-    ),
-    modern: (
-      <div className="w-full h-full flex" style={{background:'#0d0d0d'}}>
-        <div className="w-6 h-full flex-shrink-0" style={{background:'#111',borderRight:'1px solid rgba(255,255,255,0.06)'}}>
-          {[1,2,3].map(i => <div key={i} className="mx-1 mt-1.5 h-1 bg-indigo-500/30 rounded-full" />)}
-        </div>
-        <div className="flex-1 p-1.5 space-y-1">
-          <div className="grid grid-cols-2 gap-0.5">
-            {[1,2,3,4].map(i => <div key={i} className="h-2.5 rounded bg-neutral-800/80" />)}
-          </div>
-          <div className="h-1 bg-neutral-800 rounded-full w-full" />
-          <div className="h-1 bg-neutral-800 rounded-full w-3/4" />
-        </div>
-      </div>
-    ),
-    editorial: (
-      <div className="w-full h-full" style={{background:'#f5f3ee'}}>
-        <div className="w-full h-4 flex items-center px-2 gap-1" style={{background:'#1a1814'}}>
-          <div className="h-1 bg-amber-400/60 rounded-full w-1/4" />
-          <div className="h-1 bg-neutral-600 rounded-full w-1/3 ml-auto" />
-        </div>
-        <div className="px-2 pt-1 space-y-0.5">
-          <div className="h-2 bg-neutral-800/20 rounded-full w-3/4" />
-          <div className="h-1 bg-neutral-400/30 rounded-full w-full" />
-          <div className="flex gap-0.5 mt-1">
-            {[1,2,3].map(i => <div key={i} className="w-4 h-5 rounded bg-neutral-300/60" />)}
-          </div>
-        </div>
-      </div>
-    ),
-  };
-  return <>{previews[style]}</>;
-}
+export default UIStyleSwitcher;
