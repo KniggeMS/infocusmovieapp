@@ -245,3 +245,64 @@ input:-webkit-autofill:active {
   transition: background-color 9999s ease-in-out 0s;
   border-radius: 12px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   UI-STYLE VARIABLEN — gesteuert via data-ui-style auf <html>
+══════════════════════════════════════════════════════════════════════════════ */
+
+[data-ui-style="minimal"] {
+  --ui-font-display: 'Instrument Serif', Georgia, serif;
+  --ui-font-body: 'DM Sans', system-ui, sans-serif;
+  --ui-radius-card: 6px;
+  --ui-radius-button: 6px;
+  --ui-nav-height: 56px;
+  --ui-nav-style: top;
+  --ui-card-aspect: 2 / 3;
+  --ui-spacing-section: 3rem;
+  --ui-hero-layout: split;
+  --ui-accent-weight: subtle;
+}
+
+[data-ui-style="cinematic"] {
+  --ui-font-display: 'Playfair Display', Georgia, serif;
+  --ui-font-body: 'DM Sans', system-ui, sans-serif;
+  --ui-radius-card: 3px;
+  --ui-radius-button: 4px;
+  --ui-nav-height: 64px;
+  --ui-nav-style: top;
+  --ui-card-aspect: 2 / 3;
+  --ui-spacing-section: 2.5rem;
+  --ui-hero-layout: fullbleed;
+  --ui-accent-weight: bold;
+}
+
+[data-ui-style="modern"] {
+  --ui-font-display: 'Inter', system-ui, sans-serif;
+  --ui-font-body: 'Inter', system-ui, sans-serif;
+  --ui-radius-card: 10px;
+  --ui-radius-button: 6px;
+  --ui-nav-height: 56px;
+  --ui-nav-style: sidebar;
+  --ui-card-aspect: 2 / 3;
+  --ui-spacing-section: 2rem;
+  --ui-hero-layout: dashboard;
+  --ui-accent-weight: subtle;
+}
+
+[data-ui-style="editorial"] {
+  --ui-font-display: 'Playfair Display', Georgia, serif;
+  --ui-font-body: 'DM Sans', system-ui, sans-serif;
+  --ui-radius-card: 6px;
+  --ui-radius-button: 4px;
+  --ui-nav-height: 60px;
+  --ui-nav-style: top;
+  --ui-card-aspect: 2 / 3;
+  --ui-spacing-section: 4rem;
+  --ui-hero-layout: split;
+  --ui-accent-weight: bold;
+}
+
+.ui-font-display { font-family: var(--ui-font-display, 'DM Sans', sans-serif); }
+.ui-font-body    { font-family: var(--ui-font-body, 'DM Sans', sans-serif); }
+.ui-card         { border-radius: var(--ui-radius-card, 6px); aspect-ratio: var(--ui-card-aspect, 2/3); }
+.ui-btn          { border-radius: var(--ui-radius-button, 6px); }

@@ -8,6 +8,7 @@ import { MovieConductor } from '../core/conductor/MovieConductor';
 import { CustomList } from '../types/domain';
 import { AdminPanel } from './AdminPanel';
 import { GlassCard, GlassButton, GlassSection, GlassDivider } from './glass';
+import { UIStyleSwitcher } from './UIStyleSwitcher';
 
 interface AdminNotification {
   id: string;
@@ -186,6 +187,9 @@ export const ProfileModal = React.memo(({
                 />
               </div>
             </GlassButton>
+
+            <GlassDivider />
+            <UIStyleSwitcher />
           </GlassSection>
 
           <GlassDivider />
