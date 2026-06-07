@@ -189,8 +189,8 @@ export const ProfileModal = React.memo(({
             </GlassButton>
 
             <GlassDivider />
-            {{/* TODO: Re-enable UI style switcher once Tailwind color tokens are refactored */}}
-{{false && <UIStyleSwitcher />}}
+            {/* TODO: Re-enable UI style switcher once Tailwind color tokens are refactored */}
+// <UIStyleSwitcher />
           </GlassSection>
 
           <GlassDivider />
