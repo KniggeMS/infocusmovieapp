@@ -81,7 +81,8 @@ export class MovieConductor {
 
   static getWatchedRuntimeMinutes(movies: Movie[]): number {
     return movies.reduce((sum, movie) => {
-      return movie.watched ? sum + MovieConductor.getRuntimeMinutes(movie) : sum;
+      const watched = movie.watched;
+      return watched ? sum + MovieConductor.getRuntimeMinutes(movie) : sum;
     }, 0);
   }
 
@@ -113,29 +114,26 @@ export class MovieConductor {
 
   public async dispatch(intent: UserIntent): Promise<void> {
     switch (intent.type) {
-      case 'LOAD_MOVIES':       await this.handleLoadMovies(); break;
-      case 'SEARCH':            await this.handleSearch(intent.payload); break;
-      case 'ADD_MOVIE':         await this.handleAddMovie(intent.payload); break;
-      case 'REMOVE_MOVIE':      await this.handleRemoveMovie(intent.payload); break;
-      case 'TOGGLE_WATCHED':    await this.handleToggleWatched(intent.payload); break;
-      case 'TOGGLE_FAVORITE':   await this.handleToggleFavorite(intent.payload); break;
-      case 'SET_FILTER':        this.updateState({ filter: intent.payload, activeListId: null }); break;
-      case 'SELECT_MOVIE':      await this.handleSelectMovie(intent.payload); break;
-      case 'CLOSE_DETAILS':     this.updateState({ selectedMovie: null }); break;
-      case 'CREATE_LIST':       await this.handleCreateList(intent.payload); break;
-      case 'DELETE_LIST':       await this.handleDeleteList(intent.payload); break;
-      // ✅ FIX: jetzt movieId statt movie-Objekt
+      case 'LOAD_MOVIES': await this.handleLoadMovies(); break;
+      case 'SEARCH': await this.handleSearch(intent.payload); break;
+      case 'ADD_MOVIE': await this.handleAddMovie(intent.payload); break;
+      case 'REMOVE_MOVIE': await this.handleRemoveMovie(intent.payload); break;
+      case 'TOGGLE_WATCHED': await this.handleToggleWatched(intent.payload); break;
+      case 'TOGGLE_FAVORITE': await this.handleToggleFavorite(intent.payload); break;
+      case 'SET_FILTER': this.updateState({ filter: intent.payload, activeListId: null }); break;
+      case 'SELECT_MOVIE': await this.handleSelectMovie(intent.payload); break;
+      case 'CLOSE_DETAILS': this.updateState({ selectedMovie: null }); break;
+      case 'CREATE_LIST': await this.handleCreateList(intent.payload); break;
+      case 'DELETE_LIST': await this.handleDeleteList(intent.payload); break;
       case 'ADD_TO_LIST': await this.handleAddMovieToList(intent.payload.listId, intent.payload.movie); break;
-      // ✅ NEU: Film aus Liste entfernen
-      case 'REMOVE_FROM_LIST':  await this.handleRemoveMovieFromList(intent.payload.listId, intent.payload.movieId); break;
-      case 'SELECT_LIST':       await this.handleSelectList(intent.payload); break;
+      case 'SELECT_LIST': await this.handleSelectList(intent.payload); break;
       case 'UPDATE_USER_RATING': await this.handleUpdateField(intent.payload.id, { userRating: intent.payload.userRating }); break;
-      case 'UPDATE_NOTES':      await this.handleUpdateField(intent.payload.id, { notes: intent.payload.notes }); break;
-      case 'UPDATE_TAGS':       await this.handleUpdateField(intent.payload.id, { tags: intent.payload.tags }); break;
-      case 'SET_TAG_FILTER':    this.updateState({ tagFilter: intent.payload }); break;
-      case 'LOAD_TV_PROGRESS':  await this.handleLoadTvProgress(); break;
-      case 'TOGGLE_EPISODE':    await this.handleToggleEpisode(intent.payload); break;
-      case 'DIARY_ENTRY':       await this.handleDiaryEntry(intent.payload); break;
+      case 'UPDATE_NOTES': await this.handleUpdateField(intent.payload.id, { notes: intent.payload.notes }); break;
+      case 'UPDATE_TAGS': await this.handleUpdateField(intent.payload.id, { tags: intent.payload.tags }); break;
+      case 'SET_TAG_FILTER': this.updateState({ tagFilter: intent.payload }); break;
+      case 'LOAD_TV_PROGRESS': await this.handleLoadTvProgress(); break;
+      case 'TOGGLE_EPISODE': await this.handleToggleEpisode(intent.payload); break;
+      case 'DIARY_ENTRY': await this.handleDiaryEntry(intent.payload); break;
     }
   }
 
@@ -190,58 +188,28 @@ export class MovieConductor {
     }
   }
 
-  // ✅ FIX: nimmt jetzt movieId (string) statt movie-Objekt
   private async handleAddMovieToList(listId: string, movie: Movie): Promise<void> {
-    const movie = this.state.items.find(m => m.id === movieId);
-    if (!movie) return;
-
-    // Optimistisches Update: movieId in items-Array der Liste eintragen
     const updatedLists = this.state.customLists.map(l => {
       if (l.id !== listId) return l;
       const currentItems: string[] = (l as any).items || [];
-      if (currentItems.includes(movieId)) return l; // bereits drin
-      return { ...l, items: [...currentItems, movieId], movieCount: (l.movieCount || 0) + 1 };
+      if (currentItems.includes(movie.id)) return l;
+      return { ...l, items: [...currentItems, movie.id], movieCount: (l.movieCount || 0) + 1 };
     });
     this.updateState({ customLists: updatedLists, error: null });
 
     try {
       await this.adapter.addMovieToList(listId, movie);
     } catch (error) {
-      // Rollback
       const rollback = this.state.customLists.map(l => {
         if (l.id !== listId) return l;
         const currentItems: string[] = (l as any).items || [];
         return {
           ...l,
-          items: currentItems.filter(id => id !== movieId),
+          items: currentItems.filter(id => id !== movie.id),
           movieCount: Math.max((l.movieCount || 1) - 1, 0)
         };
       });
       this.updateState({ customLists: rollback, error: error instanceof Error ? error.message : 'Failed to add to list' });
-    }
-  }
-
-  // ✅ NEU: Film aus Liste entfernen
-  private async handleRemoveMovieFromList(listId: string, movieId: string): Promise<void> {
-    const oldLists = [...this.state.customLists];
-
-    const updatedLists = this.state.customLists.map(l => {
-      if (l.id !== listId) return l;
-      const currentItems: string[] = (l as any).items || [];
-      return {
-        ...l,
-        items: currentItems.filter(id => id !== movieId),
-        movieCount: Math.max((l.movieCount || 1) - 1, 0)
-      };
-    });
-    this.updateState({ customLists: updatedLists, error: null });
-
-    try {
-      if (typeof (this.adapter as any).removeMovieFromList === 'function') {
-        await (this.adapter as any).removeMovieFromList(listId, movieId);
-      }
-    } catch (error) {
-      this.updateState({ customLists: oldLists, error: error instanceof Error ? error.message : 'Failed to remove from list' });
     }
   }
 
