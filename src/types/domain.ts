@@ -101,7 +101,7 @@ export type UserIntent =
   | { type: 'CREATE_LIST'; payload: { name: string; description?: string } }
   | { type: 'DELETE_LIST'; payload: string }
   // ✅ FIX: movieId statt movie-Objekt
-  | { type: 'ADD_TO_LIST'; payload: { listId: string; movieId: string } }
+  | { type: 'ADD_TO_LIST'; payload: { listId: string; movie: Movie } }
   // ✅ NEU: Film aus Liste entfernen
   | { type: 'REMOVE_FROM_LIST'; payload: { listId: string; movieId: string } }
   | { type: 'SELECT_LIST'; payload: string }
