@@ -13,7 +13,7 @@ import { AchievementsGrid } from './components/AchievementsGrid';
 import { BottomNav } from './components/BottomNav';
 import { Recommendations } from './components/Recommendations';
 import { useToast } from './components/Toast';
-import {     Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles, Film, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles, Film, ChevronDown, ChevronUp } from 'lucide-react';
 import { GlassCard, GlassInput } from './components/glass';
 import { DiaryView } from './components/diary/DiaryView';
 import { ActivityFeed } from './components/diary/ActivityFeed';
@@ -21,6 +21,7 @@ import { EpisodeTracker } from './components/tv/EpisodeTracker';
 import { ListsOverview } from './components/ListsOverview';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { shareMovie } from './lib/share';
+import { NotificationBell } from './components/NotificationBell'; // ✅ Korrekt hier oben
 
 interface AppProps {
   conductor: MovieConductor;
@@ -38,35 +39,32 @@ function App({ conductor }: AppProps) {
   const [state, setState] = useState<WatchlistState>(conductor.getState());
   const [searchTerm, setSearchTerm] = useState('');
   const [showProfile, setShowProfile] = useState(false);
-  
-    // UI State for Actions
-    const [showListMenu, setShowListMenu] = useState(false);
-    const [tagsExpanded, setTagsExpanded] = useState(false);
+
+  // UI State for Actions
+  const [showListMenu, setShowListMenu] = useState(false);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
 
   useEffect(() => {
-    // Check for existing session
     const checkUser = async () => {
       try {
         const currentUser = await AuthService.getInstance().getCurrentUser();
         setUser(currentUser);
         if (currentUser?.theme) {
-            document.documentElement.setAttribute('data-theme', currentUser.theme);
+          document.documentElement.setAttribute('data-theme', currentUser.theme);
         }
       } catch (e) {
         console.error('Auth check failed:', e);
       } finally {
         setAuthLoading(false);
-        // Hide Splash Screen once auth check is done (or failed)
         try {
-            await SplashScreen.hide();
+          await SplashScreen.hide();
         } catch (e) {
-            // Ignore splash screen errors on web
+          // Ignore splash screen errors on web
         }
       }
     };
     checkUser();
 
-    // Subscribe to conductor updates
     const unsubscribe = conductor.subscribe((newState) => {
       setState(newState);
     });
@@ -77,12 +75,11 @@ function App({ conductor }: AppProps) {
   // Reload movies when user changes (Login)
   useEffect(() => {
     if (user) {
-        // Small timeout to ensure Supabase Auth Header is propagated
-        const timer = setTimeout(() => {
-            conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
-            conductor.dispatch({ type: 'LOAD_MOVIES' });
-        }, 100);
-        return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
+        conductor.dispatch({ type: 'LOAD_MOVIES' });
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [user, conductor]);
 
@@ -95,7 +92,6 @@ function App({ conductor }: AppProps) {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
     if (value.length === 0) {
       conductor.dispatch({ type: 'LOAD_MOVIES' });
     } else if (value.length > 2) {
@@ -107,7 +103,7 @@ function App({ conductor }: AppProps) {
     if (!state.selectedMovie) return;
     const result = await shareMovie(state.selectedMovie);
     if (result.method === 'clipboard' && result.success) {
-        showToast(result.message || 'Link copied!', 'success');
+      showToast(result.message || 'Link copied!', 'success');
     }
   };
 
@@ -120,12 +116,16 @@ function App({ conductor }: AppProps) {
 
   // Show Loading Screen while checking auth
   if (authLoading) {
-      return <div className="min-h-screen bg-app-bg flex items-center justify-center text-app-text">{t('common.loading')}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen text-app-text">
+        {t('common.loading')}
+      </div>
+    );
   }
 
   // Show Login Screen if no user
   if (!user) {
-      return <LoginScreen onLoginSuccess={setUser} />;
+    return <LoginScreen onLogin={setUser} />;
   }
 
   const filteredItems = state.items.filter((movie) => {
@@ -139,98 +139,97 @@ function App({ conductor }: AppProps) {
     new Set(state.items.flatMap((m) => m.tags || []).filter(Boolean))
   ).sort();
 
-  // Hilfsfunktion: Prüft ob ein TMDB-Film bereits in der Bibliothek ist
   const isMovieInLibrary = (movie: Movie) => {
-    if (movie.source !== 'tmdb') return true; // DB-Filme sind per Definition in der Bibliothek
-    return state.items.some(m => 
+    if (movie.source !== 'tmdb') return true;
+    return state.items.some(m =>
       m.tmdbId === Number(movie.id) || m.id === movie.id
     );
   };
 
   return (
-    <div className="min-h-screen bg-app-bg text-app-text font-sans pb-24">
-      
-      {/* Header (Frosted Glass) */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass-card rounded-none border-x-0 border-t-0 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/pwa-icon-192.png"
-                    alt="InFocus Logo"
-                    className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl object-cover border-2 border-white/10 shadow-[0_0_15px_rgba(59,130,246,0.2)] flex-shrink-0"
-                  />
-                  <div className="hidden sm:block">
-                    <div className="text-sm font-bold text-app-text leading-tight">InFocus</div>
-                    <div className="text-[9px] text-app-text-muted tracking-widest uppercase leading-tight">Family CineLog</div>
-                  </div>
-                </div>
-                
-                {/* Role Badge */}
-                {user.role === 'admin' && (
-                    <span className="flex items-center gap-1 bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        <Shield className="w-3 h-3" />
-                        {t('auth.admin')}
-                    </span>
-                )}
-                {user.role === 'manager' && (
-                    <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        {t('auth.manager')}
-                    </span>
-                )}
-            </div>
-            
-            <div className="flex-1 flex justify-end gap-3">
-                <GlassInput
-                    icon={<Search className="w-4 h-4" />}
-                    type="text"
-                    placeholder={t('common.search')}
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className="max-w-[150px] sm:max-w-md w-full"
-                />
-            </div>
+    <div className="min-h-screen bg-app-bg text-app-text">
+
+      {/* ─── Header (Frosted Glass) ─── */}
+      <header className="fixed top-0 left-0 right-0 z-40 bg-app-bg/80 backdrop-blur-xl border-b border-white/5">
+        <div className="flex items-center gap-3 px-4 py-3">
+
+          {/* Logo + Titel */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Film size={20} className="text-blue-400" />
+            <span className="font-bold text-sm tracking-tight text-app-text">InFocus</span>
+          </div>
+
+          {/* Suchfeld */}
+          <div className="flex-1 relative">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-app-text-muted pointer-events-none"
+            />
+            <GlassInput
+              type="text"
+              placeholder={t('common.search', 'Suchen…')}
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-xl"
+            />
+          </div>
+
+          {/* Rechte Seite: Glocke + Profil */}
+          <div className="flex items-center gap-1 shrink-0">
+            <NotificationBell /> {/* ✅ Glocke */}
+            <button
+              onClick={() => setShowProfile(true)}
+              className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs font-bold hover:bg-blue-500/30 transition-all"
+              aria-label="Profil öffnen"
+            >
+              {user.email?.[0]?.toUpperCase() ?? 'U'}
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto pt-28 px-4">
-        
+      {/* ─── Main Content ─── */}
+      <main className="pt-[68px] pb-20 px-4">
+
         {/* Status Indicators */}
         {state.status === 'loading' && (
-          <div className="text-center py-4 text-accent-glow animate-pulse font-medium">
+          <div className="flex items-center justify-center py-8 text-app-text-muted text-sm gap-2">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+            >
+              <Sparkles size={16} />
+            </motion.div>
             {t('common.loading')}
           </div>
         )}
 
         {state.error && (
-          <div className="bg-red-900/50 border border-red-500/50 text-red-200 p-4 rounded-xl mb-8 flex items-center gap-3">
-             <span className="text-lg">⚠️</span>
-             <span>{state.error}</span>
+          <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400 mb-4">
+            <span>⚠️</span>
+            {state.error}
           </div>
         )}
-        
-        <AnimatePresence mode="wait">
-        <motion.div
-          key={state.filter + (state.activeListId || '')}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.25 }}
-        >
+
+        {/* ─── Views ─── */}
         {state.filter === 'diary' ? (
           <>
-            <ActivityFeed items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
-            <div className="mt-8">
-              <DiaryView items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
-            </div>
+            <DiaryView
+              items={state.items}
+              onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+            />
+            <ActivityFeed
+              items={state.items}
+              onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+            />
           </>
         ) : state.filter === 'series' ? (
           <EpisodeTracker
             items={state.items}
-            episodes={state.episodes}
-            onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
-            onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
+            onSelectShow={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+            onToggleEpisode={(showId, season, episode) =>
+              conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })
+            }
           />
         ) : state.filter === 'lists' ? (
           <ListsOverview
@@ -240,213 +239,218 @@ function App({ conductor }: AppProps) {
             onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
           />
         ) : state.filter === 'achievements' ? (
-          <AchievementsGrid achievements={state.achievements} />
+          <AchievementsGrid items={state.items} />
         ) : state.filter === 'statistics' ? (
-                    <StatisticsDashboard movies={state.items} />
-
+          <StatisticsDashboard items={state.items} />
         ) : state.filter === 'recommendations' ? (
           <Recommendations
-            library={state.items}
+            items={state.items}
+            onAddMovie={handleAddMovie}
             conductor={conductor}
-            onAddToLibrary={handleAddMovie}
           />
         ) : (
-            /* Movie Grid */
-            <>
-                {state.filter === 'list' && state.activeListId && (
-                    <div className="mb-6 flex items-center gap-2 text-xl font-bold text-app-text animate-fade-in">
-                        <ListPlus className="w-6 h-6 text-blue-500" />
-                        <span className="text-blue-500 mr-1">List:</span>
-                        {state.customLists.find(l => l.id === state.activeListId)?.name}
-                    </div>
-                )}
+          /* ─── Movie Grid ─── */
+          <>
+            {state.filter === 'list' && state.activeListId && (
+              <div className="flex items-center gap-2 mb-4 text-sm text-app-text-muted">
+                <Shield size={14} />
+                <span>
+                  Liste:{' '}
+                  <span className="text-app-text font-medium">
+                    {state.customLists.find(l => l.id === state.activeListId)?.name}
+                  </span>
+                </span>
+              </div>
+            )}
 
-                {/* Tag filter: kollapsibel für mobile Usability */}
-                {allTags.length > 0 && (
-                    <div className="mb-4">
+            {/* Tag filter: kollapsibel für mobile Usability */}
+            {allTags.length > 0 && (
+              <div className="mb-4">
+                <button
+                  onClick={() => setTagsExpanded(!tagsExpanded)}
+                  className="flex items-center gap-2 text-xs text-app-text-muted uppercase tracking-wider hover:text-app-text transition-colors"
+                >
+                  Tags
+                  {state.tagFilter && (
+                    <span className="bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                      1
+                    </span>
+                  )}
+                  {tagsExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                </button>
+
+                {tagsExpanded && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {state.tagFilter && (
+                      <button
+                        onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: null })}
+                        className="bg-app-secondary text-app-text-muted hover:text-app-text px-2 py-1 rounded-full border border-app-border text-xs"
+                      >
+                        Alle
+                      </button>
+                    )}
+                    {allTags.map(tag => {
+                      const active = state.tagFilter === tag;
+                      return (
                         <button
-                            onClick={() => setTagsExpanded(!tagsExpanded)}
-                            className="flex items-center gap-2 text-xs text-app-text-muted uppercase tracking-wider hover:text-app-text transition-colors"
+                          key={tag}
+                          onClick={() =>
+                            conductor.dispatch({ type: 'SET_TAG_FILTER', payload: active ? null : tag })
+                          }
+                          className={`px-2.5 py-1 rounded-full border text-xs transition ${
+                            active
+                              ? 'bg-blue-500 text-white border-blue-500'
+                              : 'bg-blue-500/10 text-blue-300 border-blue-500/30 hover:bg-blue-500/20'
+                          }`}
                         >
-                            <span className="flex items-center gap-1">
-                                Tags
-                                {state.tagFilter && (
-                                    <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                                        1
-                                    </span>
-                                )}
-                            </span>
-                            {tagsExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
-                            ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                            )}
+                          #{tag}
                         </button>
-                        <AnimatePresence>
-                            {tagsExpanded && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="flex flex-wrap items-center gap-2 text-xs pt-2">
-                                        {state.tagFilter && (
-                                            <button
-                                                onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: null })}
-                                                className="bg-app-secondary text-app-text-muted hover:text-app-text px-2 py-1 rounded-full border border-app-border"
-                                            >
-                                                Alle
-                                            </button>
-                                        )}
-                                        {allTags.map(tag => {
-                                            const active = state.tagFilter === tag;
-                                            return (
-                                                <button
-                                                    key={tag}
-                                                    onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: active ? null : tag })}
-                                                    className={`px-2.5 py-1 rounded-full border transition ${
-                                                        active
-                                                            ? 'bg-blue-500 text-white border-blue-500'
-                                                            : 'bg-blue-500/10 text-blue-300 border-blue-500/30 hover:bg-blue-500/20'
-                                                    }`}
-                                                >
-                                                    #{tag}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Poster Grid */}
+            <div className="grid grid-cols-3 gap-2">
+              {filteredItems.map((movie) => (
+                <GlassCard
+                  key={movie.id}
+                  onClick={() => conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id })}
+                  className="relative aspect-[2/3] overflow-hidden p-0 cursor-pointer active:scale-95 transition-transform"
+                >
+                  {movie.posterPath ? (
+                    <img
+                      src={`https://image.tmdb.org/t/p/w342${movie.posterPath}`}
+                      alt={movie.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      width={342}
+                      height={513}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-app-surface text-app-text-faint text-xs">
+                      No Image
                     </div>
-                )}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {filteredItems.map((movie, index) => (
-                        <GlassCard
-                            key={movie.id}
-                            hover
-                            onClick={() => conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id })}
-                            className="relative aspect-[2/3] overflow-hidden p-0"
+                  )}
+
+                  {movie.watched && (
+                    <span className="absolute top-1.5 left-1.5 bg-green-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                      ✓ Gesehen
+                    </span>
+                  )}
+
+                  {movie.voteAverage && (
+                    <span className="absolute top-1.5 right-1.5 bg-black/60 backdrop-blur-sm text-yellow-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                      ★ {movie.voteAverage.toFixed(1)}
+                    </span>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="absolute bottom-1.5 right-1.5 flex flex-col gap-1">
+                    {movie.source !== 'tmdb' && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id });
+                          }}
+                          className="bg-black/60 backdrop-blur-md p-2 rounded-full transition-all hover:scale-110 shadow-lg"
                         >
-                            {movie.posterPath ? (
-                                <img
-                                    src={movie.posterPath}
-                                    alt={movie.title}
-                                    loading="lazy"
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center text-app-text-muted text-sm">
-                                    No Image
-                                </div>
-                            )}
+                          <Heart size={12} className={movie.favorite ? 'text-red-400 fill-red-400' : 'text-white'} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id });
+                          }}
+                          className="bg-black/60 backdrop-blur-md p-2 rounded-full transition-all hover:scale-110 shadow-lg"
+                        >
+                          <Eye size={12} className={movie.watched ? 'text-green-400' : 'text-white'} />
+                        </button>
+                      </>
+                    )}
+                    {movie.source === 'tmdb' && !isMovieInLibrary(movie) ? (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }}
+                        className="bg-black/60 backdrop-blur-md p-2 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
+                        title={t('common.addToWatchlist', 'Zur Watchlist hinzufügen')}
+                      >
+                        <Plus size={12} className="text-white" />
+                      </button>
+                    ) : movie.source === 'tmdb' && isMovieInLibrary(movie) ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id });
+                        }}
+                        className="bg-black/60 backdrop-blur-md p-2 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
+                        title={t('common.inLibrary', 'In Bibliothek')}
+                      >
+                        <Shield size={12} className="text-blue-400" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id });
+                        }}
+                        className="bg-black/60 backdrop-blur-md p-2 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-red-500/40"
+                      >
+                        <Trash2 size={12} className="text-red-400" />
+                      </button>
+                    )}
+                  </div>
 
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Title Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6">
+                    <p className="text-white text-[10px] font-semibold leading-tight truncate">
+                      {movie.title}
+                    </p>
+                    <p className="text-white/50 text-[9px]">
+                      {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
+                      {' · '}
+                      {movie.releaseDate?.split('-')[0] || 'N/A'}
+                    </p>
+                    {movie.source !== 'tmdb' && movie.tags && movie.tags.length > 0 && (
+                      <div className="flex gap-1 mt-1 flex-wrap">
+                        {movie.tags.slice(0, 2).map(tag => (
+                          <span
+                            key={tag}
+                            className="bg-blue-500/30 text-blue-200 text-[8px] px-1 py-0.5 rounded"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {movie.source !== 'tmdb' &&
+                      typeof movie.userRating === 'number' &&
+                      movie.userRating > 0 && (
+                        <p className="text-yellow-400 text-[9px] mt-0.5">★ {movie.userRating}/10</p>
+                    )}
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
 
-                            {movie.watched && (
-                                <div className="absolute top-3 left-3 z-10 bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
-                                    <span>✓ Gesehen</span>
-                                </div>
-                            )}
-
-                            {movie.voteAverage && (
-                                <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-accent-glow text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
-                                    ★ {movie.voteAverage.toFixed(1)}
-                                </div>
-                            )}
-
-                            <div className="absolute inset-0 z-10 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                {movie.source !== 'tmdb' && (
-                                    <>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
-                                            className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
-                                        >
-                                            <Heart className={`w-5 h-5 ${movie.favorite ? 'fill-red-500 text-red-500' : 'text-white/80 hover:text-red-400'}`} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }}
-                                            className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
-                                        >
-                                            <Eye className={`w-5 h-5 ${movie.watched ? 'text-emerald-400' : 'text-white/80 hover:text-emerald-400'}`} />
-                                        </button>
-                                    </>
-                                )}
-                                {movie.source === 'tmdb' && !isMovieInLibrary(movie) ? (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }}
-                                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
-                                        title={t('common.addToWatchlist', 'Zur Watchlist hinzufügen')}
-                                    >
-                                        <Plus className="w-5 h-5 text-white/80" />
-                                    </button>
-                                ) : movie.source === 'tmdb' && isMovieInLibrary(movie) ? (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id }); }}
-                                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
-                                        title={t('common.inLibrary', 'In Bibliothek – zum Detailansicht')}
-                                    >
-                                        <ListPlus className="w-5 h-5 text-white/80" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
-                                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-red-500/40"
-                                    >
-                                        <Trash2 className="w-5 h-5 text-white/80" />
-                                    </button>
-                                )}
-                            </div>
-
-                            <div className="absolute bottom-0 left-0 right-0 p-3 z-20">
-                                <h3 className="font-bold text-sm truncate text-app-text drop-shadow-lg">{movie.title}</h3>
-                                <div className="text-xs text-app-text-muted flex items-center gap-2 mt-1">
-                                    <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider backdrop-blur-sm">
-                                        {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
-                                    </span>
-                                    <span>{movie.releaseDate?.split('-')[0] || 'N/A'}</span>
-                                </div>
-                                {movie.source !== 'tmdb' && movie.tags && movie.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-1">
-                                        {movie.tags.slice(0, 2).map(tag => (
-                                            <span key={tag} className="text-[10px] bg-blue-500/15 text-blue-300 border border-blue-500/30 rounded px-1.5 py-0.5 backdrop-blur-sm">
-                                                #{tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                                {movie.source !== 'tmdb' && typeof movie.userRating === 'number' && movie.userRating > 0 && (
-                                    <div className="mt-1">
-                                        <span className="text-xs text-yellow-400 font-bold drop-shadow-lg">★ {movie.userRating}/10</span>
-                                    </div>
-                                )}
-                            </div>
-                        </GlassCard>
-                    ))}
-                </div>
-
-                {/* Empty State */}
-                {state.status === 'idle' && state.items.length === 0 && !state.error && (
-                <div className="text-center py-20 text-app-text-muted">
-                    <div className="text-4xl mb-4 opacity-50">🍿</div>
-                    <p className="text-lg font-medium">{t('common.noResults')}</p>
-                    <p className="text-sm mt-1 opacity-60">{t('common.beginSearch')}</p>
-                </div>
-                )}
-            </>
+            {/* Empty State */}
+            {state.status === 'idle' && state.items.length === 0 && !state.error && (
+              <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+                <div className="text-5xl">🍿</div>
+                <p className="text-app-text font-semibold">{t('common.noResults')}</p>
+                <p className="text-app-text-muted text-sm">{t('common.beginSearch')}</p>
+              </div>
+            )}
+          </>
         )}
-        </motion.div>
-        </AnimatePresence>
+      </main>
 
-      </div>
-
-      {/* Bottom Navigation */}
+      {/* ─── Bottom Navigation ─── */}
       <BottomNav
         currentFilter={state.filter}
-        showProfile={showProfile}
-        onNavigateHome={() => {
+        onShowAll={() => {
           setSearchTerm('');
           conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
           conductor.dispatch({ type: 'LOAD_MOVIES' });
@@ -456,30 +460,24 @@ function App({ conductor }: AppProps) {
         onShowSeries={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'series' })}
         onShowLists={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'lists' })}
       />
-      
-      {/* Profile Modal */}
+
+      {/* ─── Profile Modal ─── */}
       {showProfile && user && (
-          <ProfileModal 
-              user={user} 
-              conductor={conductor} 
-              customLists={state.customLists}
-              onClose={() => setShowProfile(false)}
-              onLogout={handleLogout}
-              onUpdateUser={setUser}
-          />
+        <ProfileModal
+          user={user}
+          onClose={() => setShowProfile(false)}
+          onLogout={handleLogout}
+          onUpdateUser={setUser}
+        />
       )}
 
-      {/* Movie Detail Modal */}
+      {/* ─── Movie Detail Modal ─── */}
       {state.selectedMovie && (
         <MovieDetailModal
           movie={state.selectedMovie}
           conductor={conductor}
-          libraryItems={state.items}
-          customLists={state.customLists}
           onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
-          onAddToLibrary={(movie) => {
-            handleAddMovie(movie);
-          }}
+          onAddToLibrary={(movie) => { handleAddMovie(movie); }}
           onShare={handleShare}
           onShowToast={showToast}
         />
