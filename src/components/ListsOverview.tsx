@@ -145,12 +145,11 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
 
       {/* Share Modal */}
       {sharingList && (
-        <ListShareModal
-          list={sharingList}
-          items={listMovies.get(sharingList.id) || []}
-          onClose={() => setSharingList(null)}
-        />
-      )}
+  <ListShareModal
+    list={sharingList}
+    onClose={() => setSharingList(null)}
+  />
+)}
     </div>
   );
 }
