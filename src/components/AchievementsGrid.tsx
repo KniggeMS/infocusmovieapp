@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Achievement } from '../types/domain';
-import { Lock, Popcorn, Library, Trophy, Star } from 'lucide-react';
+import { Lock, Popcorn, Trophy, Star } from 'lucide-react';
 
 interface AchievementsGridProps {
   achievements: Achievement[];
@@ -21,7 +21,6 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
   const unlockedCount = useMemo(() => achievements.filter(a => a.unlocked).length, [achievements]);
   const totalCount = achievements.length;
   const movieCount = useMemo(() => {
-    const maxThreshold = Math.max(...achievements.map(a => a.threshold), 0);
     const unlockedThresholds = achievements.filter(a => a.unlocked).map(a => a.threshold);
     return Math.max(...unlockedThresholds, 0);
   }, [achievements]);
@@ -39,121 +38,75 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="space-y-6"
-    >
+    <div className="pb-24 space-y-4">
       {/* XP / Level Bar */}
-      <motion.div
-        variants={cardVariants}
-        className="bg-app-card-bg border border-app-border rounded-2xl p-5 shadow-lg"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-full bg-gradient-to-br from-yellow-400/20 to-yellow-500/10 text-yellow-400">
-              <Trophy className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-app-text">Level {level}</div>
-              <div className="text-[11px] text-app-text-muted">{xp} XP gesamt</div>
-            </div>
+      <div className="glass-card rounded-xl p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <p className="font-bold text-app-text">Level {level}</p>
+            <p className="text-xs text-app-text-muted">{xp} XP gesamt</p>
           </div>
           <div className="text-right">
-            <div className="text-xs font-bold text-app-text-muted uppercase tracking-wider">
-              {unlockedCount}/{totalCount} Erfolge
-            </div>
-            <div className="text-[11px] text-app-text-muted">
-              {movieCount} Filme
-            </div>
+            <p className="text-xs text-app-text-muted">{unlockedCount}/{totalCount} Erfolge</p>
+            <p className="text-xs text-app-text-muted">{movieCount} Filme</p>
           </div>
         </div>
-
-        {/* XP Progress Bar */}
-        <div className="relative w-full h-3 bg-app-secondary rounded-full overflow-hidden">
-          <motion.div
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400"
-            initial={{ width: 0 }}
-            animate={{ width: `${(currentLevelXp / XP_PER_LEVEL) * 100}%` }}
-            transition={{ duration: 1, ease: 'easeOut' }}
+        <div className="h-2 bg-app-secondary rounded-full overflow-hidden mb-1">
+          <div
+            className="h-full bg-accent-color rounded-full transition-all"
+            style={{ width: `${(currentLevelXp / XP_PER_LEVEL) * 100}%` }}
           />
         </div>
-        <div className="flex justify-between mt-1 text-[10px] text-app-text-muted">
+        <div className="flex justify-between text-xs text-app-text-muted">
           <span>{currentLevelXp} / {XP_PER_LEVEL} XP zum nächsten Level</span>
           <span>Level {level + 1}</span>
         </div>
-      </motion.div>
+      </div>
 
       {/* Achievements Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <motion.div
+        className="grid grid-cols-2 gap-3"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
         {achievements.map((a, i) => (
           <motion.div
-            key={a.id}
+            key={a.id ?? i}
             variants={cardVariants}
-            whileHover={a.unlocked ? { scale: 1.02 } : {}}
-            className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center text-center gap-3 ${
-              a.unlocked
-                ? 'bg-app-card-bg border-yellow-500/40 shadow-[0_0_20px_rgba(250,204,21,0.1)]'
-                : 'bg-app-secondary/30 border-app-border opacity-60'
-            }`}
+            className={`glass-card rounded-xl p-3 flex flex-col gap-2 ${a.unlocked ? 'opacity-100' : 'opacity-50'}`}
           >
-            <div className="relative">
-              <motion.div
-                className={`p-3 rounded-full ${
-                  a.unlocked
-                    ? 'bg-yellow-400/15 text-yellow-400'
-                    : 'bg-app-secondary/50 text-app-text-muted'
-                }`}
-                animate={a.unlocked ? { rotate: [0, -10, 10, -5, 0] } : { rotate: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 + 0.3, ease: 'easeInOut' }}
-              >
-                {a.iconName === 'Popcorn' ? (
-                  <Popcorn className="w-7 h-7" />
-                ) : (
-                  <Library className="w-7 h-7" />
-                )}
-              </motion.div>
+            <div className="relative w-10 h-10">
+              {a.iconName === 'Popcorn' ? (
+                <Popcorn size={40} className={a.unlocked ? 'text-accent-color' : 'text-app-text-muted'} />
+              ) : (
+                <Trophy size={40} className={a.unlocked ? 'text-yellow-400' : 'text-app-text-muted'} />
+              )}
               {!a.unlocked && (
-                <div className="absolute -top-1 -right-1 bg-app-bg rounded-full p-1 border border-app-border">
-                  <Lock className="w-3 h-3 text-app-text-muted" />
+                <div className="absolute inset-0 flex items-center justify-center bg-app-bg/60 rounded">
+                  <Lock size={16} className="text-app-text-muted" />
                 </div>
               )}
               {a.unlocked && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.5, type: 'spring' }}
-                  className="absolute -top-1 -right-1"
-                >
-                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                </motion.div>
+                <Star size={14} className="absolute -top-1 -right-1 text-yellow-400 fill-yellow-400" />
               )}
             </div>
 
             <div>
-              <h3 className={`text-sm font-bold leading-tight ${a.unlocked ? 'text-app-text' : 'text-app-text-muted'}`}>
-                {a.title}
-              </h3>
-              <p className="text-[10px] text-app-text-muted mt-1 leading-relaxed line-clamp-2">
-                {a.description}
-              </p>
+              <p className="text-xs font-semibold text-app-text leading-tight">{a.title}</p>
+              <p className="text-[11px] text-app-text-muted mt-0.5 leading-snug">{a.description}</p>
             </div>
 
-            {/* Threshold Progress */}
             {a.unlocked && (
-              <div className="w-full h-1 bg-yellow-500/30 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-yellow-400 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                />
+              <div className="mt-auto">
+                <div className="h-1 bg-accent-color/30 rounded-full">
+                  <div className="h-full bg-accent-color rounded-full" style={{ width: '100%' }} />
+                </div>
               </div>
             )}
           </motion.div>
         ))}
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }

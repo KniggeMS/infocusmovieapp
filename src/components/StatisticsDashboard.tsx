@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 import { Movie } from '../types/domain';
 import { useTranslation } from 'react-i18next';
@@ -96,119 +96,100 @@ export const StatisticsDashboard = React.memo(({ movies }: StatisticsDashboardPr
 
   return (
     <motion.div
+      className="pb-24 space-y-4"
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-6 pb-6"
     >
-      <h2 className="text-2xl font-bold text-app-text">Statistiken</h2>
+      <h2 className="text-lg font-bold text-app-text px-1">Statistiken</h2>
 
       {/* Stat Cards */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {[
           { icon: Film, label: 'Filme', value: stats.totalCount, sub: `${stats.watchedCount} gesehen` },
-          { icon: Clock, label: 'Laufzeit', value: `${stats.totalHours}`, sub: `${stats.totalMinutes} Min.` },
+          { icon: Clock, label: 'Laufzeit', value: `${stats.totalHours}h`, sub: `${stats.totalMinutes} Min.` },
           { icon: Star, label: 'Ø Bewertung', value: stats.avgRating > 0 ? stats.avgRating : '—', sub: 'User-Rating' },
           { icon: TrendingUp, label: 'Ø Laufzeit', value: `${stats.avgRuntime}`, sub: 'Min. pro Film' },
         ].map(({ icon: Icon, label, value, sub }) => (
-          <div key={label} className="bg-app-card-bg border border-app-border p-4 rounded-2xl shadow-lg">
-            <div className="flex items-center gap-2 text-app-text-muted mb-2">
-              <Icon className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>
+          <motion.div key={label} variants={itemVariants} className="glass-card rounded-xl p-3">
+            <p className="text-xs text-app-text-muted mb-1">{label}</p>
+            <div className="flex items-end gap-1">
+              <Icon size={14} className="text-accent-color mb-0.5" />
+              <span className="text-xl font-bold text-app-text">{value}</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-app-text">{value}</div>
-            <div className="text-[11px] text-app-text-muted mt-0.5">{sub}</div>
-          </div>
+            <p className="text-xs text-app-text-muted mt-0.5">{sub}</p>
+          </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Genre Distribution */}
+      {/* Charts */}
+      <div className="space-y-4">
         {stats.genreData.length > 0 && (
-          <motion.div variants={itemVariants} className="bg-app-card-bg border border-app-border p-4 sm:p-5 rounded-2xl">
-            <h3 className="text-sm font-bold text-app-text-muted uppercase tracking-wider mb-4">Genres</h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie
-                  data={stats.genreData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={90}
-                  paddingAngle={3}
-                  dataKey="value"
-                  nameKey="name"
-                >
-                  {stats.genreData.map((_, i) => (
-                    <Cell key={i} fill={GENRE_COLORS[i % GENRE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 12, fontSize: 13, color: colors.text }}
-                  labelStyle={{ color: colors.muted }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap gap-2 mt-3 justify-center">
-              {stats.genreData.slice(0, 6).map((g, i) => (
-                <span key={g.name} className="flex items-center gap-1.5 text-xs text-app-text-muted">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GENRE_COLORS[i % GENRE_COLORS.length] }} />
-                  {g.name} ({g.value})
-                </span>
-              ))}
+          <motion.div variants={itemVariants} className="glass-card rounded-xl p-4">
+            <p className="text-sm font-semibold text-app-text mb-3">Genres</p>
+            <div className="flex gap-4">
+              <ResponsiveContainer width={120} height={120}>
+                <PieChart>
+                  <Pie data={stats.genreData} cx="50%" cy="50%" innerRadius={30} outerRadius={55} dataKey="value">
+                    {stats.genreData.map((_, i) => (
+                      <Cell key={i} fill={GENRE_COLORS[i % GENRE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex-1 space-y-1">
+                {stats.genreData.slice(0, 6).map((g, i) => (
+                  <div key={g.name} className="flex items-center gap-2 text-xs">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: GENRE_COLORS[i % GENRE_COLORS.length] }} />
+                    <span className="text-app-text truncate">{g.name} ({g.value})</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
 
-        {/* Rating Distribution */}
         {stats.ratingBuckets.length > 0 && (
-          <motion.div variants={itemVariants} className="bg-app-card-bg border border-app-border p-4 sm:p-5 rounded-2xl">
-            <h3 className="text-sm font-bold text-app-text-muted uppercase tracking-wider mb-4">Bewertungen</h3>
-            <ResponsiveContainer width="100%" height={240}>
+          <motion.div variants={itemVariants} className="glass-card rounded-xl p-4">
+            <p className="text-sm font-semibold text-app-text mb-3">Bewertungen</p>
+            <ResponsiveContainer width="100%" height={120}>
               <BarChart data={stats.ratingBuckets}>
                 <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-                <XAxis dataKey="name" tick={{ fill: colors.muted, fontSize: 12 }} />
-                <YAxis tick={{ fill: colors.muted, fontSize: 12 }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 12, fontSize: 13, color: colors.text }}
-                  labelStyle={{ color: colors.muted }}
-                />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                <XAxis dataKey="name" tick={{ fill: colors.muted, fontSize: 10 }} />
+                <YAxis tick={{ fill: colors.muted, fontSize: 10 }} />
+                <Tooltip />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {stats.ratingBuckets.map((_, i) => (
-                    <Cell key={i} fill={i >= 7 ? '#10b981' : i >= 4 ? '#f59e0b' : '#ef4444'} />
+                    <Cell key={i} fill={i >= 6 ? '#10b981' : i >= 3 ? '#f59e0b' : '#ef4444'} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </motion.div>
         )}
+
+        {stats.decadeData.length > 0 && (
+          <motion.div variants={itemVariants} className="glass-card rounded-xl p-4">
+            <p className="text-sm font-semibold text-app-text mb-3">Jahrzehnte</p>
+            <ResponsiveContainer width="100%" height={100}>
+              <BarChart data={stats.decadeData}>
+                <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
+                <XAxis dataKey="decade" tick={{ fill: colors.muted, fontSize: 10 }} />
+                <YAxis tick={{ fill: colors.muted, fontSize: 10 }} />
+                <Tooltip />
+                <Bar dataKey="count" fill={GENRE_COLORS[0]} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </motion.div>
+        )}
       </div>
 
-      {/* Decade Distribution */}
-      {stats.decadeData.length > 0 && (
-        <motion.div variants={itemVariants} className="bg-app-card-bg border border-app-border p-4 sm:p-5 rounded-2xl">
-          <h3 className="text-sm font-bold text-app-text-muted uppercase tracking-wider mb-4">Jahrzehnte</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={stats.decadeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
-              <XAxis dataKey="decade" tick={{ fill: colors.muted, fontSize: 12 }} />
-              <YAxis tick={{ fill: colors.muted, fontSize: 12 }} />
-              <Tooltip
-                contentStyle={{ backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: 12, fontSize: 13, color: colors.text }}
-              />
-              <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
-      )}
-
-      {/* Empty State */}
       {stats.totalCount === 0 && (
-        <div className="text-center py-12 text-app-text-muted">
-          <div className="text-4xl mb-3 opacity-50">📊</div>
+        <div className="flex flex-col items-center justify-center py-20 text-center text-app-text-muted">
+          <Film size={48} className="mb-4 opacity-30" />
           <p className="font-medium">Noch keine Daten</p>
-          <p className="text-sm mt-1 opacity-60">Füge Filme hinzu, um Statistiken zu sehen.</p>
+          <p className="text-sm mt-1">Füge Filme hinzu, um Statistiken zu sehen.</p>
         </div>
       )}
     </motion.div>
