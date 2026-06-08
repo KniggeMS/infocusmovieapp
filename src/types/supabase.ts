@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       admin_notifications: {
@@ -291,11 +266,61 @@ export type Database = {
           },
         ]
       }
+      list_shares: {
+        Row: {
+          can_edit: boolean | null
+          created_at: string | null
+          id: string
+          list_id: string
+          owner_id: string
+          shared_with: string
+        }
+        Insert: {
+          can_edit?: boolean | null
+          created_at?: string | null
+          id?: string
+          list_id: string
+          owner_id: string
+          shared_with: string
+        }
+        Update: {
+          can_edit?: boolean | null
+          created_at?: string | null
+          id?: string
+          list_id?: string
+          owner_id?: string
+          shared_with?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_shares_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_shares_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_shares_shared_with_fkey"
+            columns: ["shared_with"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lists: {
         Row: {
           created_at: string | null
           description: string | null
           id: string
+          is_public: boolean | null
           name: string
           user_id: string
         }
@@ -303,6 +328,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_public?: boolean | null
           name: string
           user_id: string
         }
@@ -310,6 +336,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_public?: boolean | null
           name?: string
           user_id?: string
         }
@@ -392,6 +419,41 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          payload: Json | null
+          read_at: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          payload?: Json | null
+          read_at?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -402,6 +464,7 @@ export type Database = {
           last_login_at: string | null
           role: string
           theme: string | null
+          ui_style: string
           updated_at: string
           username: string | null
         }
@@ -414,6 +477,7 @@ export type Database = {
           last_login_at?: string | null
           role?: string
           theme?: string | null
+          ui_style?: string
           updated_at?: string
           username?: string | null
         }
@@ -426,6 +490,7 @@ export type Database = {
           last_login_at?: string | null
           role?: string
           theme?: string | null
+          ui_style?: string
           updated_at?: string
           username?: string | null
         }
@@ -673,9 +738,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
