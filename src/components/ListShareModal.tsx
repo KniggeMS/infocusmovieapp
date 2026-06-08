@@ -13,9 +13,11 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ShareableUser[]>([]);
   const [searching, setSearching] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => { loadSharedWith(listId); }, [loadSharedWith, listId]);
+  useEffect(() => {
+    void loadSharedWith();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
@@ -32,38 +34,39 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
   const waLink = `https://wa.me/?text=${encodeURIComponent(`🎬 Schau dir meine Film-Liste "${list.name}" an: ${shareUrl}`)}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-app-surface border border-white/10 rounded-2xl w-full max-w-md p-6 space-y-5">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md glass-card rounded-2xl p-5 space-y-4">
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-app-text">„{list.name}" teilen</h2>
-          <button onClick={onClose} className="text-app-text-muted hover:text-app-text">
-            <X size={20} />
+          <h3 className="font-bold text-app-text text-base">„{list.name}" teilen</h3>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-app-secondary transition-all">
+            <X size={18} className="text-app-text-muted" />
           </button>
         </div>
 
         {/* User-Suche */}
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-app-text-muted" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-app-text-muted" />
           <input
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-sm text-app-text placeholder:text-app-text-muted focus:outline-none focus:border-app-primary"
-            placeholder="Username oder Name suchen..."
+            type="text"
+            placeholder="Nutzer suchen..."
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full bg-app-secondary border border-app-border rounded-xl pl-9 pr-4 py-2.5 text-sm text-app-text placeholder:text-app-text-muted focus:outline-none focus:border-accent-color/50"
           />
         </div>
 
         {/* Suchergebnisse */}
         {(searching || results.length > 0) && (
-          <div className="space-y-1 max-h-40 overflow-y-auto">
-            {searching && <p className="text-xs text-app-text-muted px-1">Suche...</p>}
-            {results.map(u => {
+          <div className="space-y-2">
+            {searching && <p className="text-xs text-app-text-muted text-center">Suche...</p>}
+            {results.map((u: ShareableUser) => {
               const alreadyShared = sharedWith.some((s: ShareableUser) => s.id === u.id);
               return (
-                <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5">
+                <div key={u.id} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-app-secondary">
                   <div>
-                    <p className="text-sm text-app-text">{u.display_name ?? u.username}</p>
+                    <p className="text-sm font-medium text-app-text">{u.display_name ?? u.username}</p>
                     {u.username && <p className="text-xs text-app-text-muted">@{u.username}</p>}
                   </div>
                   <button
@@ -72,7 +75,7 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
                     className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all ${
                       alreadyShared
                         ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                        : 'bg-app-primary/10 text-app-primary hover:bg-app-primary/20'
+                        : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'
                     }`}
                   >
                     {loading ? <Loader2 size={12} className="animate-spin" /> :
@@ -90,7 +93,7 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
             <p className="text-xs text-app-text-muted mb-2">Geteilt mit:</p>
             <div className="space-y-1">
               {sharedWith.map((u: ShareableUser) => (
-                <div key={u.id} className="flex items-center justify-between px-3 py-2 bg-white/5 rounded-lg">
+                <div key={u.id} className="flex items-center justify-between p-2 rounded-xl bg-app-secondary">
                   <p className="text-sm text-app-text">{u.display_name ?? u.username ?? 'Unbekannt'}</p>
                   <button
                     onClick={() => unshareWithUser(u.id)}
@@ -109,9 +112,9 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/20 rounded-xl text-sm font-medium hover:bg-[#25D366]/20 transition-all"
+          className="flex items-center justify-center gap-2 w-full py-2.5 bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-sm hover:bg-green-500/30 transition-all"
         >
-          <Share2 size={16} />
+          <Share2 size={14} />
           Via WhatsApp teilen
         </a>
       </div>
