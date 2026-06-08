@@ -15,7 +15,7 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
   const [searching, setSearching] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  useEffect(() => { loadSharedWith(); }, [loadSharedWith]);
+  useEffect(() => { loadSharedWith(listId); }, [loadSharedWith, listId]);
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
