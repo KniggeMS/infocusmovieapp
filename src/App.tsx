@@ -110,7 +110,8 @@ function App({ conductor }: AppProps) {
   }
 
   if (!user) {
-    return <LoginScreen onLogin={setUser} />;
+    // ✅ FIX: onLoginSuccess statt onLogin
+    return <LoginScreen onLoginSuccess={setUser} />;
   }
 
   const filteredItems = state.items.filter((movie) => {
@@ -176,8 +177,8 @@ function App({ conductor }: AppProps) {
           </>
         ) : state.filter === 'series' ? (
           <EpisodeTracker
-          episodes={state.episodes}
             items={state.items}
+            episodes={state.episodes}
             onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
             onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
           />
@@ -189,11 +190,18 @@ function App({ conductor }: AppProps) {
             onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
           />
         ) : state.filter === 'achievements' ? (
-          <AchievementsGrid items={state.items} />
+          // ✅ FIX: achievements statt items
+          <AchievementsGrid achievements={state.achievements} />
         ) : state.filter === 'statistics' ? (
-          <StatisticsDashboard items={state.items} />
+          // ✅ FIX: statistics statt items
+          <StatisticsDashboard statistics={state.statistics} items={state.items} />
         ) : state.filter === 'recommendations' ? (
-          <Recommendations items={state.items} onAddMovie={handleAddMovie} />
+          // ✅ FIX: library + conductor + onAddToLibrary statt items + onAddMovie
+          <Recommendations
+            library={state.items}
+            conductor={conductor}
+            onAddToLibrary={handleAddMovie}
+          />
         ) : (
           <>
             {state.filter === 'list' && state.activeListId && (
@@ -360,9 +368,11 @@ function App({ conductor }: AppProps) {
         )}
       </main>
 
+      {/* ✅ FIX: BottomNav — onNavigateHome + showProfile statt onShowAll */}
       <BottomNav
         currentFilter={state.filter}
-        onShowAll={() => {
+        showProfile={showProfile}
+        onNavigateHome={() => {
           setSearchTerm('');
           conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
           conductor.dispatch({ type: 'LOAD_MOVIES' });
