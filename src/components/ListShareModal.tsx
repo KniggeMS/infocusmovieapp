@@ -59,7 +59,7 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
           <div className="space-y-1 max-h-40 overflow-y-auto">
             {searching && <p className="text-xs text-app-text-muted px-1">Suche...</p>}
             {results.map(u => {
-              const alreadyShared = sharedWith.some(s => s.id === u.id);
+              const alreadyShared = sharedWith.some((s: ShareableUser) => s.id === u.id);
               return (
                 <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5">
                   <div>
@@ -89,7 +89,7 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
           <div>
             <p className="text-xs text-app-text-muted mb-2">Geteilt mit:</p>
             <div className="space-y-1">
-              {sharedWith.map(u => (
+              {sharedWith.map((u: ShareableUser) => (
                 <div key={u.id} className="flex items-center justify-between px-3 py-2 bg-white/5 rounded-lg">
                   <p className="text-sm text-app-text">{u.display_name ?? u.username ?? 'Unbekannt'}</p>
                   <button
