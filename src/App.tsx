@@ -190,18 +190,15 @@ function App({ conductor }: AppProps) {
             onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
           />
         ) : state.filter === 'achievements' ? (
-          // ✅ FIX: achievements statt items
-          <AchievementsGrid achievements={state.achievements} />
-        ) : state.filter === 'statistics' ? (
-          // ✅ FIX: statistics statt items
-          <StatisticsDashboard statistics={state.statistics} items={state.items} />
-        ) : state.filter === 'recommendations' ? (
-          // ✅ FIX: library + conductor + onAddToLibrary statt items + onAddMovie
-          <Recommendations
-            library={state.items}
-            conductor={conductor}
-            onAddToLibrary={handleAddMovie}
-          />
+  <AchievementsGrid achievements={state.achievements} />   // ✅ achievements prop
+) : state.filter === 'statistics' ? (
+  <StatisticsDashboard movies={state.items} />             // ✅ movies statt statistics+items
+) : state.filter === 'recommendations' ? (
+  <Recommendations
+    library={state.items}
+    conductor={conductor}
+    onAddToLibrary={handleAddMovie}
+  />
         ) : (
           <>
             {state.filter === 'list' && state.activeListId && (

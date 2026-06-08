@@ -190,8 +190,7 @@ const ActionButtons = React.memo(({
   const [showListCreation, setShowListCreation] = useState(false);
 
   const handleAddToList = useCallback(async (listId: string) => {
-    await conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movieId } });
-    // Prüfen ob ein Fehler aufgetreten ist
+    await conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId, movie } }); // ✅ movie statt movieId
     const currentError = conductor.getState().error;
     if (currentError) {
       onShowToast(currentError, 'error');
