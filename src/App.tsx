@@ -205,7 +205,7 @@ function App({ conductor }: AppProps) {
 
         {state.error && (
           <div className="bg-red-900/50 border border-red-500/50 text-red-200 p-4 rounded-xl mb-8 flex items-center gap-3">
-             <span className="text-lg">âš ï¸</span>
+             <Film className="w-10 h-10 mb-3 opacity-40" />
              <span>{state.error}</span>
           </div>
         )}
@@ -234,11 +234,11 @@ function App({ conductor }: AppProps) {
           />
         ) : state.filter === 'lists' ? (
           <ListsOverview
-            lists={state.customLists}
-            items={state.items}
-            conductor={conductor}
-            onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
-          />
+  lists={state.customLists}
+  items={state.items}
+  conductor={conductor}   // ← DIESE ZEILE HINZUFÜGEN
+  onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
+/>
         ) : state.filter === 'achievements' ? (
           <AchievementsGrid achievements={state.achievements} />
         ) : state.filter === 'statistics' ? (
