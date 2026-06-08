@@ -149,7 +149,7 @@ function App({ conductor }: AppProps) {
           icon={<Search size={16} />}
           className="flex-1"
         />
-        <NotificationBell conductor={conductor} />
+        <NotificationBell />
       </header>
 
       {/* Main Content */}
