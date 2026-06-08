@@ -188,10 +188,11 @@ function App({ conductor }: AppProps) {
           />
         ) : state.filter === 'lists' ? (
           <ListsOverview
-            lists={state.customLists}
-            items={state.items}
-            onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
-          />
+  lists={state.customLists}
+  items={state.items}
+  conductor={conductor}
+  onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
+/>
         ) : state.filter === 'achievements' ? (
           <AchievementsGrid achievements={state.achievements ?? []} />
         ) : state.filter === 'statistics' ? (
@@ -373,17 +374,18 @@ function App({ conductor }: AppProps) {
 
       {/* Bottom Navigation */}
       <BottomNav
-        currentFilter={state.filter}
-        onHome={() => {
-          setSearchTerm('');
-          conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
-          conductor.dispatch({ type: 'LOAD_MOVIES' });
-        }}
-        onShowDiary={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'diary' })}
-        onShowProfile={() => setShowProfile(true)}
-        onShowSeries={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'series' })}
-        onShowLists={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'lists' })}
-      />
+  currentFilter={state.filter}
+  showProfile={showProfile}
+  onNavigateHome={() => {
+    setSearchTerm('');
+    conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
+    conductor.dispatch({ type: 'LOAD_MOVIES' });
+  }}
+  onShowDiary={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'diary' })}
+  onShowProfile={() => setShowProfile(true)}
+  onShowSeries={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'series' })}
+  onShowLists={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'lists' })}
+/>
 
       {/* Profile Modal */}
       {showProfile && user && (
@@ -399,14 +401,17 @@ function App({ conductor }: AppProps) {
 
       {/* Movie Detail Modal */}
       {state.selectedMovie && (
-        <MovieDetailModal
-          movie={state.selectedMovie}
-          onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
-          onAddToLibrary={(movie) => { handleAddMovie(movie); }}
-          onShare={handleShare}
-          onShowToast={showToast}
-        />
-      )}
+  <MovieDetailModal
+    movie={state.selectedMovie}
+    conductor={conductor}
+    libraryItems={state.items}
+    customLists={state.customLists}
+    onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
+    onAddToLibrary={(movie) => { handleAddMovie(movie); }}
+    onShare={handleShare}
+    onShowToast={showToast}
+  />
+)}
     </div>
   );
 }
