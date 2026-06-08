@@ -72,9 +72,9 @@ export interface MovieStatistics {
   favoriteCount: number;
   byGenre: { name: string; value: number }[];
   byDecade: { decade: string; count: number }[];
-  averageUserRating?: number; // 0..10
+  averageUserRating?: number;
   ratedCount?: number;
-  byYear?: { year: string; count: number }[]; // by addedAt year
+  byYear?: { year: string; count: number }[];
   thisYearCount?: number;
   allTimeCount?: number;
   topTags?: { name: string; value: number }[];
@@ -84,11 +84,11 @@ export interface CustomList {
   id: string;
   name: string;
   description?: string;
-  movieCount: number; // Computed locally or via count
+  movieCount: number;
   items?: string[]; // List of Movie IDs
 }
 
-export type UserIntent = 
+export type UserIntent =
   | { type: 'LOAD_MOVIES' }
   | { type: 'ADD_MOVIE'; payload: Movie }
   | { type: 'SEARCH'; payload: string }
@@ -98,9 +98,12 @@ export type UserIntent =
   | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'diary' | 'series' | 'achievements' | 'statistics' | 'lists' | 'recommendations' }
   | { type: 'SELECT_MOVIE'; payload: string }
   | { type: 'CLOSE_DETAILS' }
-  | { type: 'CREATE_LIST'; payload: { name: string, description?: string } }
+  | { type: 'CREATE_LIST'; payload: { name: string; description?: string } }
   | { type: 'DELETE_LIST'; payload: string }
-  | { type: 'ADD_TO_LIST'; payload: { listId: string, movie: Movie } }
+  // ✅ FIX: movieId statt movie-Objekt
+  | { type: 'ADD_TO_LIST'; payload: { listId: string; movieId: string } }
+  // ✅ NEU: Film aus Liste entfernen
+  | { type: 'REMOVE_FROM_LIST'; payload: { listId: string; movieId: string } }
   | { type: 'SELECT_LIST'; payload: string }
   | { type: 'UPDATE_USER_RATING'; payload: { id: string; userRating: number | null } }
   | { type: 'UPDATE_NOTES'; payload: { id: string; notes: string } }
@@ -131,7 +134,7 @@ export interface MovieServiceAdapter {
   getById(id: string): Promise<Movie | null>;
   getTrending(): Promise<Movie[]>;
   getMovieDetails(tmdbId: string, mediaType?: 'movie' | 'tv'): Promise<Movie>;
-  add(movie: Omit<Movie, 'id' | 'addedAt'>): Promise<Movie>;
+  add(movie: Omit<Movie, 'id'>): Promise<Movie>;
   delete(id: string): Promise<void>;
   update(id: string, updates: Partial<Movie>): Promise<void>;
   exists(movie: { title: string; tmdbId?: number }): Promise<boolean>;
@@ -139,7 +142,7 @@ export interface MovieServiceAdapter {
   createList(name: string, description?: string): Promise<CustomList>;
   deleteList(listId: string): Promise<void>;
   getLists(): Promise<CustomList[]>;
-  getListMovies(listId: string): Promise<Movie[]>; // New method
+  getListMovies(listId: string): Promise<Movie[]>;
   addMovieToList(listId: string, movie: Movie): Promise<void>;
   removeMovieFromList(listId: string, movieId: string): Promise<void>;
 }
