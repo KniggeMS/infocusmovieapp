@@ -140,8 +140,8 @@ function App({ conductor }: AppProps) {
     );
   };
 
-  return (
-    <div>
+    return (
+    <div className="app-container">
       {/* Header */}
       <header className="sticky top-0 z-40 glass-header px-4 py-3 flex items-center gap-3">
         <GlassInput
@@ -158,7 +158,6 @@ function App({ conductor }: AppProps) {
         {state.status === 'loading' && (
           <div className="text-center py-4 text-app-text-muted text-sm">{t('common.loading')}</div>
         )}
-
         {state.error && (
           <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 text-red-400 text-sm mb-3">
             <span>⚠️</span>
@@ -168,41 +167,29 @@ function App({ conductor }: AppProps) {
 
         {state.filter === 'diary' ? (
           <>
-            <DiaryView
-              items={state.items}
-              onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
-            />
-            <ActivityFeed
-              items={state.items}
-              onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
-            />
+            <DiaryView items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
+            <ActivityFeed items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
           </>
         ) : state.filter === 'series' ? (
           <EpisodeTracker
             items={state.items}
             episodes={state.episodes ?? []}
             onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
-            onToggleEpisode={(showId, season, episode) =>
-              conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })
-            }
+            onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
           />
         ) : state.filter === 'lists' ? (
           <ListsOverview
-  lists={state.customLists}
-  items={state.items}
-  conductor={conductor}
-  onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
-/>
+            lists={state.customLists}
+            items={state.items}
+            conductor={conductor}
+            onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
+          />
         ) : state.filter === 'achievements' ? (
           <AchievementsGrid achievements={state.achievements ?? []} />
         ) : state.filter === 'statistics' ? (
           <StatisticsDashboard movies={state.items} />
         ) : state.filter === 'recommendations' ? (
-          <Recommendations
-            library={state.items}
-            conductor={conductor}
-            onAddToLibrary={handleAddMovie}
-          />
+          <Recommendations library={state.items} conductor={conductor} onAddToLibrary={handleAddMovie} />
         ) : (
           <>
             {state.filter === 'list' && state.activeListId && (
@@ -226,7 +213,6 @@ function App({ conductor }: AppProps) {
                   )}
                   {tagsExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </button>
-
                 {tagsExpanded && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {state.tagFilter && (
@@ -273,83 +259,50 @@ function App({ conductor }: AppProps) {
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-app-secondary text-app-text-muted text-xs">
-                      No Image
-                    </div>
+                    <div className="w-full h-full flex items-center justify-center bg-app-secondary text-app-text-muted text-xs">No Image</div>
                   )}
-
                   {movie.watched && (
-                    <span className="absolute top-1 left-1 bg-green-500/80 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                      ✓ Gesehen
-                    </span>
+                    <span className="absolute top-1 left-1 bg-green-500/80 text-white text-[10px] px-1.5 py-0.5 rounded-full">✓ Gesehen</span>
                   )}
-
                   {movie.voteAverage && (
-                    <span className="absolute top-1 right-1 bg-black/60 text-yellow-400 text-[10px] px-1.5 py-0.5 rounded-full">
-                      ★ {movie.voteAverage.toFixed(1)}
-                    </span>
+                    <span className="absolute top-1 right-1 bg-black/60 text-yellow-400 text-[10px] px-1.5 py-0.5 rounded-full">★ {movie.voteAverage.toFixed(1)}</span>
                   )}
-
                   <div className="absolute bottom-1 right-1 flex flex-col gap-1">
                     {movie.source !== 'tmdb' && (
                       <>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
-                          className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
-                        >
+                        <button onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }} className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg">
                           <Heart size={14} className={movie.favorite ? 'fill-red-500 text-red-500' : 'text-white'} />
                         </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }}
-                          className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
-                        >
+                        <button onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }} className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg">
                           <Eye size={14} className={movie.watched ? 'fill-green-500 text-green-500' : 'text-white'} />
                         </button>
                       </>
                     )}
                     {movie.source === 'tmdb' && !isMovieInLibrary(movie) ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }}
-                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
-                        title={t('common.addToWatchlist', 'Zur Watchlist hinzufügen')}
-                      >
+                      <button onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }} className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40" title={t('common.addToWatchlist', 'Zur Watchlist hinzufügen')}>
                         <Plus size={14} className="text-white" />
                       </button>
                     ) : movie.source === 'tmdb' && isMovieInLibrary(movie) ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id }); }}
-                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
-                        title={t('common.inLibrary', 'In Bibliothek')}
-                      >
+                      <button onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id }); }} className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40" title={t('common.inLibrary', 'In Bibliothek')}>
                         <Shield size={14} className="text-blue-400" />
                       </button>
                     ) : (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
-                        className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-red-500/40"
-                      >
+                      <button onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }} className="bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-red-500/40">
                         <Trash2 size={14} className="text-white" />
                       </button>
                     )}
                   </div>
-
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2">
                     <p className="text-white text-xs font-medium leading-tight line-clamp-2">{movie.title}</p>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <span className="text-app-text-muted text-[10px]">
-                        {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')}
-                      </span>
+                      <span className="text-app-text-muted text-[10px]">{movie.mediaType === 'tv' ? t('common.series') : t('common.movie')}</span>
                       <span className="text-app-text-muted text-[10px]">·</span>
-                      <span className="text-app-text-muted text-[10px]">
-                        {movie.releaseDate?.split('-')[0] || 'N/A'}
-                      </span>
+                      <span className="text-app-text-muted text-[10px]">{movie.releaseDate?.split('-')[0] || 'N/A'}</span>
                     </div>
                     {movie.source !== 'tmdb' && movie.tags && movie.tags.length > 0 && (
                       <div className="flex flex-wrap gap-0.5 mt-1">
                         {movie.tags.slice(0, 2).map(tag => (
-                          <span key={tag} className="text-[9px] bg-blue-500/20 text-blue-300 px-1 rounded">
-                            #{tag}
-                          </span>
+                          <span key={tag} className="text-[9px] bg-blue-500/20 text-blue-300 px-1 rounded">#{tag}</span>
                         ))}
                       </div>
                     )}
@@ -372,22 +325,20 @@ function App({ conductor }: AppProps) {
         )}
       </main>
 
-      {/* Bottom Navigation */}
       <BottomNav
-  currentFilter={state.filter}
-  showProfile={showProfile}
-  onNavigateHome={() => {
-    setSearchTerm('');
-    conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
-    conductor.dispatch({ type: 'LOAD_MOVIES' });
-  }}
-  onShowDiary={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'diary' })}
-  onShowProfile={() => setShowProfile(true)}
-  onShowSeries={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'series' })}
-  onShowLists={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'lists' })}
-/>
+        currentFilter={state.filter}
+        showProfile={showProfile}
+        onNavigateHome={() => {
+          setSearchTerm('');
+          conductor.dispatch({ type: 'SET_FILTER', payload: 'all' });
+          conductor.dispatch({ type: 'LOAD_MOVIES' });
+        }}
+        onShowDiary={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'diary' })}
+        onShowProfile={() => setShowProfile(true)}
+        onShowSeries={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'series' })}
+        onShowLists={() => conductor.dispatch({ type: 'SET_FILTER', payload: 'lists' })}
+      />
 
-      {/* Profile Modal */}
       {showProfile && user && (
         <ProfileModal
           user={user}
@@ -399,19 +350,18 @@ function App({ conductor }: AppProps) {
         />
       )}
 
-      {/* Movie Detail Modal */}
       {state.selectedMovie && (
-  <MovieDetailModal
-    movie={state.selectedMovie}
-    conductor={conductor}
-    libraryItems={state.items}
-    customLists={state.customLists}
-    onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
-    onAddToLibrary={(movie) => { handleAddMovie(movie); }}
-    onShare={handleShare}
-    onShowToast={showToast}
-  />
-)}
+        <MovieDetailModal
+          movie={state.selectedMovie}
+          conductor={conductor}
+          libraryItems={state.items}
+          customLists={state.customLists}
+          onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
+          onAddToLibrary={(movie) => { handleAddMovie(movie); }}
+          onShare={handleShare}
+          onShowToast={showToast}
+        />
+      )}
     </div>
   );
 }
