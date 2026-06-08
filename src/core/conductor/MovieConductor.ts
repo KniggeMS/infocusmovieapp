@@ -191,7 +191,7 @@ export class MovieConductor {
   }
 
   // ✅ FIX: nimmt jetzt movieId (string) statt movie-Objekt
-  private async handleAddMovieToList(listId: string, movieId: string): Promise<void> {
+  private async handleAddMovieToList(listId: string, movie: Movie): Promise<void> {
     const movie = this.state.items.find(m => m.id === movieId);
     if (!movie) return;
 
