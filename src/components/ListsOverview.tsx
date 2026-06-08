@@ -49,7 +49,9 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
 
   const handleAddToList = (movieId: string) => {
     if (!selectedList) return;
-    conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId: selectedList.id, movieId } });
+    const movie = items.find(m => m.id === movieId);
+    if (!movie) return;
+    conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId: selectedList.id, movie } });
   };
 
   // ── Detailansicht einer Liste ──────────────────────────────────────────────

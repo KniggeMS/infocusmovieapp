@@ -125,7 +125,7 @@ export class MovieConductor {
       case 'CREATE_LIST':       await this.handleCreateList(intent.payload); break;
       case 'DELETE_LIST':       await this.handleDeleteList(intent.payload); break;
       // ✅ FIX: jetzt movieId statt movie-Objekt
-      case 'ADD_TO_LIST':       await this.handleAddMovieToList(intent.payload.listId, intent.payload.movieId); break;
+      case 'ADD_TO_LIST': await this.handleAddMovieToList(intent.payload.listId, intent.payload.movie); break;
       // ✅ NEU: Film aus Liste entfernen
       case 'REMOVE_FROM_LIST':  await this.handleRemoveMovieFromList(intent.payload.listId, intent.payload.movieId); break;
       case 'SELECT_LIST':       await this.handleSelectList(intent.payload); break;
