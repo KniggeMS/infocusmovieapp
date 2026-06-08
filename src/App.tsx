@@ -176,6 +176,7 @@ function App({ conductor }: AppProps) {
           </>
         ) : state.filter === 'series' ? (
           <EpisodeTracker
+          episodes={state.episodes}
             items={state.items}
             onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
             onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
@@ -375,6 +376,8 @@ function App({ conductor }: AppProps) {
       {showProfile && user && (
         <ProfileModal
           user={user}
+          conductor={conductor}
+          customLists={state.customLists}
           onClose={() => setShowProfile(false)}
           onLogout={handleLogout}
           onUpdateUser={setUser}
@@ -384,6 +387,9 @@ function App({ conductor }: AppProps) {
       {state.selectedMovie && (
         <MovieDetailModal
           movie={state.selectedMovie}
+          conductor={conductor}
+          libraryItems={state.items}
+          customLists={state.customLists}
           onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
           onAddToLibrary={(movie) => { handleAddMovie(movie); }}
           onShare={handleShare}
