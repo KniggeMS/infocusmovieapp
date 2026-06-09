@@ -3,7 +3,7 @@
 **Projekt:** InFocus Family CineLog  
 **Dokumentationsdatum:** 10. Juni 2026  
 **Dokumentationsverantwortlicher:** KniggeMS (Service Owner)  
-**Aktuelle Version:** 2.4.1 (Build 34aaafa)  
+**Aktuelle Version:** 2.4.1 (Build 3ca3ca2)  
 **Klassifizierung:** Intern — Entwicklungsteam
 
 ---
@@ -265,6 +265,79 @@ Hardcodiertes `grid-cols-3` führte auf Desktop-Bildschirmen (>1000px) zu überd
 ---
 
 ### 3.6 Change CR-2026-06-10-006: TypeScript-Test-Fix + Gitignore
+
+| Feld | Wert |
+|------|------|
+| **Change ID** | CR-2026-06-10-006 |
+| **Kategorie** | Minor Change (Build-Fix) |
+| **Risikobewertung** | Kein Risiko |
+| **Betroffene CIs** | `.gitignore`, `MovieConductor_Providers.test.ts` |
+
+**Beschreibung:**
+- `.gitignore` Pattern `conductor/` matchte fälschlich `src/core/conductor/` → force-add nötig
+- `MovieConductor_Providers.test.ts` fehlten 4 neue Adapter-Methoden → `lint_or_type_error` in Vercel
+
+**Resolution:**
+1. `.gitignore`: `conductor/` → `/conductor/` (nur Root-Verzeichnis)
+2. Mock-Adapter im Test-File um 4 neue Methoden ergänzt
+
+---
+
+### 3.7 Change CR-2026-06-10-007: Code-Splitting / Performance
+
+| Feld | Wert |
+|------|------|
+| **Change ID** | CR-2026-06-10-007 |
+| **Kategorie** | Minor Change (Performance) |
+| **Risikobewertung** | Gering — Lazy Loading kann Timing-Issues verursachen |
+| **Betroffene CIs** | `App.tsx`, `vite.config.ts` |
+| **Implementierungsdatum** | 10.06.2026 |
+| **Status** | ✅ Abgeschlossen (Commit `12a9ab0`) |
+
+**Beschreibung:**
+Hauptbundle 1102 KB löste Chunk-Warning aus. Ladezeit auf mobilen Geräten suboptimal.
+
+**Resolution:**
+- 10 Komponenten per `React.lazy()` + `Suspense` code-gesplittet
+- Hauptbundle von 1102 KB → **628 KB** (-45%)
+- Statistik-Chunk (352 KB) und Detail-Chunk (52 KB) separat
+- `chunkSizeWarningLimit` auf 700 KB gesenkt
+
+### 3.8 Change CR-2026-06-10-008: watchedAt Persistenz + List-Fix
+
+| Feld | Wert |
+|------|------|
+| **Change ID** | CR-2026-06-10-008 |
+| **Kategorie** | Minor Change (Bugfix) |
+| **Risikobewertung** | Gering |
+| **Betroffene CIs** | `SupabaseMovieService.ts` |
+| **Implementierungsdatum** | 10.06.2026 |
+| **Status** | ✅ Abgeschlossen (Commit `3ca3ca2`) |
+
+**Beschreibung:**
+- `watchedAt` wurde nie in Supabase persistiert → nach Refresh verloren
+- `addMovieToList()` fehlgeschlagen für Filme ohne TMDB-ID
+
+**Resolution:**
+1. `mapRowToMovie()`: `watchedAt: row.watched_at ?? null` ergänzt
+2. `update()`: Mapping `watchedAt → watched_at` ergänzt
+3. `addMovieToList()`: Hash aus UUID für Movies ohne `tmdbId` (Fallback)
+
+---
+
+## 4. Release & Deployment Management
+
+### 4.1 Release History (Auszug aktuellste)
+
+| Release | Datum | Commit | Status | Änderungen |
+|---------|-------|--------|--------|-----------|
+| v2.4.1-hotfix.9 | 10.06.2026 | `3ca3ca2` | 🔄 Building | watchedAt-Persistenz, List-Fix |
+| v2.4.1-hotfix.8 | 10.06.2026 | `12a9ab0` | 🔄 Building | Code-Splitting (Bundle -45%) |
+| v2.4.1-hotfix.7 | 10.06.2026 | `e04cbc3` | ✅ Ready (Prod) | ITIL-Doku Update |
+| v2.4.1-hotfix.6 | 10.06.2026 | `34aaafa` | ✅ Ready (Prod) | Responsive Grid + Poster-Qualität |
+| v2.4.1-hotfix.5 | 10.06.2026 | `f3b4927` | ✅ Ready (Prod) | Test-Fix + Gitignore |
+| v2.4.1-hotfix.4 | 10.06.2026 | `d21f545` | ✅ Ready (Prod) | Episoden/Tagebuch/UIStyle |
+| v2.4.1 | 09.06.2026 | `c8z458bwn` | ✅ Ready (Vorher) | Basis-Release |
 
 | Feld | Wert |
 |------|------|
@@ -588,25 +661,7 @@ CI-020 (Vercel) ──serves──▶ CI-013 (opencode.json MCP Server Config)
 
 | Feld | Wert |
 |------|------|
-| **CIR-ID** | CIR-007 |
-| **Priorität** | Niedrig |
-| **Kategorie** | Performance |
-
-**Beschreibung:** Hauptbundle war 1102 KB (vor Code-Splitting). Nach React.lazy-Optimierung auf **628 KB** (-45%) reduziert.  
-**Chunk-Aufteilung (gzippte Größen):**
-- `index.js`: 188 KB (Initial)
-- `StatisticsDashboard`: 108 KB (nur bei Statistiken geladen)
-- `MovieDetailModal`: 13 KB (nur bei Film-Auswahl geladen)
-- `ProfileModal`: 7 KB (nur bei Profil geladen)
-- Alle anderen Lazy-Chunks: <5 KB gzipped
-
-**Status:** ✅ Erledigt (Commit `12a9ab0`)
-
-### CIR-008: CI um Lint + Coverage ergänzen
-
-| Feld | Wert |
-|------|------|
-| **CIR-ID** | CIR-007 |
+| **CIR-ID** | CIR-008 |
 | **Priorität** | Niedrig |
 | **Kategorie** | Quality Assurance |
 
@@ -727,6 +782,7 @@ Die ITIL V4 Guiding Principles wurden in dieser Session wie folgt angewandt:
 |-------|-------|----------|
 | 11.05.2026 | KniggeMS | Initiale ITIL V4 Dokumentation (v2.4.2 Release) |
 | 10.06.2026 | OpenCode Agent | Vollständige Überarbeitung; SDP, CMDB, KEDB, CIR ergänzt; 6 Change Records dokumentiert |
+| 10.06.2026 | OpenCode Agent | CR-007 (Code-Splitting), CR-008 (watchedAt+List-Fix) ergänzt; Bundle-Optimierung dokumentiert |
 
 ---
 
@@ -737,7 +793,7 @@ Die ITIL V4 Guiding Principles wurden in dieser Session wie folgt angewandt:
 | Service Design Package (SDP) | ✅ | Abschnitt 1 |
 | Service Level Requirements (SLR) | ✅ | Abschnitt 1.3 |
 | Service Acceptance Criteria (SAC) | ✅ | Abschnitt 1.4 |
-| Change Records (CR) | ✅ | Abschnitt 3 (6 CRs) |
+| Change Records (CR) | ✅ | Abschnitt 3 (8 CRs) |
 | Known Error Database (KEDB) | ✅ | Abschnitt 5 (5 Einträge) |
 | Configuration Management (CMDB) | ✅ | Abschnitt 6 (20+ CIs) |
 | Incident Management Log | ✅ | Abschnitt 7 (2 Incidents) |
