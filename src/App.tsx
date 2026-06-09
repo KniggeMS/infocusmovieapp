@@ -1,28 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MovieConductor } from './core/conductor/MovieConductor';
 import { WatchlistState, Movie } from './types/domain';
 import { UserProfile } from './types/auth';
 import { AuthService } from './services/AuthService';
-import { LoginScreen } from './components/LoginScreen';
-import { ProfileModal } from './components/ProfileModal';
-import { MovieDetailModal } from './components/MovieDetailModal';
-import { StatisticsDashboard } from './components/StatisticsDashboard';
-import { AchievementsGrid } from './components/AchievementsGrid';
 import { BottomNav } from './components/BottomNav';
-import { Recommendations } from './components/Recommendations';
 import { useToast } from './components/Toast';
 import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles, Film, ChevronDown, ChevronUp } from 'lucide-react';
 import { GlassCard, GlassInput } from './components/glass';
-import { DiaryView } from './components/diary/DiaryView';
-import { ActivityFeed } from './components/diary/ActivityFeed';
-import { EpisodeTracker } from './components/tv/EpisodeTracker';
-import { ListsOverview } from './components/ListsOverview';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { shareMovie } from './lib/share';
 import { NotificationBell } from './components/NotificationBell';
 import { AdminNotifications } from './components/AdminNotifications';
+
+// Lazy-loaded heavy components — split into separate chunks
+const LoginScreen = lazy(() => import('./components/LoginScreen').then(m => ({ default: m.LoginScreen })));
+const ProfileModal = lazy(() => import('./components/ProfileModal').then(m => ({ default: m.ProfileModal })));
+const MovieDetailModal = lazy(() => import('./components/MovieDetailModal').then(m => ({ default: m.MovieDetailModal })));
+const StatisticsDashboard = lazy(() => import('./components/StatisticsDashboard').then(m => ({ default: m.StatisticsDashboard })));
+const AchievementsGrid = lazy(() => import('./components/AchievementsGrid').then(m => ({ default: m.AchievementsGrid })));
+const Recommendations = lazy(() => import('./components/Recommendations').then(m => ({ default: m.Recommendations })));
+const DiaryView = lazy(() => import('./components/diary/DiaryView').then(m => ({ default: m.DiaryView })));
+const ActivityFeed = lazy(() => import('./components/diary/ActivityFeed').then(m => ({ default: m.ActivityFeed })));
+const EpisodeTracker = lazy(() => import('./components/tv/EpisodeTracker').then(m => ({ default: m.EpisodeTracker })));
+const ListsOverview = lazy(() => import('./components/ListsOverview').then(m => ({ default: m.ListsOverview })));
+
+// Loading fallback for lazy components
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-12 text-app-text-muted text-sm gap-2">
+    <div className="w-4 h-4 border-2 border-blue-400/40 border-t-blue-400 rounded-full animate-spin" />
+  </div>
+);
+
+// Wrapper to add Suspense around lazy components
+function LazyLoad({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<LazyFallback />}>{children}</Suspense>;
+}
 
 interface AppProps {
   conductor: MovieConductor;
@@ -113,7 +127,7 @@ function App({ conductor }: AppProps) {
 
   if (!user) {
     // ✅ FIX: onLoginSuccess statt onLogin
-    return <LoginScreen onLoginSuccess={setUser} />;
+    return <LazyLoad><LoginScreen onLoginSuccess={setUser} /></LazyLoad>;
   }
 
   const filteredItems = state.items.filter((movie) => {
@@ -175,34 +189,40 @@ function App({ conductor }: AppProps) {
         )}
 
         {state.filter === 'diary' ? (
-          <>
+          <LazyLoad>
             <DiaryView items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
             <ActivityFeed items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
-          </>
+          </LazyLoad>
         ) : state.filter === 'series' ? (
-          <EpisodeTracker
-            items={state.items}
-            episodes={state.episodes}
-            onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
-            onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
-          />
+          <LazyLoad>
+            <EpisodeTracker
+              items={state.items}
+              episodes={state.episodes}
+              onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+              onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
+            />
+          </LazyLoad>
         ) : state.filter === 'lists' ? (
-          <ListsOverview
-            lists={state.customLists}
-            items={state.items}
-            conductor={conductor}
-            onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
-          />
+          <LazyLoad>
+            <ListsOverview
+              lists={state.customLists}
+              items={state.items}
+              conductor={conductor}
+              onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
+            />
+          </LazyLoad>
         ) : state.filter === 'achievements' ? (
-  <AchievementsGrid achievements={state.achievements} />   // ✅ achievements prop
-) : state.filter === 'statistics' ? (
-  <StatisticsDashboard movies={state.items} />             // ✅ movies statt statistics+items
-) : state.filter === 'recommendations' ? (
-  <Recommendations
-    library={state.items}
-    conductor={conductor}
-    onAddToLibrary={handleAddMovie}
-  />
+          <LazyLoad><AchievementsGrid achievements={state.achievements} /></LazyLoad>
+        ) : state.filter === 'statistics' ? (
+          <LazyLoad><StatisticsDashboard movies={state.items} /></LazyLoad>
+        ) : state.filter === 'recommendations' ? (
+          <LazyLoad>
+            <Recommendations
+              library={state.items}
+              conductor={conductor}
+              onAddToLibrary={handleAddMovie}
+            />
+          </LazyLoad>
         ) : (
           <>
             {state.filter === 'list' && state.activeListId && (
@@ -385,27 +405,31 @@ function App({ conductor }: AppProps) {
       />
 
       {showProfile && user && (
-        <ProfileModal
-          user={user}
-          conductor={conductor}
-          customLists={state.customLists}
-          onClose={() => setShowProfile(false)}
-          onLogout={handleLogout}
-          onUpdateUser={setUser}
-        />
+        <LazyLoad>
+          <ProfileModal
+            user={user}
+            conductor={conductor}
+            customLists={state.customLists}
+            onClose={() => setShowProfile(false)}
+            onLogout={handleLogout}
+            onUpdateUser={setUser}
+          />
+        </LazyLoad>
       )}
 
       {state.selectedMovie && (
-        <MovieDetailModal
-          movie={state.selectedMovie}
-          conductor={conductor}
-          libraryItems={state.items}
-          customLists={state.customLists}
-          onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
-          onAddToLibrary={(movie) => { handleAddMovie(movie); }}
-          onShare={handleShare}
-          onShowToast={showToast}
-        />
+        <LazyLoad>
+          <MovieDetailModal
+            movie={state.selectedMovie}
+            conductor={conductor}
+            libraryItems={state.items}
+            customLists={state.customLists}
+            onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
+            onAddToLibrary={(movie) => { handleAddMovie(movie); }}
+            onShare={handleShare}
+            onShowToast={showToast}
+          />
+        </LazyLoad>
       )}
     </div>
   );

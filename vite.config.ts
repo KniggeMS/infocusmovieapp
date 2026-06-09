@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
           // React 19 + Vite bundling works better with default chunking
         }
       },
-      chunkSizeWarningLimit: 1000 
+      chunkSizeWarningLimit: 700 
     },
     server: {
       host: '0.0.0.0',
