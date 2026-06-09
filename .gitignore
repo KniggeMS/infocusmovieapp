@@ -47,7 +47,8 @@ supabase/.temp/
 GEMINI.md
 AGENTS.md
 PLAN.md
-conductor/
+# Ignore root-level conductor documentation, not src/core/conductor
+/conductor/
 
 # Debug-Skripte
 check-supabase-v2.js

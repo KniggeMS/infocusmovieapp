@@ -18,6 +18,10 @@ const mockAdapter: MovieServiceAdapter = {
   getListMovies: vi.fn().mockResolvedValue([]),
   addMovieToList: vi.fn(),
   removeMovieFromList: vi.fn(),
+  saveEpisodeProgress: vi.fn().mockResolvedValue(undefined),
+  loadEpisodeProgress: vi.fn().mockResolvedValue([]),
+  saveDiaryEntry: vi.fn().mockResolvedValue(undefined),
+  getDiaryEntries: vi.fn().mockResolvedValue([]),
 };
 
 describe('MovieConductor - Streaming Providers', () => {
