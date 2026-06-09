@@ -81,6 +81,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       source: 'database',
       mediaType: (row.media_type as 'movie' | 'tv') || 'movie',
       watched: row.watched ?? false,
+      watchedAt: row.watched_at ?? null,
       favorite: row.favorite ?? false,
       userRating: anyRow.user_rating ?? null,
       notes: anyRow.notes ?? null,
@@ -383,6 +384,7 @@ export class SupabaseMovieService implements MovieServiceAdapter {
 
     const dbUpdate: Record<string, unknown> = {};
     if (updates.watched !== undefined) dbUpdate.watched = updates.watched;
+    if (updates.watchedAt !== undefined) dbUpdate.watched_at = updates.watchedAt;
     if (updates.favorite !== undefined) dbUpdate.favorite = updates.favorite;
     if (updates.title !== undefined) dbUpdate.title = updates.title;
     if (updates.overview !== undefined) dbUpdate.overview = updates.overview;
@@ -582,11 +584,14 @@ export class SupabaseMovieService implements MovieServiceAdapter {
   }
 
   async addMovieToList(listId: string, movie: Movie): Promise<void> {
-    // TMDB-ID ermitteln: tmdbId-Feld oder aus id ableiten (für Suchergebnisse)
-    const tmdbId = movie.tmdbId ?? (movie.source === 'tmdb' ? Number(movie.id) || 0 : 0);
+    // TMDB-ID ermitteln: tmdbId-Feld oder aus id ableiten
+    let tmdbId = movie.tmdbId ?? (movie.source === 'tmdb' ? Number(movie.id) || 0 : 0);
 
+    // Fallback: Generiere eine numerische ID aus der internen UUID
+    // (für Filme ohne TMDB-ID, z.B. manuell angelegte Einträge)
     if (!tmdbId) {
-      throw new Error('Movie has no valid TMDB ID and cannot be added to a list');
+      const hex = movie.id.replace(/-/g, '').slice(0, 12);
+      tmdbId = parseInt(hex, 16) % 2147483647;
     }
 
     // Prüfen ob Film bereits in der Liste ist
