@@ -257,7 +257,7 @@ function App({ conductor }: AppProps) {
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-2 p-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-2 sm:gap-3 p-4">
               {filteredItems.map((movie, index) => (
                 <motion.div
                   key={movie.id}
@@ -271,7 +271,7 @@ function App({ conductor }: AppProps) {
                   >
                     {movie.posterPath ? (
                       <img
-                        src={`https://image.tmdb.org/t/p/w342${movie.posterPath}`}
+                        src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
                         alt={movie.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
