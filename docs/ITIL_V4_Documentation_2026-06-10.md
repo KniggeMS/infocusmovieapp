@@ -565,7 +565,44 @@ CI-020 (Vercel) ──serves──▶ CI-013 (opencode.json MCP Server Config)
 **Vorschlag:** Tokens von Environment-Variablen beziehen lassen (aktuell schon korrekt), Werte in `.bashrc` sichern.  
 **Status:** ✅ Bereits umgesetzt (Env-Vars in `.bashrc`, Config nutzt `${SUPABASE_TOKEN}` und `${VERCEL_TOKEN}`)
 
-### CIR-007: CI um Lint + Coverage ergänzen
+### CIR-007: Bundle-Size Optimierung (✅ Erledigt)
+
+| Feld | Wert |
+|------|------|
+| **CIR-ID** | CIR-007 |
+| **Priorität** | Niedrig → Erledigt |
+| **Kategorie** | Performance |
+
+**Beschreibung:** Hauptbundle war 1102 KB (vor Code-Splitting). Nach React.lazy-Optimierung auf **628 KB** (-45%) reduziert.  
+**Chunk-Aufteilung (gzippte Größen):**
+- `index.js`: 188 KB (Initial)
+- `StatisticsDashboard`: 108 KB (nur bei Statistiken geladen)
+- `MovieDetailModal`: 13 KB (nur bei Film-Auswahl geladen)
+- `ProfileModal`: 7 KB (nur bei Profil geladen)
+- Alle anderen Lazy-Chunks: <5 KB gzipped
+- **Kein Chunk-Warning mehr** ✓
+
+**Resolution:** Commit `12a9ab0` — 10 Komponenten via `React.lazy()` code-gesplittet.
+
+### CIR-008: CI um Lint + Coverage ergänzen
+
+| Feld | Wert |
+|------|------|
+| **CIR-ID** | CIR-007 |
+| **Priorität** | Niedrig |
+| **Kategorie** | Performance |
+
+**Beschreibung:** Hauptbundle war 1102 KB (vor Code-Splitting). Nach React.lazy-Optimierung auf **628 KB** (-45%) reduziert.  
+**Chunk-Aufteilung (gzippte Größen):**
+- `index.js`: 188 KB (Initial)
+- `StatisticsDashboard`: 108 KB (nur bei Statistiken geladen)
+- `MovieDetailModal`: 13 KB (nur bei Film-Auswahl geladen)
+- `ProfileModal`: 7 KB (nur bei Profil geladen)
+- Alle anderen Lazy-Chunks: <5 KB gzipped
+
+**Status:** ✅ Erledigt (Commit `12a9ab0`)
+
+### CIR-008: CI um Lint + Coverage ergänzen
 
 | Feld | Wert |
 |------|------|
