@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Movie, MovieServiceAdapter, CustomList } from '../types/domain';
+import { Movie, MovieServiceAdapter, CustomList, EpisodeEntry } from '../types/domain';
 import { Database } from '../types/supabase';
 import { supabase } from '../lib/supabase';
 
@@ -630,5 +630,125 @@ export class SupabaseMovieService implements MovieServiceAdapter {
       .eq('tmdb_movie_id', numId);
 
     if (error) throw new Error(error.message);
+  }
+
+  // ─── TV Episode Progress ──────────────────────────────────
+
+  async saveEpisodeProgress(episodes: EpisodeEntry[]): Promise<void> {
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Upsert each episode: delete existing then insert
+    for (const ep of episodes) {
+      // Delete existing entry for this show/season/episode
+      await this.client
+        .from('tv_progress')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('tmdb_id', ep.tmdbId)
+        .eq('season_number', ep.seasonNumber)
+        .eq('episode_number', ep.episodeNumber);
+
+      // Insert current state
+      const { error } = await this.client
+        .from('tv_progress')
+        .insert({
+          user_id: user.id,
+          tmdb_id: ep.tmdbId,
+          season_number: ep.seasonNumber,
+          episode_number: ep.episodeNumber,
+          title: ep.title,
+          watched: ep.watched,
+          watched_at: ep.watchedAt,
+        } as any);
+
+      if (error) {
+        console.warn('saveEpisodeProgress insert error:', error.message);
+      }
+    }
+  }
+
+  async loadEpisodeProgress(): Promise<EpisodeEntry[]> {
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await this.client
+      .from('tv_progress')
+      .select('*')
+      .eq('user_id', user.id) as any;
+
+    if (error) {
+      console.warn('loadEpisodeProgress error:', error.message);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      tmdbId: row.tmdb_id,
+      title: row.title,
+      seasonNumber: row.season_number,
+      episodeNumber: row.episode_number,
+      watched: row.watched ?? false,
+      watchedAt: row.watched_at,
+    }));
+  }
+
+  // ─── Diary Entries ──────────────────────────────────────
+
+  async saveDiaryEntry(entry: Movie): Promise<void> {
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    const tmdbId = entry.tmdbId ?? (entry.source === 'tmdb' ? Number(entry.id) : 0);
+    if (!tmdbId) return;
+
+    const { error } = await this.client
+      .from('diary_entries')
+      .insert({
+        user_id: user.id,
+        tmdb_movie_id: tmdbId,
+        movie_title: entry.title,
+        media_type: entry.mediaType || 'movie',
+        movie_poster_path: entry.posterPath,
+        movie_year: entry.releaseDate?.split('-')[0] || null,
+        watched_on: entry.watchedAt || new Date().toISOString(),
+        rating: entry.userRating,
+      } as any);
+
+    if (error) {
+      console.warn('saveDiaryEntry error:', error.message);
+    }
+  }
+
+  async getDiaryEntries(): Promise<Movie[]> {
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await this.client
+      .from('diary_entries')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('watched_on', { ascending: false })
+      .limit(200) as any;
+
+    if (error) {
+      console.warn('getDiaryEntries error:', error.message);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      tmdbId: row.tmdb_movie_id,
+      title: row.movie_title,
+      posterPath: row.movie_poster_path,
+      releaseDate: row.movie_year ? `${row.movie_year}-01-01` : null,
+      mediaType: row.media_type || 'movie',
+      source: 'database' as const,
+      watched: true,
+      watchedAt: row.watched_on,
+      userRating: row.rating,
+      overview: null,
+      voteAverage: null,
+      runtime: null,
+    }));
   }
 }

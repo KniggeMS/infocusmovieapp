@@ -139,7 +139,10 @@ export class MovieConductor {
 
   private async handleUpdateField(id: string, patch: Partial<Movie>): Promise<void> {
     const movie = this.state.items.find(m => m.id === id);
-    if (!movie) return;
+    if (!movie) {
+      console.warn(`handleUpdateField: movie with id "${id}" not found for update`, patch);
+      return;
+    }
 
     const previousState = {
       items: [...this.state.items],
@@ -228,13 +231,17 @@ export class MovieConductor {
     this.updateState({ status: 'loading' });
     this.loadInFlight = (async () => {
       try {
-        const [movies, lists] = await Promise.all([
+        const [movies, lists, episodes, diaryEntries] = await Promise.all([
           this.adapter.getTrending(),
-          this.adapter.getLists()
+          this.adapter.getLists(),
+          this.adapter.loadEpisodeProgress(),
+          this.adapter.getDiaryEntries(),
         ]);
         this.updateState({
           items: movies,
           customLists: lists,
+          episodes,
+          diaryEntries,
           status: 'idle',
           statistics: this.calculateStatistics(movies),
           achievements: this.checkAchievements(movies)
@@ -289,7 +296,10 @@ export class MovieConductor {
 
   private async handleToggleWatched(id: string): Promise<void> {
     const movie = this.state.items.find(m => m.id === id);
-    if (!movie) return;
+    if (!movie) {
+      console.warn(`handleToggleWatched: movie with id "${id}" not found in state`);
+      return;
+    }
     const nowWatched = !movie.watched;
     const watchedAt = nowWatched ? new Date().toISOString() : null;
     try {
@@ -298,23 +308,56 @@ export class MovieConductor {
         m.id === id ? { ...m, watched: nowWatched, watchedAt } : m
       );
       this.updateState({ items: updated, statistics: this.calculateStatistics(updated) });
+
+      // Create diary entry when marking as watched
+      if (nowWatched) {
+        await this.handleDiaryEntry(movie);
+      }
     } catch (error) {
+      console.warn('handleToggleWatched failed:', error);
       this.updateState({ error: error instanceof Error ? error.message : 'Toggle watched failed' });
     }
   }
 
   private async handleDiaryEntry(movie: Movie): Promise<void> {
-    const watchedAt = new Date().toISOString();
-    const patched = { ...movie, watched: true, watchedAt };
-    if (movie.source === 'database') {
-      try {
-        await this.adapter.update(movie.id, { watched: true, watchedAt });
-      } catch { /* ignore */ }
+    const watchedAt = movie.watchedAt || new Date().toISOString();
+    const entry: Movie = {
+      ...movie,
+      watched: true,
+      watchedAt,
+      id: movie.source === 'database' ? movie.id : crypto.randomUUID(),
+      addedAt: watchedAt,
+      source: movie.source === 'database' ? 'database' : 'database' as const,
+    };
+
+    // Persist to diary_entries table
+    try {
+      await this.adapter.saveDiaryEntry(entry);
+    } catch (error) {
+      console.warn('Failed to persist diary entry:', error);
     }
-    const entry = { ...patched, id: crypto.randomUUID(), addedAt: watchedAt, source: 'database' as const };
-    const items = [entry, ...this.state.items];
+
+    // Update in-memory state: add to items if not already there, or update
+    const exists = this.state.items.find(m =>
+      m.id === entry.id || (m.tmdbId && entry.tmdbId && m.tmdbId === entry.tmdbId)
+    );
+    let items: Movie[];
+    if (exists) {
+      items = this.state.items.map(m =>
+        (m.id === exists.id || (m.tmdbId && entry.tmdbId && m.tmdbId === entry.tmdbId))
+          ? { ...m, watched: true, watchedAt }
+          : m
+      );
+    } else {
+      items = [entry, ...this.state.items];
+    }
+
+    // Add to diary entries list
+    const diaryEntries = [entry, ...this.state.diaryEntries.filter(d => d.id !== entry.id)];
+
     this.updateState({
       items,
+      diaryEntries,
       statistics: this.calculateStatistics(items),
       achievements: this.checkAchievements(items),
     });
@@ -348,6 +391,13 @@ export class MovieConductor {
       }];
     }
     this.updateState({ episodes: updated });
+
+    // Persist to Supabase
+    try {
+      await this.adapter.saveEpisodeProgress(updated);
+    } catch (error) {
+      console.warn('Failed to persist episode progress:', error);
+    }
   }
 
   private async handleToggleFavorite(id: string): Promise<void> {

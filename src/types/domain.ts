@@ -145,4 +145,10 @@ export interface MovieServiceAdapter {
   getListMovies(listId: string): Promise<Movie[]>;
   addMovieToList(listId: string, movie: Movie): Promise<void>;
   removeMovieFromList(listId: string, movieId: string): Promise<void>;
+  // TV Episode Tracking
+  saveEpisodeProgress(episodes: EpisodeEntry[]): Promise<void>;
+  loadEpisodeProgress(): Promise<EpisodeEntry[]>;
+  // Diary Entries
+  saveDiaryEntry(entry: Movie): Promise<void>;
+  getDiaryEntries(): Promise<Movie[]>;
 }

@@ -21,6 +21,8 @@ import { EpisodeTracker } from './components/tv/EpisodeTracker';
 import { ListsOverview } from './components/ListsOverview';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { shareMovie } from './lib/share';
+import { NotificationBell } from './components/NotificationBell';
+import { AdminNotifications } from './components/AdminNotifications';
 
 interface AppProps {
   conductor: MovieConductor;
@@ -146,6 +148,8 @@ function App({ conductor }: AppProps) {
             icon={<Search className="w-4 h-4" />}
           />
         </div>
+        <NotificationBell />
+        <AdminNotifications user={user} />
         <button
           onClick={() => setShowProfile(true)}
           className="flex-shrink-0 w-9 h-9 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs font-bold hover:bg-blue-500/30 transition-all"

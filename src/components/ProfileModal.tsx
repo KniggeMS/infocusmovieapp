@@ -8,7 +8,7 @@ import { MovieConductor } from '../core/conductor/MovieConductor';
 import { CustomList } from '../types/domain';
 import { AdminPanel } from './AdminPanel';
 import { GlassCard, GlassButton, GlassSection, GlassDivider } from './glass';
-// disabled import { UIStyleSwitcher } from './UIStyleSwitcher';
+import { UIStyleSwitcher } from './UIStyleSwitcher';
 
 interface AdminNotification {
   id: string;
@@ -189,8 +189,7 @@ export const ProfileModal = React.memo(({
             </GlassButton>
 
             <GlassDivider />
-            {/* TODO: Re-enable UI style switcher once Tailwind color tokens are refactored */}
-{/* <UIStyleSwitcher /> */}
+            <UIStyleSwitcher />
           </GlassSection>
 
           <GlassDivider />

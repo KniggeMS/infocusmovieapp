@@ -54,8 +54,8 @@ export function useExternalRatings(
           cache.set(cacheKey, result);
           setRatings(result);
         }
-      } catch {
-        // silent
+      } catch (err) {
+        console.warn('useExternalRatings: OMDb fetch failed', err);
       } finally {
         if (!cancelled) setLoading(false);
       }
