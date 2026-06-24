@@ -41,6 +41,7 @@ supabase/.temp/
 .agents/
 .continue/
 .opencode/
+opencode.json
 .vscode/
 
 # Interne Entwicklungsdokumente

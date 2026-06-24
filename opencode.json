@@ -6,7 +6,23 @@
       "url": "https://mcp.context7.com/mcp",
       "enabled": true,
       "headers": {
-        "CONTEXT7_API_KEY": "ctx7sk-cb261ded-68af-4852-b497-6acd8a1480c1"
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    },
+    "supabase": {
+      "type": "remote",
+      "url": "https://mcp.supabase.com/mcp?project_ref=ekbpexbhuochrplzorce&read_only=true",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer ${SUPABASE_TOKEN}"
+      }
+    },
+    "vercel": {
+      "type": "remote",
+      "url": "https://mcp.vercel.com",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer ${VERCEL_TOKEN}"
       }
     }
   }
