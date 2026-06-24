@@ -1,7 +1,7 @@
 /**
  * Generates a privacy-friendly avatar URL using the DiceBear API.
  * Style: "bottts" (Robots) fits the tech/modern theme of InFocus.
- * 
+ *
  * @param seed - A string to seed the generator (e.g. username, email, or random string)
  * @returns string - The URL to the SVG avatar
  */

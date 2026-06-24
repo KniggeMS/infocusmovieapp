@@ -36,9 +36,12 @@ export async function shareMovie(movie: Movie): Promise<ShareResult> {
 }
 
 export async function shareList(list: CustomList, movies: Movie[]): Promise<ShareResult> {
-  const movieLines = movies.map((m, i) =>
-    `${i + 1}. ${m.title}${m.releaseDate ? ` (${m.releaseDate.split('-')[0]})` : ''}${typeof m.userRating === 'number' && m.userRating > 0 ? ` ★${m.userRating}/10` : ''}`
-  ).join('\n');
+  const movieLines = movies
+    .map(
+      (m, i) =>
+        `${i + 1}. ${m.title}${m.releaseDate ? ` (${m.releaseDate.split('-')[0]})` : ''}${typeof m.userRating === 'number' && m.userRating > 0 ? ` ★${m.userRating}/10` : ''}`,
+    )
+    .join('\n');
 
   const text = `📋 *${list.name}* — InFocus Family CineLog\n${list.description ? `_${list.description}_\n` : ''}\n${movieLines}`;
   const waText = encodeURIComponent(`${text}\n\nGet it on InFocus!`);

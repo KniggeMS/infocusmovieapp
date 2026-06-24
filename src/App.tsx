@@ -7,7 +7,19 @@ import { UserProfile } from './types/auth';
 import { AuthService } from './services/AuthService';
 import { BottomNav } from './components/BottomNav';
 import { useToast } from './components/Toast';
-import { Search, Plus, Trash2, Heart, Eye, Shield, ListPlus, Sparkles, Film, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Trash2,
+  Heart,
+  Eye,
+  Shield,
+  ListPlus,
+  Sparkles,
+  Film,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { GlassCard, GlassInput } from './components/glass';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { shareMovie } from './lib/share';
@@ -15,16 +27,36 @@ import { NotificationBell } from './components/NotificationBell';
 import { AdminNotifications } from './components/AdminNotifications';
 
 // Lazy-loaded heavy components — split into separate chunks
-const LoginScreen = lazy(() => import('./components/LoginScreen').then(m => ({ default: m.LoginScreen })));
-const ProfileModal = lazy(() => import('./components/ProfileModal').then(m => ({ default: m.ProfileModal })));
-const MovieDetailModal = lazy(() => import('./components/MovieDetailModal').then(m => ({ default: m.MovieDetailModal })));
-const StatisticsDashboard = lazy(() => import('./components/StatisticsDashboard').then(m => ({ default: m.StatisticsDashboard })));
-const AchievementsGrid = lazy(() => import('./components/AchievementsGrid').then(m => ({ default: m.AchievementsGrid })));
-const Recommendations = lazy(() => import('./components/Recommendations').then(m => ({ default: m.Recommendations })));
-const DiaryView = lazy(() => import('./components/diary/DiaryView').then(m => ({ default: m.DiaryView })));
-const ActivityFeed = lazy(() => import('./components/diary/ActivityFeed').then(m => ({ default: m.ActivityFeed })));
-const EpisodeTracker = lazy(() => import('./components/tv/EpisodeTracker').then(m => ({ default: m.EpisodeTracker })));
-const ListsOverview = lazy(() => import('./components/ListsOverview').then(m => ({ default: m.ListsOverview })));
+const LoginScreen = lazy(() =>
+  import('./components/LoginScreen').then((m) => ({ default: m.LoginScreen })),
+);
+const ProfileModal = lazy(() =>
+  import('./components/ProfileModal').then((m) => ({ default: m.ProfileModal })),
+);
+const MovieDetailModal = lazy(() =>
+  import('./components/MovieDetailModal').then((m) => ({ default: m.MovieDetailModal })),
+);
+const StatisticsDashboard = lazy(() =>
+  import('./components/StatisticsDashboard').then((m) => ({ default: m.StatisticsDashboard })),
+);
+const AchievementsGrid = lazy(() =>
+  import('./components/AchievementsGrid').then((m) => ({ default: m.AchievementsGrid })),
+);
+const Recommendations = lazy(() =>
+  import('./components/Recommendations').then((m) => ({ default: m.Recommendations })),
+);
+const DiaryView = lazy(() =>
+  import('./components/diary/DiaryView').then((m) => ({ default: m.DiaryView })),
+);
+const ActivityFeed = lazy(() =>
+  import('./components/diary/ActivityFeed').then((m) => ({ default: m.ActivityFeed })),
+);
+const EpisodeTracker = lazy(() =>
+  import('./components/tv/EpisodeTracker').then((m) => ({ default: m.EpisodeTracker })),
+);
+const ListsOverview = lazy(() =>
+  import('./components/ListsOverview').then((m) => ({ default: m.ListsOverview })),
+);
 
 // Loading fallback for lazy components
 const LazyFallback = () => (
@@ -122,12 +154,20 @@ function App({ conductor }: AppProps) {
   };
 
   if (authLoading) {
-    return <div className="flex items-center justify-center h-screen text-app-text-muted">{t('common.loading')}</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-app-text-muted">
+        {t('common.loading')}
+      </div>
+    );
   }
 
   if (!user) {
     // ✅ FIX: onLoginSuccess statt onLogin
-    return <LazyLoad><LoginScreen onLoginSuccess={setUser} /></LazyLoad>;
+    return (
+      <LazyLoad>
+        <LoginScreen onLoginSuccess={setUser} />
+      </LazyLoad>
+    );
   }
 
   const filteredItems = state.items.filter((movie) => {
@@ -138,14 +178,12 @@ function App({ conductor }: AppProps) {
   });
 
   const allTags = Array.from(
-    new Set(state.items.flatMap((m) => m.tags || []).filter(Boolean))
+    new Set(state.items.flatMap((m) => m.tags || []).filter(Boolean)),
   ).sort();
 
   const isMovieInLibrary = (movie: Movie) => {
     if (movie.source !== 'tmdb') return true;
-    return state.items.some(m =>
-      m.tmdbId === Number(movie.id) || m.id === movie.id
-    );
+    return state.items.some((m) => m.tmdbId === Number(movie.id) || m.id === movie.id);
   };
 
   return (
@@ -168,7 +206,11 @@ function App({ conductor }: AppProps) {
           onClick={() => setShowProfile(true)}
           className="flex-shrink-0 w-9 h-9 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs font-bold hover:bg-blue-500/30 transition-all"
         >
-          {user.role === 'admin' ? <Shield className="w-4 h-4" /> : (user.displayName?.[0] ?? user.email?.[0] ?? '?').toUpperCase()}
+          {user.role === 'admin' ? (
+            <Shield className="w-4 h-4" />
+          ) : (
+            (user.displayName?.[0] ?? user.email?.[0] ?? '?').toUpperCase()
+          )}
         </button>
       </header>
 
@@ -190,8 +232,14 @@ function App({ conductor }: AppProps) {
 
         {state.filter === 'diary' ? (
           <LazyLoad>
-            <DiaryView items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
-            <ActivityFeed items={state.items} onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })} />
+            <DiaryView
+              items={state.items}
+              onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+            />
+            <ActivityFeed
+              items={state.items}
+              onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
+            />
           </LazyLoad>
         ) : state.filter === 'series' ? (
           <LazyLoad>
@@ -199,7 +247,9 @@ function App({ conductor }: AppProps) {
               items={state.items}
               episodes={state.episodes}
               onSelectMovie={(id) => conductor.dispatch({ type: 'SELECT_MOVIE', payload: id })}
-              onToggleEpisode={(showId, season, episode) => conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })}
+              onToggleEpisode={(showId, season, episode) =>
+                conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId, season, episode } })
+              }
             />
           </LazyLoad>
         ) : state.filter === 'lists' ? (
@@ -208,13 +258,19 @@ function App({ conductor }: AppProps) {
               lists={state.customLists}
               items={state.items}
               conductor={conductor}
-              onSelectList={(listId) => conductor.dispatch({ type: 'SELECT_LIST', payload: listId })}
+              onSelectList={(listId) =>
+                conductor.dispatch({ type: 'SELECT_LIST', payload: listId })
+              }
             />
           </LazyLoad>
         ) : state.filter === 'achievements' ? (
-          <LazyLoad><AchievementsGrid achievements={state.achievements} /></LazyLoad>
+          <LazyLoad>
+            <AchievementsGrid achievements={state.achievements} />
+          </LazyLoad>
         ) : state.filter === 'statistics' ? (
-          <LazyLoad><StatisticsDashboard movies={state.items} /></LazyLoad>
+          <LazyLoad>
+            <StatisticsDashboard movies={state.items} />
+          </LazyLoad>
         ) : state.filter === 'recommendations' ? (
           <LazyLoad>
             <Recommendations
@@ -229,7 +285,9 @@ function App({ conductor }: AppProps) {
               <div className="flex items-center gap-2 px-4 pt-4 text-sm text-app-text-muted">
                 <ListPlus className="w-4 h-4" />
                 <span>List:</span>
-                <span className="font-medium text-app-text">{state.customLists.find(l => l.id === state.activeListId)?.name}</span>
+                <span className="font-medium text-app-text">
+                  {state.customLists.find((l) => l.id === state.activeListId)?.name}
+                </span>
               </div>
             )}
 
@@ -241,27 +299,40 @@ function App({ conductor }: AppProps) {
                 >
                   <span>Tags</span>
                   {state.tagFilter && (
-                    <span className="w-4 h-4 bg-blue-500 rounded-full text-white text-[10px] flex items-center justify-center">1</span>
+                    <span className="w-4 h-4 bg-blue-500 rounded-full text-white text-[10px] flex items-center justify-center">
+                      1
+                    </span>
                   )}
-                  {tagsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {tagsExpanded ? (
+                    <ChevronUp className="w-3 h-3" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3" />
+                  )}
                 </button>
 
                 {tagsExpanded && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {state.tagFilter && (
                       <button
-                        onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: null })}
+                        onClick={() =>
+                          conductor.dispatch({ type: 'SET_TAG_FILTER', payload: null })
+                        }
                         className="bg-app-secondary text-app-text-muted hover:text-app-text px-2 py-1 rounded-full border border-app-border text-xs"
                       >
                         Alle
                       </button>
                     )}
-                    {allTags.map(tag => {
+                    {allTags.map((tag) => {
                       const active = state.tagFilter === tag;
                       return (
                         <button
                           key={tag}
-                          onClick={() => conductor.dispatch({ type: 'SET_TAG_FILTER', payload: active ? null : tag })}
+                          onClick={() =>
+                            conductor.dispatch({
+                              type: 'SET_TAG_FILTER',
+                              payload: active ? null : tag,
+                            })
+                          }
                           className={`px-2.5 py-1 rounded-full border transition text-xs ${
                             active
                               ? 'bg-blue-500 text-white border-blue-500'
@@ -299,7 +370,9 @@ function App({ conductor }: AppProps) {
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-white/5 text-app-text-muted gap-1">
                         <Film className="w-8 h-8 opacity-30" />
-                        <span className="text-[10px] px-2 text-center leading-tight">{movie.title}</span>
+                        <span className="text-[10px] px-2 text-center leading-tight">
+                          {movie.title}
+                        </span>
                       </div>
                     )}
 
@@ -318,23 +391,36 @@ function App({ conductor }: AppProps) {
                     {movie.source !== 'tmdb' && (
                       <>
                         <button
-                          onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id }); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            conductor.dispatch({ type: 'TOGGLE_FAVORITE', payload: movie.id });
+                          }}
                           className="absolute bottom-8 right-1.5 bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
                         >
-                          <Heart className={`w-3.5 h-3.5 ${movie.favorite ? 'fill-red-400 text-red-400' : 'text-white'}`} />
+                          <Heart
+                            className={`w-3.5 h-3.5 ${movie.favorite ? 'fill-red-400 text-red-400' : 'text-white'}`}
+                          />
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id }); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            conductor.dispatch({ type: 'TOGGLE_WATCHED', payload: movie.id });
+                          }}
                           className="absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg"
                         >
-                          <Eye className={`w-3.5 h-3.5 ${movie.watched ? 'fill-green-400 text-green-400' : 'text-white'}`} />
+                          <Eye
+                            className={`w-3.5 h-3.5 ${movie.watched ? 'fill-green-400 text-green-400' : 'text-white'}`}
+                          />
                         </button>
                       </>
                     )}
 
                     {movie.source === 'tmdb' && !isMovieInLibrary(movie) ? (
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleAddMovie(movie); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddMovie(movie);
+                        }}
                         className="absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
                         title={t('common.addToWatchlist', 'Zur Watchlist hinzufügen')}
                       >
@@ -342,7 +428,10 @@ function App({ conductor }: AppProps) {
                       </button>
                     ) : movie.source === 'tmdb' && isMovieInLibrary(movie) ? (
                       <button
-                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id }); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          conductor.dispatch({ type: 'SELECT_MOVIE', payload: movie.id });
+                        }}
                         className="absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-blue-500/40"
                         title={t('common.inLibrary', 'In Bibliothek')}
                       >
@@ -350,7 +439,10 @@ function App({ conductor }: AppProps) {
                       </button>
                     ) : (
                       <button
-                        onClick={(e) => { e.stopPropagation(); conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id }); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          conductor.dispatch({ type: 'REMOVE_MOVIE', payload: movie.id });
+                        }}
                         className="absolute bottom-1.5 left-1.5 bg-black/60 backdrop-blur-md p-2.5 rounded-full transition-all hover:scale-110 shadow-lg hover:bg-red-500/40"
                       >
                         <Trash2 className="w-3.5 h-3.5 text-white" />
@@ -360,18 +452,23 @@ function App({ conductor }: AppProps) {
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 pb-1.5 pt-4">
                       <p className="text-white text-[10px] font-medium truncate">{movie.title}</p>
                       <p className="text-white/60 text-[9px]">
-                        {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')} · {movie.releaseDate?.split('-')[0] || 'N/A'}
+                        {movie.mediaType === 'tv' ? t('common.series') : t('common.movie')} ·{' '}
+                        {movie.releaseDate?.split('-')[0] || 'N/A'}
                       </p>
                       {movie.source !== 'tmdb' && movie.tags && movie.tags.length > 0 && (
                         <div className="flex gap-1 mt-0.5 flex-wrap">
-                          {movie.tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="text-blue-300 text-[8px]">#{tag}</span>
+                          {movie.tags.slice(0, 2).map((tag) => (
+                            <span key={tag} className="text-blue-300 text-[8px]">
+                              #{tag}
+                            </span>
                           ))}
                         </div>
                       )}
-                      {movie.source !== 'tmdb' && typeof movie.userRating === 'number' && movie.userRating > 0 && (
-                        <p className="text-yellow-400 text-[9px]">★ {movie.userRating}/10</p>
-                      )}
+                      {movie.source !== 'tmdb' &&
+                        typeof movie.userRating === 'number' &&
+                        movie.userRating > 0 && (
+                          <p className="text-yellow-400 text-[9px]">★ {movie.userRating}/10</p>
+                        )}
                     </div>
                   </GlassCard>
                 </motion.div>
@@ -425,7 +522,9 @@ function App({ conductor }: AppProps) {
             libraryItems={state.items}
             customLists={state.customLists}
             onClose={() => conductor.dispatch({ type: 'CLOSE_DETAILS' })}
-            onAddToLibrary={(movie) => { handleAddMovie(movie); }}
+            onAddToLibrary={(movie) => {
+              handleAddMovie(movie);
+            }}
             onShare={handleShare}
             onShowToast={showToast}
           />

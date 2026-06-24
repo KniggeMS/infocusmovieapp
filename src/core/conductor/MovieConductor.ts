@@ -1,15 +1,72 @@
-import { MovieServiceAdapter, UserIntent, WatchlistState, Movie, Achievement, MovieStatistics, EpisodeEntry } from '../../types/domain';
+import {
+  MovieServiceAdapter,
+  UserIntent,
+  WatchlistState,
+  Movie,
+  Achievement,
+  MovieStatistics,
+  EpisodeEntry,
+} from '../../types/domain';
 
 type Listener = (state: WatchlistState) => void;
 
 const INITIAL_ACHIEVEMENTS: Achievement[] = [
-  { id: 'first-blood', title: 'First Blood', description: 'Add your first movie to the collection.', iconName: 'Popcorn', unlocked: false, threshold: 1 },
-  { id: 'collector-novice', title: 'Collector Novice', description: 'Collect 5 movies.', iconName: 'Library', unlocked: false, threshold: 5 },
-  { id: 'genre-guru', title: 'Genre Guru', description: 'Collect 10 movies to become a guru.', iconName: 'Library', unlocked: false, threshold: 10 },
-  { id: 'film-fanatic', title: 'Film Fanatic', description: 'Collect 25 movies in your library.', iconName: 'Popcorn', unlocked: false, threshold: 25 },
-  { id: 'cinema-legend', title: 'Cinema Legend', description: 'Collect 50 movies in your library.', iconName: 'Library', unlocked: false, threshold: 50 },
-  { id: 'first-watched', title: 'First Watch', description: 'Mark your first movie as watched.', iconName: 'Popcorn', unlocked: false, threshold: 1 },
-  { id: 'rating-pro', title: 'Rating Pro', description: 'Rate 10 movies with a personal score.', iconName: 'Library', unlocked: false, threshold: 10 },
+  {
+    id: 'first-blood',
+    title: 'First Blood',
+    description: 'Add your first movie to the collection.',
+    iconName: 'Popcorn',
+    unlocked: false,
+    threshold: 1,
+  },
+  {
+    id: 'collector-novice',
+    title: 'Collector Novice',
+    description: 'Collect 5 movies.',
+    iconName: 'Library',
+    unlocked: false,
+    threshold: 5,
+  },
+  {
+    id: 'genre-guru',
+    title: 'Genre Guru',
+    description: 'Collect 10 movies to become a guru.',
+    iconName: 'Library',
+    unlocked: false,
+    threshold: 10,
+  },
+  {
+    id: 'film-fanatic',
+    title: 'Film Fanatic',
+    description: 'Collect 25 movies in your library.',
+    iconName: 'Popcorn',
+    unlocked: false,
+    threshold: 25,
+  },
+  {
+    id: 'cinema-legend',
+    title: 'Cinema Legend',
+    description: 'Collect 50 movies in your library.',
+    iconName: 'Library',
+    unlocked: false,
+    threshold: 50,
+  },
+  {
+    id: 'first-watched',
+    title: 'First Watch',
+    description: 'Mark your first movie as watched.',
+    iconName: 'Popcorn',
+    unlocked: false,
+    threshold: 1,
+  },
+  {
+    id: 'rating-pro',
+    title: 'Rating Pro',
+    description: 'Rate 10 movies with a personal score.',
+    iconName: 'Library',
+    unlocked: false,
+    threshold: 10,
+  },
 ];
 
 const INITIAL_STATISTICS: MovieStatistics = {
@@ -24,7 +81,7 @@ const INITIAL_STATISTICS: MovieStatistics = {
   byYear: [],
   thisYearCount: 0,
   allTimeCount: 0,
-  topTags: []
+  topTags: [],
 };
 
 const toNumber = (value: unknown): number => {
@@ -43,7 +100,7 @@ export class MovieConductor {
   private state: WatchlistState = {
     items: [],
     customLists: [],
-    achievements: INITIAL_ACHIEVEMENTS,
+    achievements: INITIAL_ACHIEVEMENTS.map((a) => ({ ...a, unlocked: false, unlockedAt: null })),
     statistics: INITIAL_STATISTICS,
     selectedMovie: null,
     status: 'idle',
@@ -100,10 +157,10 @@ export class MovieConductor {
       ...this.state,
       items: [],
       customLists: [],
-      achievements: INITIAL_ACHIEVEMENTS,
+      achievements: INITIAL_ACHIEVEMENTS.map((a) => ({ ...a, unlocked: false, unlockedAt: null })),
       statistics: INITIAL_STATISTICS,
       selectedMovie: null,
-      activeListId: null
+      activeListId: null,
     };
     this.notify();
   }
@@ -114,31 +171,71 @@ export class MovieConductor {
 
   public async dispatch(intent: UserIntent): Promise<void> {
     switch (intent.type) {
-      case 'LOAD_MOVIES': await this.handleLoadMovies(); break;
-      case 'SEARCH': await this.handleSearch(intent.payload); break;
-      case 'ADD_MOVIE': await this.handleAddMovie(intent.payload); break;
-      case 'REMOVE_MOVIE': await this.handleRemoveMovie(intent.payload); break;
-      case 'TOGGLE_WATCHED': await this.handleToggleWatched(intent.payload); break;
-      case 'TOGGLE_FAVORITE': await this.handleToggleFavorite(intent.payload); break;
-      case 'SET_FILTER': this.updateState({ filter: intent.payload, activeListId: null }); break;
-      case 'SELECT_MOVIE': await this.handleSelectMovie(intent.payload); break;
-      case 'CLOSE_DETAILS': this.updateState({ selectedMovie: null }); break;
-      case 'CREATE_LIST': await this.handleCreateList(intent.payload); break;
-      case 'DELETE_LIST': await this.handleDeleteList(intent.payload); break;
-      case 'ADD_TO_LIST': await this.handleAddMovieToList(intent.payload.listId, intent.payload.movie); break;
-      case 'SELECT_LIST': await this.handleSelectList(intent.payload); break;
-      case 'UPDATE_USER_RATING': await this.handleUpdateField(intent.payload.id, { userRating: intent.payload.userRating }); break;
-      case 'UPDATE_NOTES': await this.handleUpdateField(intent.payload.id, { notes: intent.payload.notes }); break;
-      case 'UPDATE_TAGS': await this.handleUpdateField(intent.payload.id, { tags: intent.payload.tags }); break;
-      case 'SET_TAG_FILTER': this.updateState({ tagFilter: intent.payload }); break;
-      case 'LOAD_TV_PROGRESS': await this.handleLoadTvProgress(); break;
-      case 'TOGGLE_EPISODE': await this.handleToggleEpisode(intent.payload); break;
-      case 'DIARY_ENTRY': await this.handleDiaryEntry(intent.payload); break;
+      case 'LOAD_MOVIES':
+        await this.handleLoadMovies();
+        break;
+      case 'SEARCH':
+        await this.handleSearch(intent.payload);
+        break;
+      case 'ADD_MOVIE':
+        await this.handleAddMovie(intent.payload);
+        break;
+      case 'REMOVE_MOVIE':
+        await this.handleRemoveMovie(intent.payload);
+        break;
+      case 'TOGGLE_WATCHED':
+        await this.handleToggleWatched(intent.payload);
+        break;
+      case 'TOGGLE_FAVORITE':
+        await this.handleToggleFavorite(intent.payload);
+        break;
+      case 'SET_FILTER':
+        this.updateState({ filter: intent.payload, activeListId: null });
+        break;
+      case 'SELECT_MOVIE':
+        await this.handleSelectMovie(intent.payload);
+        break;
+      case 'CLOSE_DETAILS':
+        this.updateState({ selectedMovie: null });
+        break;
+      case 'CREATE_LIST':
+        await this.handleCreateList(intent.payload);
+        break;
+      case 'DELETE_LIST':
+        await this.handleDeleteList(intent.payload);
+        break;
+      case 'ADD_TO_LIST':
+        await this.handleAddMovieToList(intent.payload.listId, intent.payload.movie);
+        break;
+      case 'SELECT_LIST':
+        await this.handleSelectList(intent.payload);
+        break;
+      case 'UPDATE_USER_RATING':
+        await this.handleUpdateField(intent.payload.id, { userRating: intent.payload.userRating });
+        break;
+      case 'UPDATE_NOTES':
+        await this.handleUpdateField(intent.payload.id, { notes: intent.payload.notes });
+        break;
+      case 'UPDATE_TAGS':
+        await this.handleUpdateField(intent.payload.id, { tags: intent.payload.tags });
+        break;
+      case 'SET_TAG_FILTER':
+        this.updateState({ tagFilter: intent.payload });
+        break;
+      case 'LOAD_TV_PROGRESS':
+        await this.handleLoadTvProgress();
+        break;
+      case 'TOGGLE_EPISODE':
+        await this.handleToggleEpisode(intent.payload);
+        break;
+      case 'DIARY_ENTRY':
+        await this.handleDiaryEntry(intent.payload);
+        break;
     }
   }
 
   private async handleUpdateField(id: string, patch: Partial<Movie>): Promise<void> {
-    const movie = this.state.items.find(m => m.id === id);
+    const movie = this.state.items.find((m) => m.id === id);
     if (!movie) {
       console.warn(`handleUpdateField: movie with id "${id}" not found for update`, patch);
       return;
@@ -147,13 +244,14 @@ export class MovieConductor {
     const previousState = {
       items: [...this.state.items],
       selectedMovie: this.state.selectedMovie ? { ...this.state.selectedMovie } : null,
-      statistics: { ...this.state.statistics }
+      statistics: { ...this.state.statistics },
     };
 
-    const updatedItems = this.state.items.map(m => m.id === id ? { ...m, ...patch } : m);
-    const updatedSelected = this.state.selectedMovie && this.state.selectedMovie.id === id
-      ? { ...this.state.selectedMovie, ...patch }
-      : this.state.selectedMovie;
+    const updatedItems = this.state.items.map((m) => (m.id === id ? { ...m, ...patch } : m));
+    const updatedSelected =
+      this.state.selectedMovie && this.state.selectedMovie.id === id
+        ? { ...this.state.selectedMovie, ...patch }
+        : this.state.selectedMovie;
 
     this.updateState({
       items: updatedItems,
@@ -183,16 +281,19 @@ export class MovieConductor {
 
   private async handleDeleteList(listId: string): Promise<void> {
     const oldLists = [...this.state.customLists];
-    this.updateState({ customLists: oldLists.filter(l => l.id !== listId) });
+    this.updateState({ customLists: oldLists.filter((l) => l.id !== listId) });
     try {
       await this.adapter.deleteList(listId);
     } catch (error) {
-      this.updateState({ customLists: oldLists, error: error instanceof Error ? error.message : 'Failed to delete list' });
+      this.updateState({
+        customLists: oldLists,
+        error: error instanceof Error ? error.message : 'Failed to delete list',
+      });
     }
   }
 
   private async handleAddMovieToList(listId: string, movie: Movie): Promise<void> {
-    const updatedLists = this.state.customLists.map(l => {
+    const updatedLists = this.state.customLists.map((l) => {
       if (l.id !== listId) return l;
       const currentItems: string[] = (l as any).items || [];
       if (currentItems.includes(movie.id)) return l;
@@ -203,16 +304,19 @@ export class MovieConductor {
     try {
       await this.adapter.addMovieToList(listId, movie);
     } catch (error) {
-      const rollback = this.state.customLists.map(l => {
+      const rollback = this.state.customLists.map((l) => {
         if (l.id !== listId) return l;
         const currentItems: string[] = (l as any).items || [];
         return {
           ...l,
-          items: currentItems.filter(id => id !== movie.id),
-          movieCount: Math.max((l.movieCount || 1) - 1, 0)
+          items: currentItems.filter((id) => id !== movie.id),
+          movieCount: Math.max((l.movieCount || 1) - 1, 0),
         };
       });
-      this.updateState({ customLists: rollback, error: error instanceof Error ? error.message : 'Failed to add to list' });
+      this.updateState({
+        customLists: rollback,
+        error: error instanceof Error ? error.message : 'Failed to add to list',
+      });
     }
   }
 
@@ -222,7 +326,10 @@ export class MovieConductor {
       const movies = await this.adapter.getListMovies(listId);
       this.updateState({ items: movies, status: 'idle' });
     } catch (error) {
-      this.updateState({ status: 'error', error: error instanceof Error ? error.message : 'Failed to load list items' });
+      this.updateState({
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Failed to load list items',
+      });
     }
   }
 
@@ -231,12 +338,24 @@ export class MovieConductor {
     this.updateState({ status: 'loading' });
     this.loadInFlight = (async () => {
       try {
-        const [movies, lists, episodes, diaryEntries] = await Promise.all([
+        const [movies, lists, episodes, diaryEntries, persistedAchievements] = await Promise.all([
           this.adapter.getTrending(),
           this.adapter.getLists(),
           this.adapter.loadEpisodeProgress(),
           this.adapter.getDiaryEntries(),
+          this.adapter.loadAchievements(),
         ]);
+
+        const persistedSet = new Set(persistedAchievements.map((a) => a.achievementId));
+        const persistedAtMap = new Map(
+          persistedAchievements.map((a) => [a.achievementId, a.unlockedAt]),
+        );
+        const achievements = INITIAL_ACHIEVEMENTS.map((a) => ({
+          ...a,
+          unlocked: persistedSet.has(a.id),
+          unlockedAt: persistedAtMap.get(a.id) ?? null,
+        }));
+
         this.updateState({
           items: movies,
           customLists: lists,
@@ -244,10 +363,13 @@ export class MovieConductor {
           diaryEntries,
           status: 'idle',
           statistics: this.calculateStatistics(movies),
-          achievements: this.checkAchievements(movies)
+          achievements,
         });
       } catch (error) {
-        this.updateState({ status: 'error', error: error instanceof Error ? error.message : 'Load failed' });
+        this.updateState({
+          status: 'error',
+          error: error instanceof Error ? error.message : 'Load failed',
+        });
       } finally {
         this.loadInFlight = null;
       }
@@ -261,7 +383,10 @@ export class MovieConductor {
       const results = await this.adapter.search(query);
       this.updateState({ items: results, status: 'idle' });
     } catch (error) {
-      this.updateState({ status: 'error', error: error instanceof Error ? error.message : 'Search failed' });
+      this.updateState({
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Search failed',
+      });
     }
   }
 
@@ -274,11 +399,13 @@ export class MovieConductor {
       }
       const added = await this.adapter.add(movie);
       const items = [added, ...this.state.items];
+      const { all: achievements, newlyUnlocked } = this.checkAchievements(items);
       this.updateState({
         items,
         statistics: this.calculateStatistics(items),
-        achievements: this.checkAchievements(items)
+        achievements,
       });
+      this.persistNewAchievements(newlyUnlocked);
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Add failed' });
     }
@@ -287,7 +414,7 @@ export class MovieConductor {
   private async handleRemoveMovie(id: string): Promise<void> {
     try {
       await this.adapter.delete(id);
-      const items = this.state.items.filter(m => m.id !== id);
+      const items = this.state.items.filter((m) => m.id !== id);
       this.updateState({ items, statistics: this.calculateStatistics(items) });
     } catch (error) {
       this.updateState({ error: error instanceof Error ? error.message : 'Remove failed' });
@@ -295,7 +422,7 @@ export class MovieConductor {
   }
 
   private async handleToggleWatched(id: string): Promise<void> {
-    const movie = this.state.items.find(m => m.id === id);
+    const movie = this.state.items.find((m) => m.id === id);
     if (!movie) {
       console.warn(`handleToggleWatched: movie with id "${id}" not found in state`);
       return;
@@ -304,12 +431,13 @@ export class MovieConductor {
     const watchedAt = nowWatched ? new Date().toISOString() : null;
     try {
       await this.adapter.update(id, { watched: nowWatched, watchedAt });
-      const updated = this.state.items.map(m =>
-        m.id === id ? { ...m, watched: nowWatched, watchedAt } : m
+      const updated = this.state.items.map((m) =>
+        m.id === id ? { ...m, watched: nowWatched, watchedAt } : m,
       );
-      this.updateState({ items: updated, statistics: this.calculateStatistics(updated) });
+      const { all: achievements, newlyUnlocked } = this.checkAchievements(updated);
+      this.updateState({ items: updated, statistics: this.calculateStatistics(updated), achievements });
+      this.persistNewAchievements(newlyUnlocked);
 
-      // Create diary entry when marking as watched
       if (nowWatched) {
         await this.handleDiaryEntry(movie);
       }
@@ -327,7 +455,7 @@ export class MovieConductor {
       watchedAt,
       id: movie.source === 'database' ? movie.id : crypto.randomUUID(),
       addedAt: watchedAt,
-      source: movie.source === 'database' ? 'database' : 'database' as const,
+      source: movie.source === 'database' ? 'database' : ('database' as const),
     };
 
     // Persist to diary_entries table
@@ -338,57 +466,71 @@ export class MovieConductor {
     }
 
     // Update in-memory state: add to items if not already there, or update
-    const exists = this.state.items.find(m =>
-      m.id === entry.id || (m.tmdbId && entry.tmdbId && m.tmdbId === entry.tmdbId)
+    const exists = this.state.items.find(
+      (m) => m.id === entry.id || (m.tmdbId && entry.tmdbId && m.tmdbId === entry.tmdbId),
     );
     let items: Movie[];
     if (exists) {
-      items = this.state.items.map(m =>
-        (m.id === exists.id || (m.tmdbId && entry.tmdbId && m.tmdbId === entry.tmdbId))
+      items = this.state.items.map((m) =>
+        m.id === exists.id || (m.tmdbId && entry.tmdbId && m.tmdbId === entry.tmdbId)
           ? { ...m, watched: true, watchedAt }
-          : m
+          : m,
       );
     } else {
       items = [entry, ...this.state.items];
     }
 
     // Add to diary entries list
-    const diaryEntries = [entry, ...this.state.diaryEntries.filter(d => d.id !== entry.id)];
+    const diaryEntries = [entry, ...this.state.diaryEntries.filter((d) => d.id !== entry.id)];
 
+    const { all: achievements, newlyUnlocked } = this.checkAchievements(items);
     this.updateState({
       items,
       diaryEntries,
       statistics: this.calculateStatistics(items),
-      achievements: this.checkAchievements(items),
+      achievements,
     });
+    this.persistNewAchievements(newlyUnlocked);
   }
 
   private async handleLoadTvProgress(): Promise<void> {
-    const tvShows = this.state.items.filter(m => m.mediaType === 'tv');
+    const tvShows = this.state.items.filter((m) => m.mediaType === 'tv');
     this.updateState({ tvShows });
   }
 
-  private async handleToggleEpisode(payload: { showId: number; season: number; episode: number }): Promise<void> {
+  private async handleToggleEpisode(payload: {
+    showId: number;
+    season: number;
+    episode: number;
+  }): Promise<void> {
     const existing = this.state.episodes.find(
-      e => e.tmdbId === payload.showId && e.seasonNumber === payload.season && e.episodeNumber === payload.episode
+      (e) =>
+        e.tmdbId === payload.showId &&
+        e.seasonNumber === payload.season &&
+        e.episodeNumber === payload.episode,
     );
     let updated: EpisodeEntry[];
     if (existing) {
-      updated = this.state.episodes.map(e =>
-        e.tmdbId === payload.showId && e.seasonNumber === payload.season && e.episodeNumber === payload.episode
+      updated = this.state.episodes.map((e) =>
+        e.tmdbId === payload.showId &&
+        e.seasonNumber === payload.season &&
+        e.episodeNumber === payload.episode
           ? { ...e, watched: !e.watched, watchedAt: !e.watched ? new Date().toISOString() : null }
-          : e
+          : e,
       );
     } else {
-      const show = this.state.items.find(m => m.tmdbId === payload.showId);
-      updated = [...this.state.episodes, {
-        tmdbId: payload.showId,
-        title: show?.title || '',
-        seasonNumber: payload.season,
-        episodeNumber: payload.episode,
-        watched: true,
-        watchedAt: new Date().toISOString(),
-      }];
+      const show = this.state.items.find((m) => m.tmdbId === payload.showId);
+      updated = [
+        ...this.state.episodes,
+        {
+          tmdbId: payload.showId,
+          title: show?.title || '',
+          seasonNumber: payload.season,
+          episodeNumber: payload.episode,
+          watched: true,
+          watchedAt: new Date().toISOString(),
+        },
+      ];
     }
     this.updateState({ episodes: updated });
 
@@ -401,25 +543,32 @@ export class MovieConductor {
   }
 
   private async handleToggleFavorite(id: string): Promise<void> {
-    const movie = this.state.items.find(m => m.id === id);
+    const movie = this.state.items.find((m) => m.id === id);
     if (!movie) return;
     try {
       await this.adapter.update(id, { favorite: !movie.favorite });
-      const updated = this.state.items.map(m => m.id === id ? { ...m, favorite: !m.favorite } : m);
+      const updated = this.state.items.map((m) =>
+        m.id === id ? { ...m, favorite: !m.favorite } : m,
+      );
       this.updateState({ items: updated, statistics: this.calculateStatistics(updated) });
     } catch (error) {
-      this.updateState({ error: error instanceof Error ? error.message : 'Toggle favorite failed' });
+      this.updateState({
+        error: error instanceof Error ? error.message : 'Toggle favorite failed',
+      });
     }
   }
 
   private async handleSelectMovie(id: string): Promise<void> {
     try {
       const localMovie =
-        this.state.items.find(m => m.id === id) ||
-        (await this.adapter.getById(id)) ||
-        null;
+        this.state.items.find((m) => m.id === id) || (await this.adapter.getById(id)) || null;
 
-      const tmdbId = localMovie?.tmdbId != null ? String(localMovie.tmdbId) : (localMovie?.source === 'database' ? null : id);
+      const tmdbId =
+        localMovie?.tmdbId != null
+          ? String(localMovie.tmdbId)
+          : localMovie?.source === 'database'
+            ? null
+            : id;
       const mediaType = localMovie?.mediaType;
 
       let details: Movie | null = null;
@@ -443,7 +592,10 @@ export class MovieConductor {
           userRating: localMovie.userRating ?? null,
           notes: localMovie.notes ?? null,
           tags: localMovie.tags ?? [],
-          genres: details.genres && details.genres.length > 0 ? details.genres : (localMovie.genres ?? []),
+          genres:
+            details.genres && details.genres.length > 0
+              ? details.genres
+              : (localMovie.genres ?? []),
         };
       }
 
@@ -465,7 +617,7 @@ export class MovieConductor {
     let thisYearCount = 0;
 
     for (const m of items) {
-      (m.genres || []).forEach(g => {
+      (m.genres || []).forEach((g) => {
         if (!g) return;
         genreCount.set(g, (genreCount.get(g) || 0) + 1);
       });
@@ -482,7 +634,7 @@ export class MovieConductor {
         if (Number(added) === currentYear) thisYearCount++;
       }
 
-      (m.tags || []).forEach(t => {
+      (m.tags || []).forEach((t) => {
         if (!t) return;
         tagCount.set(t, (tagCount.get(t) || 0) + 1);
       });
@@ -494,22 +646,26 @@ export class MovieConductor {
     }
 
     const sortDesc = <T extends { value?: number; count?: number }>(arr: T[]) =>
-      arr.sort((a, b) => ((b.value ?? b.count ?? 0) - (a.value ?? a.count ?? 0)));
+      arr.sort((a, b) => (b.value ?? b.count ?? 0) - (a.value ?? a.count ?? 0));
 
-    const byGenre = sortDesc(Array.from(genreCount.entries()).map(([name, value]) => ({ name, value })));
+    const byGenre = sortDesc(
+      Array.from(genreCount.entries()).map(([name, value]) => ({ name, value })),
+    );
     const byDecade = Array.from(decadeCount.entries())
       .map(([decade, count]) => ({ decade, count }))
       .sort((a, b) => a.decade.localeCompare(b.decade));
     const byYear = Array.from(yearCount.entries())
       .map(([year, count]) => ({ year, count }))
       .sort((a, b) => a.year.localeCompare(b.year));
-    const topTags = sortDesc(Array.from(tagCount.entries()).map(([name, value]) => ({ name, value })));
+    const topTags = sortDesc(
+      Array.from(tagCount.entries()).map(([name, value]) => ({ name, value })),
+    );
 
     return {
       totalMovies: items.length,
-      watchedCount: items.filter(m => m.watched).length,
+      watchedCount: items.filter((m) => m.watched).length,
       totalRuntimeMinutes: items.reduce((sum, m) => sum + (m.runtime || 0), 0),
-      favoriteCount: items.filter(m => m.favorite).length,
+      favoriteCount: items.filter((m) => m.favorite).length,
       byGenre: byGenre.slice(0, 8),
       byDecade,
       averageUserRating: ratedCount > 0 ? Number((ratingSum / ratedCount).toFixed(1)) : 0,
@@ -521,13 +677,21 @@ export class MovieConductor {
     };
   }
 
-  private checkAchievements(items: Movie[]): Achievement[] {
+  private checkAchievements(
+    items: Movie[],
+  ): { all: Achievement[]; newlyUnlocked: string[] } {
     const count = items.length;
-    const watchedCount = items.filter(m => m.watched).length;
-    const ratedCount = items.filter(m => typeof m.userRating === 'number' && m.userRating > 0).length;
+    const watchedCount = items.filter((m) => m.watched).length;
+    const ratedCount = items.filter(
+      (m) => typeof m.userRating === 'number' && m.userRating > 0,
+    ).length;
 
-    return INITIAL_ACHIEVEMENTS.map(a => {
-      let unlocked = false;
+    const previouslyUnlocked = new Set(
+      this.state.achievements.filter((a) => a.unlocked).map((a) => a.id),
+    );
+
+    const all = INITIAL_ACHIEVEMENTS.map((a) => {
+      let unlocked: boolean;
       switch (a.id) {
         case 'first-watched':
           unlocked = watchedCount >= a.threshold;
@@ -538,8 +702,19 @@ export class MovieConductor {
         default:
           unlocked = count >= a.threshold;
       }
-      return { ...a, unlocked };
+      const existing = this.state.achievements.find((sa) => sa.id === a.id);
+      return {
+        ...a,
+        unlocked,
+        unlockedAt: unlocked ? (existing?.unlockedAt ?? new Date().toISOString()) : null,
+      };
     });
+
+    const newlyUnlocked = all
+      .filter((a) => a.unlocked && !previouslyUnlocked.has(a.id))
+      .map((a) => a.id);
+
+    return { all, newlyUnlocked };
   }
 
   private updateState(updates: Partial<WatchlistState>): void {
@@ -547,8 +722,16 @@ export class MovieConductor {
     this.notify();
   }
 
+  private persistNewAchievements(newlyUnlocked: string[]): void {
+    for (const id of newlyUnlocked) {
+      this.adapter.saveAchievement(id).catch((err) => {
+        console.warn(`Failed to persist achievement "${id}":`, err);
+      });
+    }
+  }
+
   private notify(): void {
     const currentState = this.getState();
-    this.listeners.forEach(listener => listener(currentState));
+    this.listeners.forEach((listener) => listener(currentState));
   }
 }

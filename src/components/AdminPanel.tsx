@@ -40,12 +40,14 @@ export function AdminPanel() {
     }
   }, [authService]);
 
-  useEffect(() => { loadUsers(); }, [loadUsers]);
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
       await authService.adminUpdateUserRole(userId, newRole);
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole as Role } : u));
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole as Role } : u)));
     } catch (e: any) {
       setError(e?.message || 'Fehler beim Ändern der Rolle');
     }
@@ -55,7 +57,7 @@ export function AdminPanel() {
     if (!deleteConfirm) return;
     try {
       await authService.adminDeleteUser(deleteConfirm.id);
-      setUsers(prev => prev.filter(u => u.id !== deleteConfirm.id));
+      setUsers((prev) => prev.filter((u) => u.id !== deleteConfirm.id));
       setDeleteConfirm(null);
       setSuccessMsg('Benutzer gelöscht');
       setTimeout(() => setSuccessMsg(null), 3000);
@@ -94,7 +96,11 @@ export function AdminPanel() {
         <h2 className="text-xl font-bold text-app-text flex items-center gap-2">
           <Shield className="w-5 h-5 text-red-400" /> Benutzerverwaltung
         </h2>
-        <button onClick={loadUsers} disabled={loading} className="p-2 text-app-text-muted hover:text-app-text transition-colors">
+        <button
+          onClick={loadUsers}
+          disabled={loading}
+          className="p-2 text-app-text-muted hover:text-app-text transition-colors"
+        >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
@@ -102,7 +108,9 @@ export function AdminPanel() {
       {error && (
         <div className="bg-red-950/60 border border-red-800/50 text-red-200 p-3 rounded-xl text-sm">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">Schließen</button>
+          <button onClick={() => setError(null)} className="ml-2 underline">
+            Schließen
+          </button>
         </div>
       )}
       {successMsg && (
@@ -117,7 +125,7 @@ export function AdminPanel() {
         <div className="text-center py-8 text-app-text-muted">Keine Benutzer gefunden.</div>
       ) : (
         <div className="space-y-2">
-          {users.map(u => (
+          {users.map((u) => (
             <motion.div
               key={u.id}
               layout
@@ -127,12 +135,15 @@ export function AdminPanel() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-app-text truncate">{u.username || (u.email ? u.email.split('@')[0] : 'User ' + u.id.slice(0, 8))}</span>
+                  <span className="font-semibold text-app-text truncate">
+                    {u.username || (u.email ? u.email.split('@')[0] : 'User ' + u.id.slice(0, 8))}
+                  </span>
                   <RoleBadge role={u.role} />
                 </div>
                 <div className="text-xs text-app-text-muted truncate">{u.email}</div>
                 <div className="text-[10px] text-app-text-muted mt-0.5">
-                  Registriert: {formatDate(u.created_at)} · Letzter Login: {formatDate(u.last_login_at)}
+                  Registriert: {formatDate(u.created_at)} · Letzter Login:{' '}
+                  {formatDate(u.last_login_at)}
                 </div>
               </div>
 
@@ -140,11 +151,13 @@ export function AdminPanel() {
                 <div className="relative group">
                   <select
                     value={u.role}
-                    onChange={e => handleRoleChange(u.id, e.target.value)}
+                    onChange={(e) => handleRoleChange(u.id, e.target.value)}
                     className="appearance-none bg-app-secondary border border-app-border rounded-lg px-3 py-1.5 text-sm text-app-text cursor-pointer pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
-                    {ROLE_OPTIONS.map(r => (
-                      <option key={r} value={r}>{r}</option>
+                    {ROLE_OPTIONS.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-app-text-muted pointer-events-none" />
@@ -174,7 +187,10 @@ export function AdminPanel() {
       {/* Password Modal */}
       {passwordModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPasswordModal(null)} />
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setPasswordModal(null)}
+          />
           <motion.div
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
@@ -185,17 +201,24 @@ export function AdminPanel() {
             <input
               type="password"
               value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
+              onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Neues Passwort (min. 6 Zeichen)"
               minLength={6}
               className="auth-input-field mb-4"
               autoFocus
             />
             <div className="flex gap-2">
-              <button onClick={() => setPasswordModal(null)} className="flex-1 py-2.5 rounded-xl bg-app-secondary border border-app-border text-app-text font-medium transition-colors">
+              <button
+                onClick={() => setPasswordModal(null)}
+                className="flex-1 py-2.5 rounded-xl bg-app-secondary border border-app-border text-app-text font-medium transition-colors"
+              >
                 Abbrechen
               </button>
-              <button onClick={handlePasswordChange} disabled={newPassword.length < 6} className="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-bold transition-colors disabled:opacity-50">
+              <button
+                onClick={handlePasswordChange}
+                disabled={newPassword.length < 6}
+                className="flex-1 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-bold transition-colors disabled:opacity-50"
+              >
                 Speichern
               </button>
             </div>
@@ -206,7 +229,10 @@ export function AdminPanel() {
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setDeleteConfirm(null)}
+          />
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -218,17 +244,26 @@ export function AdminPanel() {
               </div>
               <h3 className="text-lg font-bold text-app-text">Benutzer löschen?</h3>
               <p className="text-sm text-app-text-muted mt-2">
-                <strong className="text-app-text">{deleteConfirm.username || 'User ' + deleteConfirm.id.slice(0, 8)}</strong>
-                <br />
-                ({deleteConfirm.email || 'Keine E-Mail'})
+                <strong className="text-app-text">
+                  {deleteConfirm.username || 'User ' + deleteConfirm.id.slice(0, 8)}
+                </strong>
+                <br />({deleteConfirm.email || 'Keine E-Mail'})
               </p>
-              <p className="text-xs text-red-400 mt-3">Alle Daten des Benutzers werden unwiderruflich gelöscht.</p>
+              <p className="text-xs text-red-400 mt-3">
+                Alle Daten des Benutzers werden unwiderruflich gelöscht.
+              </p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 rounded-xl bg-app-secondary border border-app-border text-app-text font-medium transition-colors hover:bg-app-secondary/80">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-2.5 rounded-xl bg-app-secondary border border-app-border text-app-text font-medium transition-colors hover:bg-app-secondary/80"
+              >
                 Abbrechen
               </button>
-              <button onClick={handleDeleteConfirm} className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold transition-colors">
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold transition-colors"
+              >
                 Löschen
               </button>
             </div>
@@ -246,7 +281,9 @@ function RoleBadge({ role }: { role: Role }) {
     user: 'bg-green-500/10 text-green-400 border-green-500/20',
   };
   return (
-    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${styles[role]}`}>
+    <span
+      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${styles[role]}`}
+    >
       {role}
     </span>
   );

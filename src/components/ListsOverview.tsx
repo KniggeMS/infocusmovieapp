@@ -26,7 +26,10 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
     const map = new Map<string, Movie[]>();
     for (const list of lists) {
       const movieIds = (list as any).items || [];
-      map.set(list.id, items.filter(m => movieIds.includes(m.id)));
+      map.set(
+        list.id,
+        items.filter((m) => movieIds.includes(m.id)),
+      );
     }
     return map;
   }, [lists, items]);
@@ -49,23 +52,25 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
 
   const handleAddToList = (movieId: string) => {
     if (!selectedList) return;
-    const movie = items.find(m => m.id === movieId);
+    const movie = items.find((m) => m.id === movieId);
     if (!movie) return;
     conductor.dispatch({ type: 'ADD_TO_LIST', payload: { listId: selectedList.id, movie } });
   };
 
   // ── Detailansicht einer Liste ──────────────────────────────────────────────
   if (selectedList) {
-    const currentList = lists.find(l => l.id === selectedList.id) ?? selectedList;
+    const currentList = lists.find((l) => l.id === selectedList.id) ?? selectedList;
     const currentMovieIds: string[] = (currentList as any).items || [];
-    const currentMovies = items.filter(m => currentMovieIds.includes(m.id));
+    const currentMovies = items.filter((m) => currentMovieIds.includes(m.id));
 
-    const filteredLibrary = addSearch.length > 1
-      ? items.filter(m =>
-          !currentMovieIds.includes(m.id) &&
-          m.title.toLowerCase().includes(addSearch.toLowerCase())
-        )
-      : [];
+    const filteredLibrary =
+      addSearch.length > 1
+        ? items.filter(
+            (m) =>
+              !currentMovieIds.includes(m.id) &&
+              m.title.toLowerCase().includes(addSearch.toLowerCase()),
+          )
+        : [];
 
     return (
       <div className="p-4 pb-24 space-y-4">
@@ -77,8 +82,12 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
           >
             ← Zurück
           </button>
-          <h2 className="text-lg font-semibold text-app-text flex-1 truncate">{currentList.name}</h2>
-          <span className="text-xs text-app-text-muted flex-shrink-0">{currentMovies.length} Filme</span>
+          <h2 className="text-lg font-semibold text-app-text flex-1 truncate">
+            {currentList.name}
+          </h2>
+          <span className="text-xs text-app-text-muted flex-shrink-0">
+            {currentMovies.length} Filme
+          </span>
         </div>
 
         {/* Suchfeld zum Hinzufügen */}
@@ -88,12 +97,15 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
             <input
               type="text"
               value={addSearch}
-              onChange={e => setAddSearch(e.target.value)}
+              onChange={(e) => setAddSearch(e.target.value)}
               placeholder="Film aus Bibliothek hinzufügen…"
               className="flex-1 bg-transparent text-sm text-app-text placeholder-app-text-muted outline-none"
             />
             {addSearch && (
-              <button onClick={() => setAddSearch('')} className="text-app-text-muted hover:text-app-text">
+              <button
+                onClick={() => setAddSearch('')}
+                className="text-app-text-muted hover:text-app-text"
+              >
                 <X className="w-4 h-4" />
               </button>
             )}
@@ -101,10 +113,13 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
 
           {filteredLibrary.length > 0 && (
             <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-app-secondary border border-app-border rounded-xl shadow-lg max-h-56 overflow-y-auto">
-              {filteredLibrary.map(movie => (
+              {filteredLibrary.map((movie) => (
                 <button
                   key={movie.id}
-                  onClick={() => { handleAddToList(movie.id); setAddSearch(''); }}
+                  onClick={() => {
+                    handleAddToList(movie.id);
+                    setAddSearch('');
+                  }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 transition-colors text-left"
                 >
                   {movie.posterPath ? (
@@ -120,7 +135,9 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-app-text truncate">{movie.title}</p>
-                    <p className="text-xs text-app-text-muted">{movie.releaseDate?.split('-')[0]}</p>
+                    <p className="text-xs text-app-text-muted">
+                      {movie.releaseDate?.split('-')[0]}
+                    </p>
                   </div>
                   <Plus className="w-4 h-4 text-blue-400 flex-shrink-0" />
                 </button>
@@ -134,11 +151,13 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Film className="w-12 h-12 text-app-text-muted opacity-30 mb-3" />
             <p className="text-app-text-muted text-sm">Noch keine Filme in dieser Liste</p>
-            <p className="text-app-text-muted text-xs mt-1">Suche oben nach Filmen aus deiner Bibliothek</p>
+            <p className="text-app-text-muted text-xs mt-1">
+              Suche oben nach Filmen aus deiner Bibliothek
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
-            {currentMovies.map(movie => (
+            {currentMovies.map((movie) => (
               <motion.div
                 key={movie.id}
                 layout
@@ -161,7 +180,8 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-app-text truncate">{movie.title}</p>
                   <p className="text-xs text-app-text-muted">
-                    {movie.mediaType === 'tv' ? 'Serie' : 'Film'} · {movie.releaseDate?.split('-')[0] || 'N/A'}
+                    {movie.mediaType === 'tv' ? 'Serie' : 'Film'} ·{' '}
+                    {movie.releaseDate?.split('-')[0] || 'N/A'}
                   </p>
                 </div>
                 <button
@@ -204,7 +224,9 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
   return (
     <div className="p-4 pb-24 space-y-3">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-base font-semibold text-app-text">{t('nav.lists')} ({lists.length})</h2>
+        <h2 className="text-base font-semibold text-app-text">
+          {t('nav.lists')} ({lists.length})
+        </h2>
         <button
           onClick={() => setShowCreation(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 text-blue-400 rounded-xl text-xs hover:bg-blue-500/30 transition-all"
@@ -227,16 +249,16 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
           >
-            <GlassCard
-              onClick={() => handleOpenList(list)}
-              className="p-3 cursor-pointer"
-            >
+            <GlassCard onClick={() => handleOpenList(list)} className="p-3 cursor-pointer">
               <div className="flex items-center gap-3">
                 {/* Poster-Stack */}
                 <div className="flex -space-x-2 flex-shrink-0">
                   {previewMovies.slice(0, 3).length > 0 ? (
-                    previewMovies.slice(0, 3).map(m => (
-                      <div key={m.id} className="w-10 h-14 rounded-lg overflow-hidden border-2 border-app-bg flex-shrink-0">
+                    previewMovies.slice(0, 3).map((m) => (
+                      <div
+                        key={m.id}
+                        className="w-10 h-14 rounded-lg overflow-hidden border-2 border-app-bg flex-shrink-0"
+                      >
                         {m.posterPath ? (
                           <img
                             src={`https://image.tmdb.org/t/p/w92${m.posterPath}`}
@@ -261,7 +283,9 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-app-text text-sm truncate">{list.name}</p>
                   {(list as any).description && (
-                    <p className="text-xs text-app-text-muted truncate">{(list as any).description}</p>
+                    <p className="text-xs text-app-text-muted truncate">
+                      {(list as any).description}
+                    </p>
                   )}
                   <p className="text-xs text-app-text-muted mt-0.5">
                     {(list as any).movieCount || previewMovies.length} Filme
@@ -271,7 +295,10 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
                 {/* Aktionen */}
                 <div className="flex flex-col gap-1">
                   <button
-                    onClick={(e) => { e.stopPropagation(); setSharingList(list); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSharingList(list);
+                    }}
                     className="p-2 text-app-text-muted hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all"
                     title="Teilen"
                   >
@@ -291,12 +318,7 @@ export function ListsOverview({ lists, items, conductor, onSelectList }: ListsOv
         );
       })}
 
-      {sharingList && (
-        <ListShareModal
-          list={sharingList}
-          onClose={() => setSharingList(null)}
-        />
-      )}
+      {sharingList && <ListShareModal list={sharingList} onClose={() => setSharingList(null)} />}
     </div>
   );
 }

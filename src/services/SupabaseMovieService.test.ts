@@ -16,7 +16,7 @@ describe('SupabaseMovieService', () => {
     vi.stubGlobal('import.meta.env', {
       VITE_SUPABASE_URL: 'https://mock.supabase.co',
       VITE_SUPABASE_ANON_KEY: 'mock-key',
-      VITE_TMDB_API_KEY: 'mock-tmdb-key'
+      VITE_TMDB_API_KEY: 'mock-tmdb-key',
     });
 
     // Mock global fetch
@@ -34,7 +34,7 @@ describe('SupabaseMovieService', () => {
     (global.fetch as any).mockResolvedValue({
       ok: false,
       status: 401,
-      json: async () => ({ status_message: 'Invalid API key' })
+      json: async () => ({ status_message: 'Invalid API key' }),
     });
 
     await expect(service.getMovieDetails('123')).rejects.toThrow('TMDB Error 401: Invalid API key');
@@ -49,8 +49,8 @@ describe('SupabaseMovieService', () => {
         title: 'Test Movie',
         // Missing runtime, overview, etc. to test fallbacks
         credits: { crew: [], cast: [] },
-        'watch/providers': { results: {} }
-      })
+        'watch/providers': { results: {} },
+      }),
     });
 
     const result = await service.getMovieDetails('123');
@@ -73,8 +73,8 @@ describe('SupabaseMovieService', () => {
         overview: 'Legal drama',
         credits: { crew: [], cast: [] },
         'watch/providers': { results: {} },
-        episode_run_time: [42]
-      })
+        episode_run_time: [42],
+      }),
     });
 
     const result = await service.getMovieDetails('999', 'tv');

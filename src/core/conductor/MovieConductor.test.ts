@@ -4,7 +4,15 @@ import { MovieServiceAdapter, Movie } from '../../types/domain';
 
 // Mock Implementation of the Adapter
 const mockMovies: Movie[] = [
-  { id: '1', title: 'Test Movie', posterPath: null, runtime: 120, releaseDate: '2025-01-01', overview: 'Test', voteAverage: 8.5 }
+  {
+    id: '1',
+    title: 'Test Movie',
+    posterPath: null,
+    runtime: 120,
+    releaseDate: '2025-01-01',
+    overview: 'Test',
+    voteAverage: 8.5,
+  },
 ];
 
 const mockAdapter: MovieServiceAdapter = {
@@ -26,6 +34,8 @@ const mockAdapter: MovieServiceAdapter = {
   loadEpisodeProgress: vi.fn().mockResolvedValue([]),
   saveDiaryEntry: vi.fn().mockResolvedValue(undefined),
   getDiaryEntries: vi.fn().mockResolvedValue([]),
+  loadAchievements: vi.fn().mockResolvedValue([]),
+  saveAchievement: vi.fn().mockResolvedValue(undefined),
 };
 
 describe('MovieConductor', () => {
@@ -56,11 +66,11 @@ describe('MovieConductor', () => {
 
     // 3. Wait for all promises to resolve
     await Promise.all([
-      dispatchPromise1, 
-      dispatchPromise2, 
-      dispatchPromise3, 
-      dispatchPromise4, 
-      dispatchPromise5
+      dispatchPromise1,
+      dispatchPromise2,
+      dispatchPromise3,
+      dispatchPromise4,
+      dispatchPromise5,
     ]);
 
     // 4. Verification: Adapter should be called EXACTLY ONCE
@@ -75,7 +85,7 @@ describe('MovieConductor', () => {
     // Setup error mock
     const errorAdapter = {
       ...mockAdapter,
-      getTrending: vi.fn().mockRejectedValue(new Error('Network Error'))
+      getTrending: vi.fn().mockRejectedValue(new Error('Network Error')),
     };
     const errorConductor = new MovieConductor(errorAdapter);
 
@@ -98,16 +108,18 @@ describe('MovieConductor', () => {
       runtime: 100,
       releaseDate: '2020-01-01',
       overview: 'Dup',
-      voteAverage: 5
+      voteAverage: 5,
     };
 
     // 2. Action: Try to add it
     await conductor.dispatch({ type: 'ADD_MOVIE', payload: duplicateMovie });
 
     // 3. Assertions
-    expect(mockAdapter.exists).toHaveBeenCalledWith(expect.objectContaining({ title: 'Existing Movie' }));
+    expect(mockAdapter.exists).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Existing Movie' }),
+    );
     expect(mockAdapter.add).not.toHaveBeenCalled();
-    
+
     const state = conductor.getState();
     expect(state.items).not.toContainEqual(expect.objectContaining({ title: 'Existing Movie' }));
     expect(state.error).toBe('Movie "Existing Movie" already exists!');
@@ -117,9 +129,9 @@ describe('MovieConductor', () => {
     it('should unlock "First Blood" achievement after adding a movie', async () => {
       // 1. Initial State Check
       let state = conductor.getState();
-      const firstBlood = state.achievements.find(a => a.id === 'first-blood');
-      const novice = state.achievements.find(a => a.id === 'collector-novice');
-      
+      const firstBlood = state.achievements.find((a) => a.id === 'first-blood');
+      const novice = state.achievements.find((a) => a.id === 'collector-novice');
+
       expect(firstBlood?.unlocked).toBe(false);
       expect(novice?.unlocked).toBe(false);
 
@@ -131,7 +143,7 @@ describe('MovieConductor', () => {
         runtime: 120,
         releaseDate: '2025-01-01',
         overview: 'Testing achievements',
-        voteAverage: 10
+        voteAverage: 10,
       };
       mockAdapter.exists = vi.fn().mockResolvedValue(false);
       mockAdapter.add = vi.fn().mockResolvedValue({ ...testMovie, id: 'uuid-101' });
@@ -141,27 +153,103 @@ describe('MovieConductor', () => {
 
       // 4. Assertions
       state = conductor.getState();
-      const firstBloodAfter = state.achievements.find(a => a.id === 'first-blood');
-      const noviceAfter = state.achievements.find(a => a.id === 'collector-novice');
+      const firstBloodAfter = state.achievements.find((a) => a.id === 'first-blood');
+      const noviceAfter = state.achievements.find((a) => a.id === 'collector-novice');
 
       expect(firstBloodAfter?.unlocked).toBe(true); // Should be unlocked now!
       expect(noviceAfter?.unlocked).toBe(false); // Still locked (only 1 movie)
     });
 
     it('should unlock "Collector Novice" achievement after adding 5 movies', async () => {
-        // We simulate adding multiple movies by manually setting items and calling load
-        // because dispatching 5 ADD_MOVIE calls would be slower and redundant for this logic check.
-        // Or we just mock trending to return 5 movies.
-        
-        mockAdapter.getTrending = vi.fn().mockResolvedValue([
-            { id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }
+      mockAdapter.loadAchievements = vi.fn().mockResolvedValue([
+        { achievementId: 'first-blood', unlockedAt: '2026-01-15T10:00:00Z' },
+        { achievementId: 'collector-novice', unlockedAt: '2026-02-20T14:30:00Z' },
+      ]);
+      mockAdapter.getTrending = vi
+        .fn()
+        .mockResolvedValue([
+          { id: '1' },
+          { id: '2' },
+          { id: '3' },
+          { id: '4' },
+          { id: '5' },
         ] as any);
 
-        await conductor.dispatch({ type: 'LOAD_MOVIES' });
+      await conductor.dispatch({ type: 'LOAD_MOVIES' });
 
-        const state = conductor.getState();
-        const novice = state.achievements.find(a => a.id === 'collector-novice');
-        expect(novice?.unlocked).toBe(true);
+      const state = conductor.getState();
+      const novice = state.achievements.find((a) => a.id === 'collector-novice');
+      expect(novice?.unlocked).toBe(true);
+      expect(novice?.unlockedAt).toBe('2026-02-20T14:30:00Z');
+    });
+
+    it('should load persisted achievements from DB on LOAD_MOVIES', async () => {
+      mockAdapter.loadAchievements = vi.fn().mockResolvedValue([
+        { achievementId: 'first-blood', unlockedAt: '2026-01-15T10:00:00Z' },
+        { achievementId: 'collector-novice', unlockedAt: '2026-02-20T14:30:00Z' },
+      ]);
+
+      await conductor.dispatch({ type: 'LOAD_MOVIES' });
+
+      const state = conductor.getState();
+      const firstBlood = state.achievements.find((a) => a.id === 'first-blood');
+      const novice = state.achievements.find((a) => a.id === 'collector-novice');
+      const guru = state.achievements.find((a) => a.id === 'genre-guru');
+
+      expect(firstBlood?.unlocked).toBe(true);
+      expect(firstBlood?.unlockedAt).toBe('2026-01-15T10:00:00Z');
+      expect(novice?.unlocked).toBe(true);
+      expect(novice?.unlockedAt).toBe('2026-02-20T14:30:00Z');
+      expect(guru?.unlocked).toBe(false);
+    });
+
+    it('should persist newly unlocked achievements via adapter', async () => {
+      // Start with empty achievements, add 1 movie → first-blood should unlock and persist
+      mockAdapter.loadAchievements = vi.fn().mockResolvedValue([]);
+      await conductor.dispatch({ type: 'LOAD_MOVIES' });
+
+      const testMovie: Movie = {
+        id: '101',
+        title: 'Persist Test',
+        posterPath: null,
+        runtime: 120,
+        releaseDate: '2025-01-01',
+        overview: 'Test',
+        voteAverage: 8,
+      };
+      mockAdapter.exists = vi.fn().mockResolvedValue(false);
+      mockAdapter.add = vi.fn().mockResolvedValue({ ...testMovie, id: 'uuid-101' });
+
+      await conductor.dispatch({ type: 'ADD_MOVIE', payload: testMovie });
+
+      expect(mockAdapter.saveAchievement).toHaveBeenCalledWith('first-blood');
+    });
+
+    it('should not re-persist already unlocked achievements', async () => {
+      const freshAdapter: MovieServiceAdapter = {
+        ...mockAdapter,
+        loadAchievements: vi.fn().mockResolvedValue([
+          { achievementId: 'first-blood', unlockedAt: '2026-01-15T10:00:00Z' },
+        ]),
+        getTrending: vi.fn().mockResolvedValue([{ id: '1' }, { id: '2' }] as any),
+        exists: vi.fn().mockResolvedValue(false),
+        add: vi.fn().mockResolvedValue({ id: 'uuid-new', title: 'New' } as Movie),
+        saveAchievement: vi.fn().mockResolvedValue(undefined),
+      };
+      const freshConductor = new MovieConductor(freshAdapter);
+
+      await freshConductor.dispatch({ type: 'LOAD_MOVIES' });
+      const firstBlood = freshConductor
+        .getState()
+        .achievements.find((a) => a.id === 'first-blood');
+      expect(firstBlood?.unlocked).toBe(true);
+
+      await freshConductor.dispatch({
+        type: 'ADD_MOVIE',
+        payload: { id: 'x', title: 'X', posterPath: null, releaseDate: null, overview: null, voteAverage: null },
+      });
+
+      expect(freshAdapter.saveAchievement).not.toHaveBeenCalled();
     });
   });
 
@@ -203,7 +291,14 @@ describe('MovieConductor', () => {
     it('should load episode progress from adapter on LOAD_MOVIES', async () => {
       // Arrange
       const storedEpisodes = [
-        { tmdbId: 123, title: 'Test Series', seasonNumber: 1, episodeNumber: 1, watched: true, watchedAt: '2025-01-01T00:00:00Z' },
+        {
+          tmdbId: 123,
+          title: 'Test Series',
+          seasonNumber: 1,
+          episodeNumber: 1,
+          watched: true,
+          watchedAt: '2025-01-01T00:00:00Z',
+        },
       ];
       mockAdapter.loadEpisodeProgress = vi.fn().mockResolvedValue(storedEpisodes);
 
@@ -229,16 +324,23 @@ describe('MovieConductor', () => {
         mediaType: 'tv',
       };
       mockAdapter.getTrending = vi.fn().mockResolvedValue([tvShow]);
+      mockAdapter.loadEpisodeProgress = vi.fn().mockResolvedValue([]);
       (mockAdapter.saveEpisodeProgress as any).mockClear();
       await conductor.dispatch({ type: 'LOAD_MOVIES' });
 
       // Toggle ON
-      await conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId: 456, season: 1, episode: 1 } });
+      await conductor.dispatch({
+        type: 'TOGGLE_EPISODE',
+        payload: { showId: 456, season: 1, episode: 1 },
+      });
       expect(mockAdapter.saveEpisodeProgress).toHaveBeenCalledTimes(1);
       expect((mockAdapter.saveEpisodeProgress as any).mock.calls[0][0][0].watched).toBe(true);
 
       // Toggle OFF
-      await conductor.dispatch({ type: 'TOGGLE_EPISODE', payload: { showId: 456, season: 1, episode: 1 } });
+      await conductor.dispatch({
+        type: 'TOGGLE_EPISODE',
+        payload: { showId: 456, season: 1, episode: 1 },
+      });
       expect(mockAdapter.saveEpisodeProgress).toHaveBeenCalledTimes(2);
       expect((mockAdapter.saveEpisodeProgress as any).mock.calls[1][0][0].watched).toBe(false);
     });
@@ -276,14 +378,24 @@ describe('MovieConductor', () => {
       // State should reflect the diary entry
       const state = conductor.getState();
       expect(state.diaryEntries.length).toBeGreaterThanOrEqual(1);
-      const entry = state.diaryEntries.find(e => e.tmdbId === 789);
+      const entry = state.diaryEntries.find((e) => e.tmdbId === 789);
       expect(entry).toBeDefined();
       expect(entry!.watched).toBe(true);
     });
 
     it('should load diary entries from adapter on LOAD_MOVIES', async () => {
       const diaryMovies = [
-        { id: 'd1', tmdbId: 111, title: 'Watched Film', posterPath: null, releaseDate: '2022-01-01', mediaType: 'movie', source: 'database' as const, watched: true, watchedAt: '2025-03-01T00:00:00Z' },
+        {
+          id: 'd1',
+          tmdbId: 111,
+          title: 'Watched Film',
+          posterPath: null,
+          releaseDate: '2022-01-01',
+          mediaType: 'movie',
+          source: 'database' as const,
+          watched: true,
+          watchedAt: '2025-03-01T00:00:00Z',
+        },
       ];
       mockAdapter.getDiaryEntries = vi.fn().mockResolvedValue(diaryMovies);
 

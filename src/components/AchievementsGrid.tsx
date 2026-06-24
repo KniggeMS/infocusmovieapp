@@ -18,10 +18,13 @@ function calculateLevel(count: number) {
 }
 
 export function AchievementsGrid({ achievements }: AchievementsGridProps) {
-  const unlockedCount = useMemo(() => achievements.filter(a => a.unlocked).length, [achievements]);
+  const unlockedCount = useMemo(
+    () => achievements.filter((a) => a.unlocked).length,
+    [achievements],
+  );
   const totalCount = achievements.length;
   const movieCount = useMemo(() => {
-    const unlockedThresholds = achievements.filter(a => a.unlocked).map(a => a.threshold);
+    const unlockedThresholds = achievements.filter((a) => a.unlocked).map((a) => a.threshold);
     return Math.max(...unlockedThresholds, 0);
   }, [achievements]);
 
@@ -47,7 +50,9 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
             <p className="text-xs text-app-text-muted">{xp} XP gesamt</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-app-text-muted">{unlockedCount}/{totalCount} Erfolge</p>
+            <p className="text-xs text-app-text-muted">
+              {unlockedCount}/{totalCount} Erfolge
+            </p>
             <p className="text-xs text-app-text-muted">{movieCount} Filme</p>
           </div>
         </div>
@@ -58,7 +63,9 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
           />
         </div>
         <div className="flex justify-between text-xs text-app-text-muted">
-          <span>{currentLevelXp} / {XP_PER_LEVEL} XP zum nächsten Level</span>
+          <span>
+            {currentLevelXp} / {XP_PER_LEVEL} XP zum nächsten Level
+          </span>
           <span>Level {level + 1}</span>
         </div>
       </div>
@@ -78,9 +85,15 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
           >
             <div className="relative w-10 h-10">
               {a.iconName === 'Popcorn' ? (
-                <Popcorn size={40} className={a.unlocked ? 'text-accent-color' : 'text-app-text-muted'} />
+                <Popcorn
+                  size={40}
+                  className={a.unlocked ? 'text-accent-color' : 'text-app-text-muted'}
+                />
               ) : (
-                <Trophy size={40} className={a.unlocked ? 'text-yellow-400' : 'text-app-text-muted'} />
+                <Trophy
+                  size={40}
+                  className={a.unlocked ? 'text-yellow-400' : 'text-app-text-muted'}
+                />
               )}
               {!a.unlocked && (
                 <div className="absolute inset-0 flex items-center justify-center bg-app-bg/60 rounded">
@@ -88,13 +101,25 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
                 </div>
               )}
               {a.unlocked && (
-                <Star size={14} className="absolute -top-1 -right-1 text-yellow-400 fill-yellow-400" />
+                <Star
+                  size={14}
+                  className="absolute -top-1 -right-1 text-yellow-400 fill-yellow-400"
+                />
               )}
             </div>
 
             <div>
               <p className="text-xs font-semibold text-app-text leading-tight">{a.title}</p>
               <p className="text-[11px] text-app-text-muted mt-0.5 leading-snug">{a.description}</p>
+              {a.unlocked && a.unlockedAt && (
+                <p className="text-[10px] text-accent-color mt-1">
+                  {new Date(a.unlockedAt).toLocaleDateString('de-DE', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </p>
+              )}
             </div>
 
             {a.unlocked && (

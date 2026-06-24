@@ -12,7 +12,7 @@ export function useExternalRatings(
   tmdbId: number | undefined,
   title: string,
   mediaType: 'movie' | 'tv' = 'movie',
-  voteAverage: number | null
+  voteAverage: number | null,
 ): { ratings: ExternalRatings; loading: boolean } {
   const [ratings, setRatings] = useState<ExternalRatings>({
     tmdb: voteAverage,
@@ -62,7 +62,9 @@ export function useExternalRatings(
     };
 
     fetchRatings();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [tmdbId, title, mediaType, voteAverage]);
 
   return { ratings, loading };

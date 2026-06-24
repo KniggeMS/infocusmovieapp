@@ -12,9 +12,9 @@ describe('Theme System Foundation', () => {
     expect(content).toContain('--text-main:');
     
     // Check for theme selectors
-    expect(content).toContain(':root[data-theme="light"]');
-    expect(content).toContain(':root[data-theme="dark"]');
-    expect(content).toContain(':root[data-theme="glass"]');
+    expect(content).toContain(":root[data-theme='light']");
+    expect(content).toContain(":root[data-theme='noir']");
+    expect(content).toContain(":root[data-theme='glass']");
   });
 
   it('should have tailwind config mapping semantic colors', () => {

@@ -26,22 +26,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type }]);
 
     setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
+      setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3000);
   }, []);
 
   const removeToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
       <div className="fixed bottom-20 left-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none">
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <div
             key={toast.id}
             className={`

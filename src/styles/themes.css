@@ -10,7 +10,7 @@
   --border-color: #262626;
   --accent-color: #e50914;
   --accent-glow: #60a5fa;
-  
+
   /* Frosted Glass Tokens */
   --glass-bg: rgba(20, 20, 20, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
@@ -29,10 +29,14 @@
   --sheet-blur: 40px;
 
   /* Smooth theme transitions */
-  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease,
+    border-color 0.5s ease,
+    box-shadow 0.5s ease;
 }
 
-:root[data-theme="light"] {
+:root[data-theme='light'] {
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
   --bg-card: #ffffff;
@@ -40,7 +44,7 @@
   --text-muted: #64748b;
   --border-color: #e2e8f0;
   --accent-color: #3b82f6;
-  
+
   --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.05);
   --glass-blur: 20px;
@@ -54,7 +58,7 @@
   --sheet-blur: 40px;
 }
 
-:root[data-theme="noir"] {
+:root[data-theme='noir'] {
   --bg-primary: #000000;
   --bg-secondary: #0a0a0a;
   --bg-card: #111111;
@@ -62,7 +66,7 @@
   --text-muted: #737373;
   --border-color: #262626;
   --accent-color: #dc2626;
-  
+
   --glass-bg: rgba(0, 0, 0, 0.8);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-blur: 24px;
@@ -76,7 +80,7 @@
   --sheet-blur: 40px;
 }
 
-:root[data-theme="glass"] {
+:root[data-theme='glass'] {
   --bg-primary: #020617;
   --bg-secondary: rgba(30, 41, 59, 0.5);
   --bg-card: rgba(30, 41, 59, 0.3);
@@ -84,7 +88,7 @@
   --text-muted: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.1);
   --accent-color: #8b5cf6;
-  
+
   --glass-bg: rgba(15, 23, 42, 0.6);
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-blur: 28px;
@@ -98,7 +102,7 @@
   --sheet-blur: 40px;
 }
 
-:root[data-theme="neon"] {
+:root[data-theme='neon'] {
   --bg-primary: #0d0221;
   --bg-secondary: #190e38;
   --bg-card: #241744;
@@ -106,7 +110,7 @@
   --text-muted: #b1a1d1;
   --border-color: #3d2b6b;
   --accent-color: #00f2ff;
-  
+
   --glass-bg: rgba(13, 2, 33, 0.7);
   --glass-border: rgba(0, 242, 255, 0.2);
   --glass-blur: 24px;

@@ -16,7 +16,9 @@ export function useNotifications() {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data } = await supabase
@@ -36,14 +38,16 @@ export function useNotifications() {
           user_id: n.user_id,
         }));
         setNotifications(mapped);
-        setUnreadCount(mapped.filter(n => !n.read_at).length);
+        setUnreadCount(mapped.filter((n) => !n.read_at).length);
       }
     };
     load();
   }, []);
 
   const markAllRead = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     await supabase
@@ -52,7 +56,9 @@ export function useNotifications() {
       .eq('user_id', user.id)
       .is('read_at', null);
 
-    setNotifications(prev => prev.map(n => ({ ...n, read_at: n.read_at ?? new Date().toISOString() })));
+    setNotifications((prev) =>
+      prev.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() })),
+    );
     setUnreadCount(0);
   };
 

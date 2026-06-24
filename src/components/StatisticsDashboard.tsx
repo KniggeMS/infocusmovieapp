@@ -1,7 +1,15 @@
 import React, { useMemo } from 'react';
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
 } from 'recharts';
 import { Movie } from '../types/domain';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +20,16 @@ interface StatisticsDashboardProps {
   movies: Movie[];
 }
 
-const GENRE_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#f97316', '#ef4444'];
+const GENRE_COLORS = [
+  '#3b82f6',
+  '#8b5cf6',
+  '#ec4899',
+  '#f59e0b',
+  '#10b981',
+  '#06b6d4',
+  '#f97316',
+  '#ef4444',
+];
 
 function useChartColors() {
   return useMemo(() => {
@@ -39,29 +56,33 @@ export const StatisticsDashboard = React.memo(({ movies }: StatisticsDashboardPr
   const colors = useChartColors();
 
   const stats = useMemo(() => {
-    const watchedMovies = movies.filter(m => m.watched);
+    const watchedMovies = movies.filter((m) => m.watched);
     const runtimeMinutes = watchedMovies.reduce((sum, m) => sum + getRuntimeMinutes(m), 0);
     const totalHours = roundHours(runtimeMinutes);
-    const avgRating = movies.reduce((sum, m) => sum + (m.userRating || 0), 0) / (movies.filter(m => m.userRating).length || 1);
+    const avgRating =
+      movies.reduce((sum, m) => sum + (m.userRating || 0), 0) /
+      (movies.filter((m) => m.userRating).length || 1);
 
     const genreMap = new Map<string, number>();
-    movies.forEach(m => (m.genres || []).forEach(g => {
-      if (g) genreMap.set(g, (genreMap.get(g) || 0) + 1);
-    }));
+    movies.forEach((m) =>
+      (m.genres || []).forEach((g) => {
+        if (g) genreMap.set(g, (genreMap.get(g) || 0) + 1);
+      }),
+    );
     const genreData = Array.from(genreMap.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 8);
 
     const ratingBuckets = Array.from({ length: 10 }, (_, i) => ({ name: `${i + 1}`, value: 0 }));
-    movies.forEach(m => {
+    movies.forEach((m) => {
       if (m.userRating && m.userRating >= 1 && m.userRating <= 10) {
         ratingBuckets[Math.floor(m.userRating) - 1].value++;
       }
     });
 
     const decadeMap = new Map<string, number>();
-    movies.forEach(m => {
+    movies.forEach((m) => {
       const year = m.releaseDate?.slice(0, 4);
       if (year && /^\d{4}$/.test(year)) {
         const decade = `${year.slice(0, 3)}0s`;
@@ -78,9 +99,9 @@ export const StatisticsDashboard = React.memo(({ movies }: StatisticsDashboardPr
       totalHours,
       totalMinutes: runtimeMinutes,
       avgRuntime: watchedMovies.length > 0 ? Math.round(runtimeMinutes / watchedMovies.length) : 0,
-      avgRating: movies.filter(m => m.userRating).length > 0 ? Number(avgRating.toFixed(1)) : 0,
+      avgRating: movies.filter((m) => m.userRating).length > 0 ? Number(avgRating.toFixed(1)) : 0,
       genreData,
-      ratingBuckets: ratingBuckets.filter(b => b.value > 0),
+      ratingBuckets: ratingBuckets.filter((b) => b.value > 0),
       decadeData,
     };
   }, [movies]);
@@ -106,10 +127,30 @@ export const StatisticsDashboard = React.memo(({ movies }: StatisticsDashboardPr
       {/* Stat Cards */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { icon: Film, label: 'Filme', value: stats.totalCount, sub: `${stats.watchedCount} gesehen` },
-          { icon: Clock, label: 'Laufzeit', value: `${stats.totalHours}h`, sub: `${stats.totalMinutes} Min.` },
-          { icon: Star, label: 'Ø Bewertung', value: stats.avgRating > 0 ? stats.avgRating : '—', sub: 'User-Rating' },
-          { icon: TrendingUp, label: 'Ø Laufzeit', value: `${stats.avgRuntime}`, sub: 'Min. pro Film' },
+          {
+            icon: Film,
+            label: 'Filme',
+            value: stats.totalCount,
+            sub: `${stats.watchedCount} gesehen`,
+          },
+          {
+            icon: Clock,
+            label: 'Laufzeit',
+            value: `${stats.totalHours}h`,
+            sub: `${stats.totalMinutes} Min.`,
+          },
+          {
+            icon: Star,
+            label: 'Ø Bewertung',
+            value: stats.avgRating > 0 ? stats.avgRating : '—',
+            sub: 'User-Rating',
+          },
+          {
+            icon: TrendingUp,
+            label: 'Ø Laufzeit',
+            value: `${stats.avgRuntime}`,
+            sub: 'Min. pro Film',
+          },
         ].map(({ icon: Icon, label, value, sub }) => (
           <motion.div key={label} variants={itemVariants} className="glass-card rounded-xl p-3">
             <p className="text-xs text-app-text-muted mb-1">{label}</p>
@@ -130,7 +171,14 @@ export const StatisticsDashboard = React.memo(({ movies }: StatisticsDashboardPr
             <div className="flex gap-4">
               <ResponsiveContainer width={120} height={120}>
                 <PieChart>
-                  <Pie data={stats.genreData} cx="50%" cy="50%" innerRadius={30} outerRadius={55} dataKey="value">
+                  <Pie
+                    data={stats.genreData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={30}
+                    outerRadius={55}
+                    dataKey="value"
+                  >
                     {stats.genreData.map((_, i) => (
                       <Cell key={i} fill={GENRE_COLORS[i % GENRE_COLORS.length]} />
                     ))}
@@ -141,8 +189,13 @@ export const StatisticsDashboard = React.memo(({ movies }: StatisticsDashboardPr
               <div className="flex-1 space-y-1">
                 {stats.genreData.slice(0, 6).map((g, i) => (
                   <div key={g.name} className="flex items-center gap-2 text-xs">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: GENRE_COLORS[i % GENRE_COLORS.length] }} />
-                    <span className="text-app-text truncate">{g.name} ({g.value})</span>
+                    <div
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: GENRE_COLORS[i % GENRE_COLORS.length] }}
+                    />
+                    <span className="text-app-text truncate">
+                      {g.name} ({g.value})
+                    </span>
                   </div>
                 ))}
               </div>

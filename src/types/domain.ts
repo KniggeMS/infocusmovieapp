@@ -63,6 +63,7 @@ export interface Achievement {
   iconName: 'Popcorn' | 'Library';
   unlocked: boolean;
   threshold: number;
+  unlockedAt?: string | null;
 }
 
 export interface MovieStatistics {
@@ -95,7 +96,19 @@ export type UserIntent =
   | { type: 'REMOVE_MOVIE'; payload: string }
   | { type: 'TOGGLE_WATCHED'; payload: string }
   | { type: 'TOGGLE_FAVORITE'; payload: string }
-  | { type: 'SET_FILTER'; payload: 'all' | 'favorites' | 'watched' | 'diary' | 'series' | 'achievements' | 'statistics' | 'lists' | 'recommendations' }
+  | {
+      type: 'SET_FILTER';
+      payload:
+        | 'all'
+        | 'favorites'
+        | 'watched'
+        | 'diary'
+        | 'series'
+        | 'achievements'
+        | 'statistics'
+        | 'lists'
+        | 'recommendations';
+    }
   | { type: 'SELECT_MOVIE'; payload: string }
   | { type: 'CLOSE_DETAILS' }
   | { type: 'CREATE_LIST'; payload: { name: string; description?: string } }
@@ -121,7 +134,17 @@ export interface WatchlistState {
   selectedMovie: Movie | null;
   status: 'idle' | 'loading' | 'error';
   error: string | null;
-  filter: 'all' | 'favorites' | 'watched' | 'diary' | 'series' | 'achievements' | 'statistics' | 'lists' | 'list' | 'recommendations';
+  filter:
+    | 'all'
+    | 'favorites'
+    | 'watched'
+    | 'diary'
+    | 'series'
+    | 'achievements'
+    | 'statistics'
+    | 'lists'
+    | 'list'
+    | 'recommendations';
   activeListId: string | null;
   tagFilter?: string | null;
   diaryEntries: Movie[];
@@ -151,4 +174,7 @@ export interface MovieServiceAdapter {
   // Diary Entries
   saveDiaryEntry(entry: Movie): Promise<void>;
   getDiaryEntries(): Promise<Movie[]>;
+  // Achievements
+  loadAchievements(): Promise<{ achievementId: string; unlockedAt: string }[]>;
+  saveAchievement(achievementId: string): Promise<void>;
 }

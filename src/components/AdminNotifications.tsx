@@ -36,7 +36,7 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-    const fetchNotifications = async () => {
+  const fetchNotifications = async () => {
     try {
       const { data, error } = await supabase
         .from('admin_notifications' as any)
@@ -85,9 +85,7 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
         .from('admin_notifications' as any)
         .update({ is_read: true } as any)
         .eq('id', id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-      );
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
     } catch (e) {
       console.warn('markAsRead error:', e);
     }
@@ -106,7 +104,6 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
       console.warn('markAllAsRead error:', e);
     }
   };
-
 
   if (!available) return null;
 
@@ -165,9 +162,7 @@ export function AdminNotifications({ user }: AdminNotificationsProps) {
                     <p className="text-sm font-medium text-app-text truncate">
                       {n.payload.username ? `@${n.payload.username}` : 'Neuer Benutzer'}
                     </p>
-                    <p className="text-xs text-app-text-muted truncate">
-                      {n.payload.email || '—'}
-                    </p>
+                    <p className="text-xs text-app-text-muted truncate">{n.payload.email || '—'}</p>
                     <p className="text-xs text-app-text-muted mt-0.5">
                       {n.payload.registered_at
                         ? new Date(n.payload.registered_at).toLocaleString('de-DE')

@@ -22,6 +22,8 @@ const mockAdapter: MovieServiceAdapter = {
   loadEpisodeProgress: vi.fn().mockResolvedValue([]),
   saveDiaryEntry: vi.fn().mockResolvedValue(undefined),
   getDiaryEntries: vi.fn().mockResolvedValue([]),
+  loadAchievements: vi.fn().mockResolvedValue([]),
+  saveAchievement: vi.fn().mockResolvedValue(undefined),
 };
 
 describe('MovieConductor - Streaming Providers', () => {
@@ -35,24 +37,22 @@ describe('MovieConductor - Streaming Providers', () => {
   it('should correctly map watch providers when selecting a movie', async () => {
     // 1. Setup Mock Response with Providers
     const mockDetails: Movie = {
-        id: '550',
-        title: 'Fight Club',
-        posterPath: null,
-        runtime: 139,
-        releaseDate: '1999-10-15',
-        overview: 'Soap.',
-        voteAverage: 8.4,
-        source: 'tmdb',
-        watchProviders: {
-            flatrate: [
-                { providerName: 'Netflix', logoPath: '/netflix.jpg' },
-                { providerName: 'Disney Plus', logoPath: '/disney.jpg' }
-            ],
-            rent: [],
-            buy: [
-                { providerName: 'Amazon Video', logoPath: '/amazon.jpg' }
-            ]
-        }
+      id: '550',
+      title: 'Fight Club',
+      posterPath: null,
+      runtime: 139,
+      releaseDate: '1999-10-15',
+      overview: 'Soap.',
+      voteAverage: 8.4,
+      source: 'tmdb',
+      watchProviders: {
+        flatrate: [
+          { providerName: 'Netflix', logoPath: '/netflix.jpg' },
+          { providerName: 'Disney Plus', logoPath: '/disney.jpg' },
+        ],
+        rent: [],
+        buy: [{ providerName: 'Amazon Video', logoPath: '/amazon.jpg' }],
+      },
     };
     mockAdapter.getMovieDetails = vi.fn().mockResolvedValue(mockDetails);
 
@@ -64,11 +64,11 @@ describe('MovieConductor - Streaming Providers', () => {
     const movie = state.selectedMovie;
 
     expect(movie).not.toBeNull();
-    
+
     // Check Flatrate (Stream)
     expect(movie?.watchProviders?.flatrate).toHaveLength(2);
     expect(movie?.watchProviders?.flatrate?.[0].providerName).toBe('Netflix');
-    
+
     // Check Buy
     expect(movie?.watchProviders?.buy).toHaveLength(1);
     expect(movie?.watchProviders?.buy?.[0].providerName).toBe('Amazon Video');

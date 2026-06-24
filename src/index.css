@@ -6,58 +6,111 @@
 
 body {
   @apply bg-app-bg text-app-text;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* ===== Animation Keyframes ===== */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-down {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes stagger-fade-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes glass-shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
 @keyframes slide-up-sheet {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes fade-in-scale {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ===== Animation Utility Classes ===== */
@@ -82,7 +135,7 @@ body {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -202,12 +255,7 @@ body {
 
   .glass-divider {
     height: 1px;
-    background: linear-gradient(
-      to right,
-      transparent,
-      var(--glass-border),
-      transparent
-    );
+    background: linear-gradient(to right, transparent, var(--glass-border), transparent);
   }
 }
 
@@ -252,118 +300,120 @@ input:-webkit-autofill:active {
 
 /* ── Fallback / Default (kein data-ui-style gesetzt) ── */
 :root {
-  --ui-font-display:    'DM Sans', system-ui, sans-serif;
-  --ui-font-body:       'DM Sans', system-ui, sans-serif;
-  --ui-radius-card:     6px;
-  --ui-radius-button:   6px;
-  --ui-nav-height:      56px;
-  --ui-nav-style:       top;
-  --ui-card-aspect:     2 / 3;
+  --ui-font-display: 'DM Sans', system-ui, sans-serif;
+  --ui-font-body: 'DM Sans', system-ui, sans-serif;
+  --ui-radius-card: 6px;
+  --ui-radius-button: 6px;
+  --ui-nav-height: 56px;
+  --ui-nav-style: top;
+  --ui-card-aspect: 2 / 3;
   --ui-spacing-section: 3rem;
-  --ui-hero-layout:     split;
-  --ui-accent-weight:   subtle;
-  --ui-bg:              #ffffff;
-  --ui-surface:         #f8f8f8;
-  --ui-surface-2:       #f0f0f0;
-  --ui-text:            #111111;
-  --ui-text-muted:      #666666;
-  --ui-accent:          #1a1a1a;
-  --ui-accent-fg:       #ffffff;
-  --ui-border:          rgba(0,0,0,0.1);
+  --ui-hero-layout: split;
+  --ui-accent-weight: subtle;
+  --ui-bg: #ffffff;
+  --ui-surface: #f8f8f8;
+  --ui-surface-2: #f0f0f0;
+  --ui-text: #111111;
+  --ui-text-muted: #666666;
+  --ui-accent: #1a1a1a;
+  --ui-accent-fg: #ffffff;
+  --ui-border: rgba(0, 0, 0, 0.1);
 }
 
-[data-ui-style="minimal"] {
-  --ui-font-display:    'Instrument Serif', Georgia, serif;
-  --ui-font-body:       'DM Sans', system-ui, sans-serif;
-  --ui-radius-card:     6px;
-  --ui-radius-button:   6px;
-  --ui-nav-height:      56px;
-  --ui-nav-style:       top;
-  --ui-card-aspect:     2 / 3;
+[data-ui-style='minimal'] {
+  --ui-font-display: 'Instrument Serif', Georgia, serif;
+  --ui-font-body: 'DM Sans', system-ui, sans-serif;
+  --ui-radius-card: 6px;
+  --ui-radius-button: 6px;
+  --ui-nav-height: 56px;
+  --ui-nav-style: top;
+  --ui-card-aspect: 2 / 3;
   --ui-spacing-section: 3rem;
-  --ui-hero-layout:     split;
-  --ui-accent-weight:   subtle;
-  --ui-bg:              #ffffff;
-  --ui-surface:         #f8f8f8;
-  --ui-surface-2:       #f0ede8;
-  --ui-text:            #111111;
-  --ui-text-muted:      #555555;
-  --ui-accent:          #1a1a1a;
-  --ui-accent-fg:       #ffffff;
-  --ui-border:          rgba(0,0,0,0.08);
+  --ui-hero-layout: split;
+  --ui-accent-weight: subtle;
+  --ui-bg: #ffffff;
+  --ui-surface: #f8f8f8;
+  --ui-surface-2: #f0ede8;
+  --ui-text: #111111;
+  --ui-text-muted: #555555;
+  --ui-accent: #1a1a1a;
+  --ui-accent-fg: #ffffff;
+  --ui-border: rgba(0, 0, 0, 0.08);
 }
 
-[data-ui-style="cinematic"] {
-  --ui-font-display:    'Playfair Display', Georgia, serif;
-  --ui-font-body:       'DM Sans', system-ui, sans-serif;
-  --ui-radius-card:     3px;
-  --ui-radius-button:   4px;
-  --ui-nav-height:      64px;
-  --ui-nav-style:       top;
-  --ui-card-aspect:     2 / 3;
+[data-ui-style='cinematic'] {
+  --ui-font-display: 'Playfair Display', Georgia, serif;
+  --ui-font-body: 'DM Sans', system-ui, sans-serif;
+  --ui-radius-card: 3px;
+  --ui-radius-button: 4px;
+  --ui-nav-height: 64px;
+  --ui-nav-style: top;
+  --ui-card-aspect: 2 / 3;
   --ui-spacing-section: 2.5rem;
-  --ui-hero-layout:     fullbleed;
-  --ui-accent-weight:   bold;
-  --ui-bg:              #0a0a0a;
-  --ui-surface:         #141414;
-  --ui-surface-2:       #1e1e1e;
-  --ui-text:            #e8e8e8;
-  --ui-text-muted:      #999999;
-  --ui-accent:          #e50914;
-  --ui-accent-fg:       #ffffff;
-  --ui-border:          rgba(255,255,255,0.08);
+  --ui-hero-layout: fullbleed;
+  --ui-accent-weight: bold;
+  --ui-bg: #0a0a0a;
+  --ui-surface: #141414;
+  --ui-surface-2: #1e1e1e;
+  --ui-text: #e8e8e8;
+  --ui-text-muted: #999999;
+  --ui-accent: #e50914;
+  --ui-accent-fg: #ffffff;
+  --ui-border: rgba(255, 255, 255, 0.08);
 }
 
-[data-ui-style="modern"] {
-  --ui-font-display:    'Inter', system-ui, sans-serif;
-  --ui-font-body:       'Inter', system-ui, sans-serif;
-  --ui-radius-card:     10px;
-  --ui-radius-button:   6px;
-  --ui-nav-height:      56px;
-  --ui-nav-style:       sidebar;
-  --ui-card-aspect:     2 / 3;
+[data-ui-style='modern'] {
+  --ui-font-display: 'Inter', system-ui, sans-serif;
+  --ui-font-body: 'Inter', system-ui, sans-serif;
+  --ui-radius-card: 10px;
+  --ui-radius-button: 6px;
+  --ui-nav-height: 56px;
+  --ui-nav-style: sidebar;
+  --ui-card-aspect: 2 / 3;
   --ui-spacing-section: 2rem;
-  --ui-hero-layout:     dashboard;
-  --ui-accent-weight:   subtle;
-  --ui-bg:              #0f172a;
-  --ui-surface:         #1e293b;
-  --ui-surface-2:       #273549;
-  --ui-text:            #f1f5f9;
-  --ui-text-muted:      #94a3b8;
-  --ui-accent:          #6366f1;
-  --ui-accent-fg:       #ffffff;
-  --ui-border:          rgba(255,255,255,0.06);
+  --ui-hero-layout: dashboard;
+  --ui-accent-weight: subtle;
+  --ui-bg: #0f172a;
+  --ui-surface: #1e293b;
+  --ui-surface-2: #273549;
+  --ui-text: #f1f5f9;
+  --ui-text-muted: #94a3b8;
+  --ui-accent: #6366f1;
+  --ui-accent-fg: #ffffff;
+  --ui-border: rgba(255, 255, 255, 0.06);
 }
 
-[data-ui-style="editorial"] {
-  --ui-font-display:    'Playfair Display', Georgia, serif;
-  --ui-font-body:       'DM Sans', system-ui, sans-serif;
-  --ui-radius-card:     6px;
-  --ui-radius-button:   4px;
-  --ui-nav-height:      60px;
-  --ui-nav-style:       top;
-  --ui-card-aspect:     2 / 3;
+[data-ui-style='editorial'] {
+  --ui-font-display: 'Playfair Display', Georgia, serif;
+  --ui-font-body: 'DM Sans', system-ui, sans-serif;
+  --ui-radius-card: 6px;
+  --ui-radius-button: 4px;
+  --ui-nav-height: 60px;
+  --ui-nav-style: top;
+  --ui-card-aspect: 2 / 3;
   --ui-spacing-section: 4rem;
-  --ui-hero-layout:     split;
-  --ui-accent-weight:   bold;
-  --ui-bg:              #fafaf8;
-  --ui-surface:         #f0ede8;
-  --ui-surface-2:       #e8e4dc;
-  --ui-text:            #1a1a1a;
-  --ui-text-muted:      #555555;
-  --ui-accent:          #c41e3a;
-  --ui-accent-fg:       #ffffff;
-  --ui-border:          rgba(0,0,0,0.1);
+  --ui-hero-layout: split;
+  --ui-accent-weight: bold;
+  --ui-bg: #fafaf8;
+  --ui-surface: #f0ede8;
+  --ui-surface-2: #e8e4dc;
+  --ui-text: #1a1a1a;
+  --ui-text-muted: #555555;
+  --ui-accent: #c41e3a;
+  --ui-accent-fg: #ffffff;
+  --ui-border: rgba(0, 0, 0, 0.1);
 }
 
 /* ── Globale Anwendung der UI-Variablen ── */
-html, body, #root {
+html,
+body,
+#root {
   background-color: var(--ui-bg) !important;
-  color:            var(--ui-text) !important;
-  min-height:       100dvh;
+  color: var(--ui-text) !important;
+  min-height: 100dvh;
   transition:
     background-color 0.35s ease,
-    color            0.35s ease;
+    color 0.35s ease;
 }
 
 body {
@@ -374,7 +424,16 @@ html {
   scrollbar-color: var(--ui-text-muted, #666) var(--ui-bg, #fff);
 }
 
-.ui-font-display { font-family: var(--ui-font-display); }
-.ui-font-body    { font-family: var(--ui-font-body); }
-.ui-card         { border-radius: var(--ui-radius-card); aspect-ratio: var(--ui-card-aspect, 2/3); }
-.ui-btn          { border-radius: var(--ui-radius-button); }
+.ui-font-display {
+  font-family: var(--ui-font-display);
+}
+.ui-font-body {
+  font-family: var(--ui-font-body);
+}
+.ui-card {
+  border-radius: var(--ui-radius-card);
+  aspect-ratio: var(--ui-card-aspect, 2/3);
+}
+.ui-btn {
+  border-radius: var(--ui-radius-button);
+}

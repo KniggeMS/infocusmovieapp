@@ -17,7 +17,9 @@ export function SheetModal({ open, onClose, title, children, className = '' }: S
     } else {
       document.body.style.overflow = '';
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [open]);
 
   return (
@@ -51,9 +53,7 @@ export function SheetModal({ open, onClose, title, children, className = '' }: S
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-hide">
-              {children}
-            </div>
+            <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-hide">{children}</div>
           </motion.div>
         </div>
       )}

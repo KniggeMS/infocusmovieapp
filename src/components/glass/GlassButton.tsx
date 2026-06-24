@@ -7,7 +7,13 @@ interface GlassButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   accent?: boolean;
 }
 
-export function GlassButton({ children, className = '', pill, accent, ...props }: GlassButtonProps) {
+export function GlassButton({
+  children,
+  className = '',
+  pill,
+  accent,
+  ...props
+}: GlassButtonProps) {
   return (
     <button
       {...props}

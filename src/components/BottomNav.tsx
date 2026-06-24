@@ -27,7 +27,7 @@ export function BottomNav({
   onShowDiary,
   onShowProfile,
   onShowSeries,
-  onShowLists
+  onShowLists,
 }: BottomNavProps) {
   const { t } = useTranslation();
   const isActive = (key: string) => {
@@ -57,7 +57,9 @@ export function BottomNav({
             >
               <Icon
                 className={`w-5 h-5 sm:w-6 sm:h-6 transition-all ${
-                  active ? 'text-accent-glow drop-shadow-[0_0_8px_var(--accent-glow)]' : 'text-app-text-muted hover:text-app-text'
+                  active
+                    ? 'text-accent-glow drop-shadow-[0_0_8px_var(--accent-glow)]'
+                    : 'text-app-text-muted hover:text-app-text'
                 }`}
               />
               <span

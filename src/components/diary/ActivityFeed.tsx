@@ -19,7 +19,11 @@ export function ActivityFeed({ items, onSelectMovie }: ActivityFeedProps) {
       if (movie.watched && (movie.watchedAt || movie.addedAt)) {
         result.push({ type: 'watched', movie, date: movie.watchedAt || movie.addedAt! });
       }
-      if (typeof movie.userRating === 'number' && movie.userRating > 0 && (movie.watchedAt || movie.addedAt)) {
+      if (
+        typeof movie.userRating === 'number' &&
+        movie.userRating > 0 &&
+        (movie.watchedAt || movie.addedAt)
+      ) {
         result.push({ type: 'rated', movie, date: movie.watchedAt || movie.addedAt! });
       }
     }
@@ -27,7 +31,7 @@ export function ActivityFeed({ items, onSelectMovie }: ActivityFeedProps) {
   }, [items]);
 
   const currentWatches = useMemo(() => {
-    return items.filter(m => !m.watched).slice(0, 6);
+    return items.filter((m) => !m.watched).slice(0, 6);
   }, [items]);
 
   return (
@@ -36,7 +40,7 @@ export function ActivityFeed({ items, onSelectMovie }: ActivityFeedProps) {
         <>
           <GlassSection title={t('diary.currentWatches')} icon={<Eye className="w-3.5 h-3.5" />} />
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {currentWatches.map(movie => (
+            {currentWatches.map((movie) => (
               <GlassCard
                 key={movie.id}
                 hover
@@ -45,9 +49,15 @@ export function ActivityFeed({ items, onSelectMovie }: ActivityFeedProps) {
               >
                 <div className="w-full aspect-[2/3] rounded-lg overflow-hidden bg-app-secondary mb-2">
                   {movie.posterPath ? (
-                    <img src={movie.posterPath} alt={movie.title} className="w-full h-full object-cover" />
+                    <img
+                      src={movie.posterPath}
+                      alt={movie.title}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[8px] text-app-text-muted">N/A</div>
+                    <div className="w-full h-full flex items-center justify-center text-[8px] text-app-text-muted">
+                      N/A
+                    </div>
                   )}
                 </div>
                 <p className="text-[10px] font-medium text-app-text truncate">{movie.title}</p>
@@ -75,20 +85,29 @@ export function ActivityFeed({ items, onSelectMovie }: ActivityFeedProps) {
                 onClick={() => onSelectMovie(activity.movie.id)}
                 className="flex items-center gap-3 p-3"
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activity.type === 'watched' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                  {activity.type === 'watched' ? <Eye className="w-4 h-4" /> : <Star className="w-4 h-4" />}
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activity.type === 'watched' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-yellow-500/20 text-yellow-400'}`}
+                >
+                  {activity.type === 'watched' ? (
+                    <Eye className="w-4 h-4" />
+                  ) : (
+                    <Star className="w-4 h-4" />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-app-text truncate">
                     <strong>{activity.movie.title}</strong>
                   </p>
                   <p className="text-[10px] text-app-text-muted">
-                    {activity.type === 'watched' ? t('diary.entry') : t('diary.rated')}
-                    {' '}★ {activity.movie.userRating}/10
+                    {activity.type === 'watched' ? t('diary.entry') : t('diary.rated')} ★{' '}
+                    {activity.movie.userRating}/10
                   </p>
                 </div>
                 <span className="text-[10px] text-app-text-muted shrink-0">
-                  {new Date(activity.date).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}
+                  {new Date(activity.date).toLocaleDateString('de-DE', {
+                    day: 'numeric',
+                    month: 'short',
+                  })}
                 </span>
               </GlassCard>
             </motion.div>

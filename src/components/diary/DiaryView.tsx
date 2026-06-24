@@ -44,7 +44,7 @@ export function DiaryView({ items, onSelectMovie }: DiaryViewProps) {
 
   const diaryEntries = useMemo(() => {
     return items
-      .filter(m => m.watched)
+      .filter((m) => m.watched)
       .sort((a, b) => {
         const aDate = a.watchedAt || a.addedAt || '';
         const bDate = b.watchedAt || b.addedAt || '';
@@ -84,7 +84,7 @@ export function DiaryView({ items, onSelectMovie }: DiaryViewProps) {
 
   return (
     <div className="space-y-8">
-      {groupOrder.map(group => {
+      {groupOrder.map((group) => {
         const entries = grouped[group];
         if (!entries || entries.length === 0) return null;
         return (
@@ -106,9 +106,15 @@ export function DiaryView({ items, onSelectMovie }: DiaryViewProps) {
                     {/* Mini Poster */}
                     <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0 bg-app-secondary">
                       {entry.posterPath ? (
-                        <img src={entry.posterPath} alt={entry.title} className="w-full h-full object-cover" />
+                        <img
+                          src={entry.posterPath}
+                          alt={entry.title}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[8px] text-app-text-muted">N/A</div>
+                        <div className="w-full h-full flex items-center justify-center text-[8px] text-app-text-muted">
+                          N/A
+                        </div>
                       )}
                     </div>
 
@@ -118,7 +124,9 @@ export function DiaryView({ items, onSelectMovie }: DiaryViewProps) {
                         <span className="text-xs text-app-text-muted">
                           {entry.mediaType === 'tv' ? '📺' : '🎬'}
                         </span>
-                        <h4 className="font-semibold text-sm text-app-text truncate">{entry.title}</h4>
+                        <h4 className="font-semibold text-sm text-app-text truncate">
+                          {entry.title}
+                        </h4>
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
                         <span className="text-[10px] text-app-text-muted flex items-center gap-1">
@@ -134,7 +142,10 @@ export function DiaryView({ items, onSelectMovie }: DiaryViewProps) {
                         {entry.watchedAt && (
                           <span className="text-[10px] text-app-text-muted flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {new Date(entry.watchedAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(entry.watchedAt).toLocaleTimeString('de-DE', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </span>
                         )}
                       </div>

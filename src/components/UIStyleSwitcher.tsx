@@ -21,16 +21,16 @@ const STYLE_PREVIEWS: Record<UIStyle, { lines: string[]; accent: string }> = {
 };
 
 const STYLE_BG: Record<UIStyle, string> = {
-  minimal:   '#ffffff',
+  minimal: '#ffffff',
   cinematic: '#0a0a0a',
-  modern:    '#0f172a',
+  modern: '#0f172a',
   editorial: '#fafaf9',
 };
 
 const STYLE_TEXT: Record<UIStyle, string> = {
-  minimal:   '#111111',
+  minimal: '#111111',
   cinematic: '#e5e5e5',
-  modern:    '#f1f5f9',
+  modern: '#f1f5f9',
   editorial: '#1c1917',
 };
 
@@ -58,7 +58,9 @@ export const UIStyleSwitcher: React.FC = () => {
             onClick={() => handleSelect(style)}
             style={{
               background: 'transparent',
-              border: isSelected ? `2px solid ${preview.accent}` : '2px solid rgba(255,255,255,0.1)',
+              border: isSelected
+                ? `2px solid ${preview.accent}`
+                : '2px solid rgba(255,255,255,0.1)',
               borderRadius: '12px',
               padding: '12px',
               cursor: 'pointer',
@@ -98,7 +100,9 @@ export const UIStyleSwitcher: React.FC = () => {
             {/* Label */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
               <span style={{ fontSize: '14px' }}>{label.icon}</span>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary, #fff)' }}>
+              <span
+                style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary, #fff)' }}
+              >
                 {label.name}
               </span>
             </div>

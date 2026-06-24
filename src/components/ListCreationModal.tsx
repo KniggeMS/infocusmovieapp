@@ -20,7 +20,7 @@ export function ListCreationModal({ conductor, onClose }: ListCreationModalProps
     try {
       await conductor.dispatch({
         type: 'CREATE_LIST',
-        payload: { name: name.trim(), description: description.trim() || undefined }
+        payload: { name: name.trim(), description: description.trim() || undefined },
       });
       onClose();
     } catch (e) {
@@ -35,7 +35,9 @@ export function ListCreationModal({ conductor, onClose }: ListCreationModalProps
       <div className="bg-app-bg rounded-3xl w-full max-w-md mx-4 border border-app-border overflow-hidden">
         <div className="flex justify-between items-center p-6 border-b border-app-border">
           <h2 className="text-xl font-bold">Neue Liste erstellen</h2>
-          <button onClick={onClose}><X className="w-6 h-6" /></button>
+          <button onClick={onClose}>
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         <div className="p-6 space-y-6">
@@ -50,7 +52,9 @@ export function ListCreationModal({ conductor, onClose }: ListCreationModalProps
             />
           </div>
           <div>
-            <label className="block text-sm text-app-text-muted mb-2">Beschreibung (optional)</label>
+            <label className="block text-sm text-app-text-muted mb-2">
+              Beschreibung (optional)
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -61,7 +65,9 @@ export function ListCreationModal({ conductor, onClose }: ListCreationModalProps
         </div>
 
         <div className="p-6 border-t border-app-border flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 rounded-2xl border border-app-border">Abbrechen</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-2xl border border-app-border">
+            Abbrechen
+          </button>
           <button
             onClick={handleCreate}
             disabled={!name.trim() || isCreating}

@@ -1,42 +1,42 @@
 import { Movie } from '../types/domain';
 
 const TMDB_GENRE_NAME_TO_ID: Record<string, number> = {
-  'Action': 28,
-  'Adventure': 12,
-  'Animation': 16,
-  'Comedy': 35,
-  'Crime': 80,
-  'Documentary': 99,
-  'Drama': 18,
-  'Family': 10751,
-  'Fantasy': 14,
-  'History': 36,
-  'Horror': 27,
-  'Music': 10402,
-  'Mystery': 9648,
-  'Romance': 10749,
+  Action: 28,
+  Adventure: 12,
+  Animation: 16,
+  Comedy: 35,
+  Crime: 80,
+  Documentary: 99,
+  Drama: 18,
+  Family: 10751,
+  Fantasy: 14,
+  History: 36,
+  Horror: 27,
+  Music: 10402,
+  Mystery: 9648,
+  Romance: 10749,
   'Science Fiction': 878,
   'Sci-Fi': 878,
   'TV Movie': 10770,
-  'Thriller': 53,
-  'War': 10752,
-  'Western': 37,
+  Thriller: 53,
+  War: 10752,
+  Western: 37,
   // German labels (TMDB returns German genre names when language=de-DE)
-  'Abenteuer': 12,
+  Abenteuer: 12,
   'Animation ': 16,
-  'Komödie': 35,
-  'Dokumentarfilm': 99,
-  'Familie': 10751,
+  Komödie: 35,
+  Dokumentarfilm: 99,
+  Familie: 10751,
   'Fantasy ': 14,
-  'Historie': 36,
+  Historie: 36,
   'Horror ': 27,
-  'Musik': 10402,
-  'Krimi': 80,
+  Musik: 10402,
+  Krimi: 80,
   'Mystery ': 9648,
-  'Liebesfilm': 10749,
+  Liebesfilm: 10749,
   'Science Fiction ': 878,
   'Thriller ': 53,
-  'Krieg': 10752,
+  Krieg: 10752,
   'Drama ': 18,
 };
 
@@ -70,7 +70,7 @@ export function deriveUserPreferences(library: Movie[]): UserPreferences {
       ratingSum += m.userRating;
       ratedCount++;
     }
-    (m.genres || []).forEach(g => {
+    (m.genres || []).forEach((g) => {
       if (!g) return;
       genreScores.set(g, (genreScores.get(g) || 0) + weight);
     });
@@ -86,8 +86,8 @@ export function deriveUserPreferences(library: Movie[]): UserPreferences {
     topGenres: sortedGenres.slice(0, 3),
     averageUserRating: avg,
     prefersHighlyRated: avg !== null && avg >= 7,
-    favoriteCount: library.filter(m => m.favorite).length,
-    watchedCount: library.filter(m => m.watched).length,
+    favoriteCount: library.filter((m) => m.favorite).length,
+    watchedCount: library.filter((m) => m.watched).length,
     totalCount: total,
   };
 }
@@ -125,7 +125,7 @@ async function fetchDiscoverByGenre(genreId: number, opts: FetchOpts): Promise<M
 export async function getSmartRecommendations(
   library: Movie[],
   apiKey: string | undefined,
-  limit = 12
+  limit = 12,
 ): Promise<{ items: RecommendationItem[]; prefs: UserPreferences }> {
   const prefs = deriveUserPreferences(library);
 
@@ -135,8 +135,8 @@ export async function getSmartRecommendations(
 
   const ownedTmdbIds = new Set(
     library
-      .map(m => (typeof m.tmdbId === 'number' ? m.tmdbId : null))
-      .filter((id): id is number => id !== null)
+      .map((m) => (typeof m.tmdbId === 'number' ? m.tmdbId : null))
+      .filter((id): id is number => id !== null),
   );
 
   const genreIdsSeen = new Set<number>();
@@ -146,7 +146,7 @@ export async function getSmartRecommendations(
     if (id && !genreIdsSeen.has(id)) {
       genreIdsSeen.add(id);
       requests.push(
-        fetchDiscoverByGenre(id, { apiKey }).then(movies => ({ genreName: g.name, movies }))
+        fetchDiscoverByGenre(id, { apiKey }).then((movies) => ({ genreName: g.name, movies })),
       );
     }
   }
@@ -179,7 +179,7 @@ export async function getSmartRecommendations(
 
   // Add a fluent reason summarizing top genres for the first few.
   if (ranked.length > 0 && prefs.prefersHighlyRated) {
-    ranked.slice(0, 3).forEach(r => r.reasons.push('hoch bewertet, passt zu deinem Geschmack'));
+    ranked.slice(0, 3).forEach((r) => r.reasons.push('hoch bewertet, passt zu deinem Geschmack'));
   }
 
   return { items: ranked, prefs };

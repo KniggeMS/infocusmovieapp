@@ -107,7 +107,12 @@ export class AuthService {
 
   public async updateProfile(
     userId: string,
-    updates: { displayName?: string; avatarUrl?: string; theme?: 'light' | 'dark' | 'glass'; username?: string }
+    updates: {
+      displayName?: string;
+      avatarUrl?: string;
+      theme?: 'light' | 'dark' | 'glass';
+      username?: string;
+    },
   ): Promise<void> {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.displayName !== undefined) dbUpdates.display_name = updates.displayName;
@@ -115,10 +120,7 @@ export class AuthService {
     if (updates.theme !== undefined) dbUpdates.theme = updates.theme;
     if (updates.username !== undefined) dbUpdates.username = updates.username;
 
-    const { error } = await this.client
-      .from('profiles')
-      .update(dbUpdates)
-      .eq('id', userId);
+    const { error } = await this.client.from('profiles').update(dbUpdates).eq('id', userId);
 
     if (error) throw error;
   }

@@ -1,5 +1,5 @@
 import './index.css';
-import "./lib/i18n";
+import './lib/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -11,7 +11,8 @@ import { ToastProvider } from './components/Toast';
 const origError = console.error;
 console.error = (...args) => {
   const msg = args.join(' ');
-  if (msg.includes('model does not support image') || msg.includes('Cannot read "image.png"')) return;
+  if (msg.includes('model does not support image') || msg.includes('Cannot read "image.png"'))
+    return;
   origError.apply(console, args);
 };
 
@@ -26,7 +27,7 @@ try {
       <ToastProvider>
         <App conductor={conductor} />
       </ToastProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 } catch (error) {
   console.error('App initialization failed:', error);
@@ -35,6 +36,6 @@ try {
       <div className="min-h-screen bg-app-bg text-app-text flex items-center justify-center p-6 text-center">
         Die App konnte nicht gestartet werden. Bitte prüfe die Konfiguration und lade die Seite neu.
       </div>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 }

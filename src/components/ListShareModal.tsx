@@ -9,7 +9,8 @@ interface ListShareModalProps {
 }
 
 export function ListShareModal({ list, onClose }: ListShareModalProps) {
-  const { sharedWith, loading, searchUsers, shareWithUser, unshareWithUser, loadSharedWith } = useListSharing(list.id);
+  const { sharedWith, loading, searchUsers, shareWithUser, unshareWithUser, loadSharedWith } =
+    useListSharing(list.id);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ShareableUser[]>([]);
   const [searching, setSearching] = useState(false);
@@ -21,7 +22,10 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
-    if (query.length < 2) { setResults([]); return; }
+    if (query.length < 2) {
+      setResults([]);
+      return;
+    }
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       const found = await searchUsers(query);
@@ -36,18 +40,23 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-md glass-card rounded-2xl p-5 space-y-4">
-
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-app-text text-base">„{list.name}" teilen</h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-app-secondary transition-all">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-app-secondary transition-all"
+          >
             <X size={18} className="text-app-text-muted" />
           </button>
         </div>
 
         {/* User-Suche */}
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-app-text-muted" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-app-text-muted"
+          />
           <input
             type="text"
             placeholder="Nutzer suchen..."
@@ -64,13 +73,18 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
             {results.map((u: ShareableUser) => {
               const alreadyShared = sharedWith.some((s: ShareableUser) => s.id === u.id);
               return (
-                <div key={u.id} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-app-secondary">
+                <div
+                  key={u.id}
+                  className="flex items-center justify-between gap-2 p-2 rounded-xl bg-app-secondary"
+                >
                   <div>
-                    <p className="text-sm font-medium text-app-text">{u.display_name ?? u.username}</p>
+                    <p className="text-sm font-medium text-app-text">
+                      {u.display_name ?? u.username}
+                    </p>
                     {u.username && <p className="text-xs text-app-text-muted">@{u.username}</p>}
                   </div>
                   <button
-                    onClick={() => alreadyShared ? unshareWithUser(u.id) : shareWithUser(u.id)}
+                    onClick={() => (alreadyShared ? unshareWithUser(u.id) : shareWithUser(u.id))}
                     disabled={loading}
                     className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-all ${
                       alreadyShared
@@ -78,8 +92,17 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
                         : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'
                     }`}
                   >
-                    {loading ? <Loader2 size={12} className="animate-spin" /> :
-                      alreadyShared ? <><UserMinus size={12} /> Entfernen</> : <><UserPlus size={12} /> Teilen</>}
+                    {loading ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : alreadyShared ? (
+                      <>
+                        <UserMinus size={12} /> Entfernen
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus size={12} /> Teilen
+                      </>
+                    )}
                   </button>
                 </div>
               );
@@ -93,8 +116,13 @@ export function ListShareModal({ list, onClose }: ListShareModalProps) {
             <p className="text-xs text-app-text-muted mb-2">Geteilt mit:</p>
             <div className="space-y-1">
               {sharedWith.map((u: ShareableUser) => (
-                <div key={u.id} className="flex items-center justify-between p-2 rounded-xl bg-app-secondary">
-                  <p className="text-sm text-app-text">{u.display_name ?? u.username ?? 'Unbekannt'}</p>
+                <div
+                  key={u.id}
+                  className="flex items-center justify-between p-2 rounded-xl bg-app-secondary"
+                >
+                  <p className="text-sm text-app-text">
+                    {u.display_name ?? u.username ?? 'Unbekannt'}
+                  </p>
                   <button
                     onClick={() => unshareWithUser(u.id)}
                     className="text-xs text-red-400/70 hover:text-red-400"

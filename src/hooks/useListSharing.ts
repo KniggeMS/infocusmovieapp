@@ -14,7 +14,9 @@ export function useListSharing(listId: string) {
 
   const searchUsers = useCallback(async (query: string): Promise<ShareableUser[]> => {
     if (query.length < 2) return [];
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const { data } = await supabase
       .from('profiles')
@@ -26,35 +28,41 @@ export function useListSharing(listId: string) {
     return data ?? [];
   }, []);
 
-  const shareWithUser = useCallback(async (userId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  const shareWithUser = useCallback(
+    async (userId: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
 
-    setLoading(true);
-    const { error } = await supabase.from('list_shares').insert({
-      list_id: listId,
-      owner_id: user.id,
-      shared_with: userId,
-    });
-    setLoading(false);
-    if (!error) await loadSharedWith();
-  }, [listId]);
+      setLoading(true);
+      const { error } = await supabase.from('list_shares').insert({
+        list_id: listId,
+        owner_id: user.id,
+        shared_with: userId,
+      });
+      setLoading(false);
+      if (!error) await loadSharedWith();
+    },
+    [listId],
+  );
 
-  const unshareWithUser = useCallback(async (userId: string) => {
-    setLoading(true);
-    await supabase
-      .from('list_shares')
-      .delete()
-      .eq('list_id', listId)
-      .eq('shared_with', userId);
-    setLoading(false);
-    await loadSharedWith();
-  }, [listId]);
+  const unshareWithUser = useCallback(
+    async (userId: string) => {
+      setLoading(true);
+      await supabase.from('list_shares').delete().eq('list_id', listId).eq('shared_with', userId);
+      setLoading(false);
+      await loadSharedWith();
+    },
+    [listId],
+  );
 
   const loadSharedWith = useCallback(async () => {
     const { data } = await supabase
       .from('list_shares')
-      .select('shared_with, profiles!list_shares_shared_with_fkey(id, display_name, username, avatar_url)')
+      .select(
+        'shared_with, profiles!list_shares_shared_with_fkey(id, display_name, username, avatar_url)',
+      )
       .eq('list_id', listId);
 
     if (data) {

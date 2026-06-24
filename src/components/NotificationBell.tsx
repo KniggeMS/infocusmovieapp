@@ -17,7 +17,7 @@ export function NotificationBell() {
   }, []);
 
   const handleOpen = () => {
-    setOpen(prev => !prev);
+    setOpen((prev) => !prev);
     if (!open && unreadCount > 0) markAllRead();
   };
 
@@ -28,9 +28,20 @@ export function NotificationBell() {
 
   const getMessage = (n: { type: string; payload: any }) => {
     if (n.type === 'list_shared')
-      return <><span className="text-app-text font-medium">{n.payload.owner_name}</span> hat die Liste <span className="text-blue-400 font-medium">„{n.payload.list_name}"</span> mit dir geteilt</>;
+      return (
+        <>
+          <span className="text-app-text font-medium">{n.payload.owner_name}</span> hat die Liste{' '}
+          <span className="text-blue-400 font-medium">„{n.payload.list_name}"</span> mit dir geteilt
+        </>
+      );
     if (n.type === 'list_item_added')
-      return <><span className="text-app-text font-medium">{n.payload.owner_name}</span> hat <span className="text-green-400 font-medium">{n.payload.movie_title}</span> zur Liste „{n.payload.list_name}" hinzugefügt</>;
+      return (
+        <>
+          <span className="text-app-text font-medium">{n.payload.owner_name}</span> hat{' '}
+          <span className="text-green-400 font-medium">{n.payload.movie_title}</span> zur Liste „
+          {n.payload.list_name}" hinzugefügt
+        </>
+      );
     return 'Neue Benachrichtigung';
   };
 
@@ -61,7 +72,10 @@ export function NotificationBell() {
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
               <h3 className="text-sm font-semibold text-app-text">Benachrichtigungen</h3>
-              <button onClick={() => setOpen(false)} className="text-app-text-muted hover:text-app-text">
+              <button
+                onClick={() => setOpen(false)}
+                className="text-app-text-muted hover:text-app-text"
+              >
                 <X size={16} />
               </button>
             </div>
@@ -74,7 +88,7 @@ export function NotificationBell() {
                   <p className="text-sm">Keine Benachrichtigungen</p>
                 </div>
               ) : (
-                notifications.map(n => (
+                notifications.map((n) => (
                   <div
                     key={n.id}
                     className={`flex gap-3 px-4 py-3 transition-colors ${!n.read_at ? 'bg-blue-500/5' : ''}`}
@@ -84,7 +98,10 @@ export function NotificationBell() {
                       <p className="text-xs text-app-text-muted leading-relaxed">{getMessage(n)}</p>
                       <p className="text-[10px] text-app-text-faint mt-1">
                         {new Date(n.created_at).toLocaleDateString('de-DE', {
-                          day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+                          day: '2-digit',
+                          month: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </p>
                     </div>
