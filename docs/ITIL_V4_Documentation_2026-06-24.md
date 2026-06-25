@@ -1,9 +1,10 @@
-# ITIL V4 Service Management Dokumentation
+# ITIL V5 Service Management Dokumentation
 
 **Projekt:** InFocus Family CineLog  
-**Dokumentationsdatum:** 24. Juni 2026  
+**Dokumentationsdatum:** 25. Juni 2026  
 **Dokumentationsverantwortlicher:** KniggeMS (Service Owner)  
-**Aktuelle Version:** 2.4.1 (Build 83b3576)  
+**Aktuelle Version:** 2.4.1 (Build 4180ade)  
+**ITIL-Version:** V5 (PeopleCert, Januar 2026)  
 **Klassifizierung:** Intern — Entwicklungsteam
 
 ---
@@ -685,10 +686,11 @@ Push to main (GitHub)
 | 11.05.2026 | KniggeMS | Initiale ITIL V4 Dokumentation (v2.4.2 Release) |
 | 10.06.2026 | OpenCode Agent | Vollständige Überarbeitung; SDP, CMDB, KEDB, CIR ergänzt; 8 CRs dokumentiert |
 | 24.06.2026 | MiCode Agent | Session 2 Update: 5 neue CRs (CR-009 bis CR-013), 2 neue Incidents, CIR-009/010, Security-Updates, Deployment-Optimierung, CLI-Integration |
+| 25.06.2026 | MiCode Agent | ITIL V4 → V5 Upgrade: Value Co-Creation, Lifecycle Thinking, Outcome-basierte Metriken, Sustainability, CocoIndex Integration |
 
 ---
 
-## Anhang B: ITIL V4 Compliance-Checkliste
+## Anhang B: ITIL V5 Compliance-Checkliste
 
 | Praxis | Status | Nachweis |
 |--------|--------|----------|
@@ -708,9 +710,73 @@ Push to main (GitHub)
 | Rollback-Pläne | ✅ | CR-001 mit Rollback-Plan |
 | Security Management | ✅ | CR-2026-06-24-003 + 007 Audit |
 | Tool/CLI Management | ✅ | CR-2026-06-24-005 |
+| **Value Co-Creation** | ✅ | Abschnitt 12 |
+| **Lifecycle Thinking** | ✅ | Abschnitt 12 |
+| **Outcome-basierte Metriken** | ✅ | Abschnitt 12 |
+| **Sustainability** | ✅ | Abschnitt 12 |
+| **AI-enabled Environments** | ✅ | CocoIndex Code Integration |
 | RACI (zukünftig) | 🔲 | Noch nicht definiert |
 
 ---
 
-*Dokument erstellt gemäß ITIL V4 Framework — Service Value System (SVS)*  
-*Nächste Überprüfung: 24.07.2026 (monatlich)*
+## 12. ITIL V5 — Erweiterungen gegenüber V4
+
+### 12.1 Value Co-Creation
+
+ITIL V5 erweitert den Wertbegriff: Wert wird nicht mehr einseitig vom Anbieter geliefert, sondern **gemeinsam** zwischen Anbietern, Konsumenten und Stakeholdern geschaffen.
+
+**Anwendung InFocus CineLog:**
+- User liefert Feedback (GitHub Issues, Feature-Wünsche)
+- Entwickler liefert Funktionen
+- Supabase/Vercel/TMDB liefern Infrastruktur
+- **Gemeinsam entsteht der Nutzwert** einer funktionsfähigen PWA
+
+### 12.2 Lifecycle Thinking
+
+Statt isolierter Service-Phasen denkt V5 in **ganzheitlichen Lebenszyklen**.
+
+**Lebenszyklus InFocus CineLog:**
+```
+Discovery → Design → Build → Deploy → Operate → Improve → (Discovery)
+    │          │        │        │         │          │
+    ▼          ▼        ▼        ▼         ▼          ▼
+ User-      Archi-   Code +   Vercel   Monitoring  CIR-
+ Research   tektur   Tests    Auto-    + User      Register
+ + ITIL     Review   CI/CD    Deploy   Feedback
+```
+
+### 12.3 Outcome-basierte Metriken
+
+V5 misst nicht nur Outputs (" Deployed") sondern **Outcomes** ("Hat sich die Ladezeit verbessert?").
+
+**Outcome-Metriken InFocus CineLog:**
+| Metrik | Output (V4) | Outcome (V5) |
+|--------|-------------|---------------|
+| Deploy | "Build erfolgreich" | "User erreicht App in <3s" |
+| Test | "27/27 bestanden" | "Keine Bug-Reports seit Deploy" |
+| Security | "Key entfernt" | "Kein Secret im Repo" |
+| Performance | "Bundle 628 KB" | "Lighthouse Score 95+" |
+
+### 12.4 Sustainability
+
+V5 integriert Nachhaltigkeit als Wertdimension.
+
+**Sustainability InFocus CineLog:**
+- Vercel: CDN mit Edge-Standorten → geringe Latenz → weniger Energie
+- Supabase: Shared Infrastructure → ressourceneffizient
+- PWA: Offline-First → weniger Server-Anfragen
+- Bundle-Optimierung: Weniger Daten → weniger Energieverbrauch
+
+### 12.5 AI-enabled Environments
+
+V5 erkennt KI als festen Bestandteil moderner Service-Umgebungen.
+
+**AI in InFocus CineLog:**
+- **CocoIndex Code**: Semantische Code-Suche für Token-Optimierung
+- **Google Gemini**: KI-Tag-Generierung für Filme
+- **TMDB API**: Genre-basierte Empfehlungen
+
+---
+
+*Dokument erstellt gemäß ITIL V5 Framework — PeopleCert (Januar 2026)*  
+*Nächste Überprüfung: 25.07.2026 (monatlich)*
