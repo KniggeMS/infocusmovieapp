@@ -37,6 +37,9 @@ supabase/.temp/
 # Editor backups
 *.old
 
+# CocoIndex Code (semantic search index)
+.cocoindex_code/
+
 # AI-Tool-Konfigurationen (lokal, nicht im Repo)
 .agents/
 .continue/
