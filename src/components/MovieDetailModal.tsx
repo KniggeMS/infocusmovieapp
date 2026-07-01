@@ -1,3 +1,4 @@
+import { TrailerOverlay } from './TrailerOverlay';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Movie, CastMember, WatchProvider } from '../types/domain';
@@ -45,6 +46,8 @@ export const MovieDetailModal = React.memo(
     onShowToast,
   }: MovieDetailModalProps) => {
     const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
 
     const isInLibrary = useMemo(
       () => libraryItems.some((m) => m.tmdbId === Number(movie.id) || m.id === movie.id),
@@ -202,6 +205,8 @@ const ActionButtons = React.memo(
     onShowToast: (message: string, type: 'success' | 'error' | 'info') => void;
   }) => {
     const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
     const [showListCreation, setShowListCreation] = useState(false);
 
     const handleAddToList = useCallback(
@@ -296,6 +301,8 @@ const ListMenu = React.memo(
     onCreateNewList: () => void;
   }) => {
     const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
 
     return (
       <div className="relative group">
@@ -341,6 +348,8 @@ ListMenu.displayName = 'ListMenu';
 
 const PlotSection = React.memo(({ movie }: { movie: Movie }) => {
   const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
   if (!movie.overview) return null;
   return (
     <section>
@@ -356,6 +365,8 @@ PlotSection.displayName = 'PlotSection';
 
 const MetadataGrid = React.memo(({ movie }: { movie: Movie }) => {
   const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
 
   const items = useMemo(
     () =>
@@ -385,6 +396,8 @@ MetadataGrid.displayName = 'MetadataGrid';
 
 const CastSection = React.memo(({ cast }: { cast?: CastMember[] }) => {
   const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
   if (!cast?.length) return null;
   return (
     <section>
@@ -420,6 +433,8 @@ CastSection.displayName = 'CastSection';
 const WatchProvidersSection = React.memo(
   ({ watchProviders }: { watchProviders?: Movie['watchProviders'] }) => {
     const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
     const flat = watchProviders?.flatrate || [];
     const rent = watchProviders?.rent || [];
     const buy = watchProviders?.buy || [];
@@ -469,6 +484,8 @@ const RecommendationsSection = React.memo(
     onSelectMovie: (id: string) => void;
   }) => {
     const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
     if (!recommendations?.length) return null;
     return (
       <section>
@@ -516,6 +533,8 @@ const PersonalSection = React.memo(
     onShowToast: (message: string, type: 'success' | 'error' | 'info') => void;
   }) => {
     const { t } = useTranslation();
+    const [showTrailerMode, setShowTrailerMode] = useState(false);
+
     const [rating, setRating] = useState<number | null>(movie.userRating ?? null);
     const { ratings, loading: ratingsLoading } = useExternalRatings(
       movie.tmdbId,
@@ -715,7 +734,19 @@ const PersonalSection = React.memo(
               ? t('common.saving', 'Speichere…')
               : t('common.autoSaveHint', 'Wird beim Verlassen des Felds automatisch gespeichert.')}
           </div>
-        </div>
+   
+          <AnimatePresence>
+            {showTrailerMode && movie.trailerKey && (
+              <TrailerOverlay
+                title={movie.title}
+                overview={movie.overview}
+                trailerKey={movie.trailerKey}
+                isVisible={showTrailerMode}
+                onClose={() => setShowTrailerMode(false)}
+              />
+            )}
+          </AnimatePresence>
+     </div>
 
         {/* Tags - kollapsibel für mobile Usability */}
         <div>
