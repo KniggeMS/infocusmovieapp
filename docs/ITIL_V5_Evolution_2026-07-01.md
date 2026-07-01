@@ -13,3 +13,8 @@
 ## 3. Risk & Rollback
 **Risk:** UX interference with existing navigation.
 **Rollback:** git checkout main; delete feat/trailer-cinema-mode branch.
+
+## 4. Milestone: Supabase Vibe Engine v3.0 (Data Layer)
+**Service Component:** Persistence Layer
+**Change:** New table `movie_vibes` for storing AI-generated mood profiles.
+**Validation:** SQL Migration verification via Supabase API.
